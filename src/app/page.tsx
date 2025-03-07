@@ -12,10 +12,12 @@ export default function Home() {
     const eventSource = new EventSource("/api/sse");
 
     eventSource.onmessage = (event) => {
+      console.log("Received event:", event.data);
       setData((prev) => [...prev, event.data]);
     };
 
-    eventSource.onerror = () => {
+    eventSource.onerror = (error) => {
+      console.error("EventSource error:", error);
       eventSource.close();
     };
 
