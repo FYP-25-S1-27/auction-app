@@ -1,16 +1,27 @@
 "use client";
+
 import { Button } from "@mui/material";
 import Image from "next/image";
 import { useState } from "react";
 
 export default function Home() {
-  const [count, setCount] = useState(0);
-
+  const [count, setCount] = useState<number>(0);
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <h1>{count}</h1>
-        <Button onClick={() => setCount(count + 1)}>asdasd</Button>
+        <h1>{"abc.test"}</h1>
+        <h2>{count}</h2>
+        <Button
+          onClick={() => {
+            setCount((prev) => prev + 1);
+          }}
+        >
+          Increase count by 1
+        </Button>
+        <p>
+          &apos;use client&apos; is directive used on this page as there is an
+          event handler
+        </p>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
