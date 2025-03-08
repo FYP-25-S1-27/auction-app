@@ -1,5 +1,6 @@
 "use client";
 
+import { useUser } from "@auth0/nextjs-auth0";
 import { Button } from "@mui/material";
 import Image from "next/image";
 import { useEffect, useState } from "react";
@@ -7,6 +8,7 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const [count, setCount] = useState<number>(0);
   const [data, setData] = useState<Array<string>>([]);
+  const { user } = useUser();
 
   useEffect(() => {
     const eventSource = new EventSource("/api/sse");
@@ -16,8 +18,8 @@ export default function Home() {
       setData((prev) => [...prev, event.data]);
     };
 
-    eventSource.onerror = (error) => {
-      console.error("EventSource error:", error);
+    eventSource.onerror = () => {
+      // console.error("EventSource error:", error);
       eventSource.close();
     };
 
@@ -48,6 +50,14 @@ export default function Home() {
           &apos;use client&apos; is directive used on this page as there is an
           event handler
         </p>
+        {user ? <p>Username: {user.nickname}</p> : null}
+        <p>{user ? `Email: ${user.email}` : "You are not logged in."}</p>
+        <a href="/auth/login">
+          <Button variant="contained">Login / Sign Up</Button>
+        </a>
+        <a href="/auth/logout">
+          <Button variant="contained">Logout</Button>
+        </a>
       </main>
       <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
         <a
