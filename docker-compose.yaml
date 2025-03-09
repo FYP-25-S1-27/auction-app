@@ -1,7 +1,7 @@
 services:
-  auction-app:
+  web:
     build:
-      context: .
+      context: ./apps/web/
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
@@ -9,6 +9,17 @@ services:
       - .env
     depends_on:
       - db
+
+  # backend:
+  #   build:
+  #     context: ./apps/web/
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "3000:3000"
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - db
 
   db:
     image: postgres:15
