@@ -1,4 +1,4 @@
-import { Divider, Stack, Typography } from "@mui/material";
+import { Divider, Link, Stack, Typography } from "@mui/material";
 import Logo from "@public/logo.svg";
 import Image from "next/image";
 
@@ -24,11 +24,17 @@ export default async function Footer() {
           <Typography variant="h6" color="#6F6F6F">
             Buy
           </Typography>
+          <Link href="#" variant="body2" color="#6F6F6F" underline="hover">
+            How to buy
+          </Link>
         </Stack>
         <Stack direction="column" maxWidth={250} id="footer-col-3">
           <Typography variant="h6" color="#6F6F6F">
             Sell
           </Typography>
+          <Link href="#" variant="body2" color="#6F6F6F" underline="hover">
+            How to sell
+          </Link>
         </Stack>
       </Stack>
       <Divider variant="middle" />
