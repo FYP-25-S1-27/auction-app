@@ -20,7 +20,7 @@ export const listings = pgTable(
   "listings",
   {
     id: serial().primaryKey().notNull(),
-    userId: integer("user_id").notNull(),
+    userUuid: text("user_uuid").notNull(),
     title: text().notNull(),
     description: text(),
     startPrice: numeric("start_price", { precision: 10, scale: 2 }).notNull(),
@@ -32,7 +32,7 @@ export const listings = pgTable(
   },
   (table) => [
     foreignKey({
-      columns: [table.userId],
+      columns: [table.userUuid],
       foreignColumns: [users.uuid],
       name: "listings_user_id_fkey",
     }).onDelete("cascade"),
@@ -44,7 +44,7 @@ export const bids = pgTable(
   {
     id: serial().primaryKey().notNull(),
     listingId: integer("listing_id").notNull(),
-    userId: integer("user_id").notNull(),
+    userUuid: text("user_uuid").notNull(),
     bidAmount: numeric("bid_amount", { precision: 10, scale: 2 }).notNull(),
     bidTime: timestamp("bid_time", { mode: "string" }).default(
       sql`CURRENT_TIMESTAMP`
@@ -57,7 +57,7 @@ export const bids = pgTable(
       name: "bids_listing_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.userId],
+      columns: [table.userUuid],
       foreignColumns: [users.uuid],
       name: "bids_user_id_fkey",
     }).onDelete("cascade"),
@@ -69,8 +69,8 @@ export const transactions = pgTable(
   {
     id: serial().primaryKey().notNull(),
     listingId: integer("listing_id").notNull(),
-    buyerId: integer("buyer_id").notNull(),
-    sellerId: integer("seller_id").notNull(),
+    buyerUuid: text("buyer_uuid").notNull(),
+    sellerUuid: text("seller_uuid").notNull(),
     salePrice: numeric("sale_price", { precision: 10, scale: 2 }).notNull(),
     transactionDate: timestamp("transaction_date", { mode: "string" }).default(
       sql`CURRENT_TIMESTAMP`
@@ -83,12 +83,12 @@ export const transactions = pgTable(
       name: "transactions_listing_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.buyerId],
+      columns: [table.buyerUuid],
       foreignColumns: [users.uuid],
       name: "transactions_buyer_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.sellerId],
+      columns: [table.sellerUuid],
       foreignColumns: [users.uuid],
       name: "transactions_seller_id_fkey",
     }).onDelete("cascade"),
@@ -99,7 +99,7 @@ export const wallets = pgTable(
   "wallets",
   {
     id: serial().primaryKey().notNull(),
-    userId: integer("user_id").notNull(),
+    userUuid: text("user_uuid").notNull(),
     balance: numeric({ precision: 10, scale: 2 }).default("0").notNull(),
     lastUpdated: timestamp("last_updated", { mode: "string" }).default(
       sql`CURRENT_TIMESTAMP`
@@ -107,7 +107,7 @@ export const wallets = pgTable(
   },
   (table) => [
     foreignKey({
-      columns: [table.userId],
+      columns: [table.userUuid],
       foreignColumns: [users.uuid],
       name: "wallets_user_id_fkey",
     }).onDelete("cascade"),

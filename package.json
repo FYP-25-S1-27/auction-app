@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "workspaces": [
-    "apps/*",
-    "libs/*"
+    "apps/*"
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "concurrently --names web,backend -c red,blue 'npm run dev -w apps/web' 'npm run dev -w apps/backend'"
+    "dev": "dotenvx run -- concurrently --names web,backend -c red,blue 'npm run dev -w apps/web' 'npm run dev -w apps/backend'",
+    "build": "dotenvx run -- concurrently --names web,backend -c red,blue 'npm run build -w apps/web' 'npm run build -w apps/backend'",
+    "start": "dotenvx run -- concurrently --names web,backend -c red,blue 'npm run start -w apps/web' 'npm run start -w apps/backend'"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,10 @@
   "homepage": "https://github.com/FYP-25-S1-27/auction-app#readme",
   "description": "",
   "devDependencies": {
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3"
+  },
+  "dependencies": {
+    "@dotenvx/dotenvx": "^1.38.4"
   }
 }

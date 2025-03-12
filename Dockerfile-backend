@@ -1,0 +1,53 @@
+FROM node:22-alpine AS base
+
+# Install dev deps for typescript compilation
+FROM base AS dev
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Install dependencies based on the preferred package manager
+COPY package.json package-lock.json* ./
+COPY ./apps/backend/package.json ./apps/backend/package.json
+
+RUN \
+	if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+	elif [ -f package-lock.json ]; then npm ci; \
+	elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
+	else echo "Lockfile not found." && exit 1; \
+	fi
+
+
+# Build stage
+FROM base AS builder
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY --from=dev /app/node_modules ./node_modules
+COPY --from=dev /app/package.json /app/package-lock.json* ./
+
+# Copy backend workspace
+COPY ./apps/backend/ ./apps/backend/
+
+# Build the application
+RUN npm run build -w backend
+
+# Production stage
+FROM base
+WORKDIR /app
+
+# Copy package files
+COPY --from=builder /app/package* ./
+COPY --from=builder /app/apps/backend/package.json ./apps/backend/package.json
+
+# Install production dependencies only
+RUN npm ci --production
+
+COPY --from=builder /app/apps/backend/dist ./apps/backend/dist
+
+# Expose port (adjust if needed)
+EXPOSE 3001
+
+# Start the application
+CMD ["npm", "start", "-w", "backend"]
