@@ -31,6 +31,24 @@ npm run dev
 - [Download DBeaver](https://dbeaver.io/download/) and follow the installation instructions.
 
 
+### Contribution workflow
+```bash
+# Create a new branch
+git checkout -b my-branch
+
+# Fetch the latest changes from the main branch
+git fetch origin
+
+# Rebase your branch on top of the main branch
+git rebase origin/main
+
+# Push your rebased branch to update the remote branch
+git push --set-upstream origin my-branch
+
+# Then go to GitHub and create a pull request before merging it (all to be done on the website)
+```
+
+
 ### Need a local PostgreSQL instance?
 1. Install Docker Desktop
 	- [Download Docker Desktop](https://www.docker.com/products/docker-desktop) and follow the installation instructions for your operating system.
