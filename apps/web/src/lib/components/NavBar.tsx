@@ -21,7 +21,7 @@ import { Fragment, useEffect, useState } from "react";
 import { getRole } from "./action";
 
 export default function NavBar() {
-  const [isAdmin, setIsAdmin] = useState<bool>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   const auth = useUser();
   useEffect(() => {
