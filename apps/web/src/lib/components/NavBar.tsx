@@ -50,18 +50,26 @@ export default function NavBar() {
         />
         {auth.isLoading ? (
           <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
+            <Link href="/auth/login?screen_hint=signup">Register</Link>
             <Link href="/auth/login">Login</Link>
-            <Link>Register</Link>
           </Box>
         ) : auth.user ? (
           <Avatar src={auth.user.picture} alt={auth.user.nickname} />
         ) : (
           <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
+            <Link href="/auth/login?screen_hint=signup">Register</Link>
             <Link href="/auth/login">Login</Link>
-            <Link>Register</Link>
           </Box>
         )}
       </Stack>
     </Container>
   );
 }
+
+// function AccountMenu() {
+//   return (
+//     <Menu open={true}>
+//       <MenuItem></MenuItem>
+//     </Menu>
+//   );
+// }

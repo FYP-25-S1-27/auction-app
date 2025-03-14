@@ -7,6 +7,9 @@ import theme from "@/lib/theme";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import NavBar from "@/lib/components/NavBar";
 import Footer from "@/lib/components/Footer";
+import { auth0 } from "@/lib/auth0";
+import { db } from "@/lib/db/drizzle";
+import { users } from "@/lib/db/schema";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -20,11 +23,24 @@ export const metadata: Metadata = {
   description: "Auction",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth0.getSession();
+  if (session) {
+    // Upsert the user into the database when they log in
+    // This is called on every and any page load, but the database will only insert the user if they don't already exist
+    const user = session.user;
+    if (user) {
+      await db
+        .insert(users)
+        .values({ uuid: user.sub ?? "", username: user.nickname ?? "" })
+        .onConflictDoNothing();
+    }
+  }
+
   return (
     <html lang="en">
       <body className={roboto.variable}>
