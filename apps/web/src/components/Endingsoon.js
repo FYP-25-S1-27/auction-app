@@ -1,86 +1,3 @@
-// import React, { useRef, useState } from "react";
-// import { Box, Typography, Grid, Container, Card, CardContent, CardMedia, IconButton } from "@mui/material";
-// import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-// import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-
-// const endingSoonItems = [
-//   { title: "Listing Name 1", price: "$600", time: "1h 10m", image: "/images/placeholder.png" },
-//   { title: "Listing Name 2", price: "$610", time: "2h 15m", image: "/images/placeholder.png" },
-//   { title: "Listing Name 3", price: "$590", time: "3h 5m", image: "/images/placeholder.png" },
-//   { title: "Listing Name 4", price: "$620", time: "4h 20m", image: "/images/placeholder.png" },
-//   { title: "Listing Name 5", price: "$580", time: "5h 30m", image: "/images/placeholder.png" },
-//   { title: "Listing Name 6", price: "$600", time: "6h 45m", image: "/images/placeholder.png" },
-// ];
-
-// const EndingSoon = () => {
-//   const [scrollIndex, setScrollIndex] = useState(0);
-//   const scrollContainerRef = useRef(null);
-
-//   const handleScroll = (direction) => {
-//     if (!scrollContainerRef.current) return;
-
-//     let newIndex = scrollIndex;
-//     if (direction === "next" && scrollIndex < endingSoonItems.length - 4) {
-//       newIndex += 1;
-//     } else if (direction === "prev" && scrollIndex > 0) {
-//       newIndex -= 1;
-//     }
-
-//     setScrollIndex(newIndex);
-//     scrollContainerRef.current.scrollTo({
-//       left: newIndex * 260, // Adjust width dynamically
-//       behavior: "smooth",
-//     });
-//   };
-
-//   return (
-//     <Box sx={{ py: 6, overflow: "hidden" }}>
-//       <Container>
-//         <Typography variant="h5" sx={{ color: "#6F6F6F", fontWeight: "bold", mb: 3 }}>
-//           Auctions Ending Soon
-//         </Typography>
-
-//         {/* Scrollable Listings with Buttons in Between */}
-//         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-//           {/* Left Arrow */}
-//           <IconButton onClick={() => handleScroll("prev")} sx={{ bgcolor: "#E0E0E0", borderRadius: "50%", p: 1, mx: 1 }}>
-//             <ArrowBackIosIcon />
-//           </IconButton>
-
-//           {/* Listings */}
-//           <Box sx={{ display: "flex", overflowX: "auto", flexGrow: 1, scrollBehavior: "smooth" }} ref={scrollContainerRef}>
-//             {endingSoonItems.map((item, index) => (
-//               <Card
-//                 key={index}
-//                 sx={{
-//                   minWidth: "20%", // Each card takes up 20% of the row for full width
-//                   flexShrink: 0,
-//                   mr: index === endingSoonItems.length - 1 ? 0 : 2,
-//                   boxShadow: 2,
-//                 }}
-//               >
-//                 <CardMedia component="img" height="140" image={item.image} alt={item.title} />
-//                 <CardContent>
-//                   <Typography variant="body1">{item.title}</Typography>
-//                   <Typography color="text.secondary">Current Bid: {item.price}</Typography>
-//                   <Typography color="error">Ending in: {item.time}</Typography>
-//                 </CardContent>
-//               </Card>
-//             ))}
-//           </Box>
-
-//           {/* Right Arrow */}
-//           <IconButton onClick={() => handleScroll("next")} sx={{ bgcolor: "#E0E0E0", borderRadius: "50%", p: 1, mx: 1 }}>
-//             <ArrowForwardIosIcon />
-//           </IconButton>
-//         </Box>
-//       </Container>
-//     </Box>
-//   );
-// };
-
-// export default EndingSoon;
-
 import React, { useState } from "react";
 import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, IconButton, Slide } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
@@ -169,3 +86,54 @@ const EndingSoon = () => {
 };
 
 export default EndingSoon;
+
+
+// import React, { useState, useEffect } from "react";
+// import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, IconButton } from "@mui/material";
+// import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+
+// const EndingSoon = () => {
+//   const [listings, setListings] = useState([]);
+//   const [currentPage, setCurrentPage] = useState(0);
+
+//   useEffect(() => {
+//     const fetchListings = async () => {
+//       try {
+//         const response = await fetch(`/api/listings?type=ending_soon&page=${currentPage}`);
+//         const data = await response.json();
+//         setListings(data);
+//       } catch (error) {
+//         console.error("Error fetching ending soon listings:", error);
+//       }
+//     };
+
+//     fetchListings();
+//   }, [currentPage]);
+
+//   return (
+//     <Box sx={{ py: 6 }}>
+//       <Container>
+//         <Typography variant="h4" sx={{ color: "#007C5F", mb: 1 }}>
+//           Auctions Ending Soon
+//         </Typography>
+
+//         <Grid container spacing={3}>
+//           {listings.slice(currentPage * 5, (currentPage + 1) * 5).map((item, index) => (
+//             <Grid item xs={12} sm={6} md={3} key={index}>
+//               <Card sx={{ boxShadow: 3 }}>
+//                 <CardMedia component="img" height="140" image="/images/placeholder.png" alt={item.name} />
+//                 <CardContent>
+//                   <Typography variant="body1">{item.name}</Typography>
+//                   <Typography color="text.secondary">Current Bid: ${item.currentPrice}</Typography>
+//                   <Typography color="error">Ends: {new Date(item.endTime).toLocaleString()}</Typography>
+//                 </CardContent>
+//               </Card>
+//             </Grid>
+//           ))}
+//         </Grid>
+//       </Container>
+//     </Box>
+//   );
+// };
+
+// export default EndingSoon;

@@ -9,14 +9,12 @@ const Footer = () => {
     <Box sx={{ bgcolor: "#F9F9F9", py: 4, mt: 4 }}>
       <Container maxWidth="lg">
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          
+
           {/* Left Section - Logo & Description */}
           <Box sx={{ maxWidth: "300px" }}>
             <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <Image src="/images/logo.png" alt="GoGavel Logo" width={32} height={32} />
-              <Typography variant="h6" sx={{ ml: 1, fontWeight: "bold", color: "#007C5F" }}>
-                GoGavel
-              </Typography>
+              {/* ✅ Updated Logo */}
+              <Image src="/logo.svg" alt="GoGavel Logo" width={120} height={40} />
             </Box>
             <Typography variant="body2" sx={{ color: "#6F6F6F", mb: 2 }}>
               Participate in online auctions to discover one-of-a-kind treasures and experience
