@@ -21,11 +21,17 @@ export const users = pgTable("users", {
     .notNull(),
 });
 
+export const listing_category = pgTable("listing_category", {
+  id: serial().primaryKey().notNull(),
+  name: text().notNull(),
+});
+
 export const listings = pgTable(
   "listings",
   {
     id: serial().primaryKey().notNull(),
     userUuid: text().notNull(),
+    categoryId: integer().notNull(),
     name: text().notNull(),
     description: text(),
     startingPrice: integer().notNull(),
@@ -40,6 +46,11 @@ export const listings = pgTable(
       columns: [table.userUuid],
       foreignColumns: [users.uuid],
       name: "listings_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.categoryId],
+      foreignColumns: [listing_category.id],
+      name: "listings_category_id_fkey",
     }).onDelete("cascade"),
   ]
 );
@@ -56,6 +67,26 @@ export const listing_images = pgTable(
       columns: [table.listingId],
       foreignColumns: [listings.id],
       name: "listing_images_listing_id_fkey",
+    }).onDelete("cascade"),
+  ]
+);
+
+export const listing_user_likes = pgTable(
+  "user_listing_likes",
+  {
+    userUuid: text().notNull(),
+    listingId: integer().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userUuid],
+      foreignColumns: [users.uuid],
+      name: "user_listing_likes_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.listingId],
+      foreignColumns: [listings.id],
+      name: "user_listing_likes_listing_id_fkey",
     }).onDelete("cascade"),
   ]
 );
