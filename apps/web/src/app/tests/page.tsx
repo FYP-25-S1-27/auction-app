@@ -1,90 +1,55 @@
 "use client";
 
-import { useUser } from "@auth0/nextjs-auth0";
-import { Button, Link } from "@mui/material";
-import Image from "next/image";
+import { getAccessToken, useUser } from "@auth0/nextjs-auth0";
+import { Button, Container, Link } from "@mui/material";
+// import Image from "next/image";
 import { useState } from "react";
 
 export default function Home() {
   const [count, setCount] = useState<number>(0);
-  const { user } = useUser();
+  const [token, setToken] = useState<string>("");
+  const auth = useUser();
+  if (auth.user) {
+    getAccessToken().then((t) => {
+      setToken(t);
+    });
+  }
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <div className="flex flex-row gap-4">
-          <Link href="/tests/db">Database</Link>
-          <Link href="/tests/socketio">Socket.io</Link>
-        </div>
-        <h1>{"abc.test"}</h1>
-        <h2>{count}</h2>
-        <Button
-          onClick={() => {
-            setCount((prev) => prev + 1);
-          }}
-        >
-          Increase count by 1
-        </Button>
-        <p>
-          &apos;use client&apos; is directive used on this page as there is an
-          event handler
-        </p>
-        {user ? <p>Username: {user.nickname}</p> : null}
-        <p>{user ? `Email: ${user.email}` : "You are not logged in."}</p>
-        <a href="/auth/login">
-          <Button variant="contained">Login / Sign Up</Button>
-        </a>
-        <a href="/auth/logout">
-          <Button variant="contained">Logout</Button>
-        </a>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    <Container>
+      <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+        <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+          <div className="flex flex-row gap-4">
+            <Link href="/tests/db">Database</Link>
+            <Link href="/tests/socketio">Socket.io</Link>
+          </div>
+          <h1>{"abc.test"}</h1>
+          <h2>{count}</h2>
+          <Button
+            onClick={() => {
+              setCount((prev) => prev + 1);
+            }}
+          >
+            Increase count by 1
+          </Button>
+          <p>
+            &apos;use client&apos; is directive used on this page as there is an
+            event handler
+          </p>
+          <p>{token}</p>
+          {auth.user ? <p>Nickname: {auth.user.nickname}</p> : null}
+          {auth.user ? <p>User: {auth.user.sub}</p> : null}
+          <p>
+            {auth.user ? `Email: ${auth.user.email}` : "You are not logged in."}
+          </p>
+          <a href="/auth/login">
+            <Button variant="contained">Login / Sign Up</Button>
+          </a>
+          <a href="/auth/logout">
+            <Button variant="contained">Logout</Button>
+          </a>
+        </main>
+      </div>
+    </Container>
   );
 }
