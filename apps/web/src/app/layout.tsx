@@ -49,7 +49,6 @@ export default async function RootLayout({
             <Auth0Provider>
               <NavBar />
               {children}
-              <Footer />
             </Auth0Provider>
           </ThemeProvider>
         </AppRouterCacheProvider>

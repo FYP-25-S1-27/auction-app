@@ -2,7 +2,7 @@ import { users } from "@/libs/db/schema";
 import { db } from "@/libs/db/drizzle";
 import { connection } from "next/server";
 import { DrizzleError } from "drizzle-orm";
-import { auth0management } from "@/libs/actions/auth0";
+import { auth0management } from "@/libs/actions/auth0-management";
 
 export default async function Page() {
   await connection(); // Make this page render on request https://nextjs.org/docs/app/api-reference/functions/connection
