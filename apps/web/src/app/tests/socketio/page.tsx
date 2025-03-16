@@ -1,5 +1,5 @@
 "use client";
-import { socket } from "@/lib/sio";
+import { socket } from "@/libs/sio";
 import { useEffect, useState } from "react";
 
 export default function Page() {
