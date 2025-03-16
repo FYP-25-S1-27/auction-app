@@ -19,6 +19,14 @@ async function main() {
       },
       count: 20,
     },
+    listing_category: {
+      count: 3,
+      columns: {
+        name: f.valuesFromArray({
+          values: ["Electronics", "Clothing", "Furniture", "Books"],
+        }),
+      },
+    },
     listings: {
       columns: {
         status: f.valuesFromArray({ values: ["active", "sold"] }),
