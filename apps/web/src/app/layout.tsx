@@ -6,7 +6,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/libs/theme";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import NavBar from "@/libs/components/NavBar";
-import Footer from "@/libs/components/Footer";
 import { auth0 } from "@/libs/auth0";
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
