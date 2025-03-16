@@ -3,13 +3,13 @@ import "./globals.css";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v15-appRouter";
 import { Roboto } from "next/font/google";
 import { ThemeProvider } from "@mui/material/styles";
-import theme from "@/lib/theme";
+import theme from "@/libs/theme";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
-import NavBar from "@/lib/components/NavBar";
-import Footer from "@/lib/components/Footer";
-import { auth0 } from "@/lib/auth0";
-import { db } from "@/lib/db/drizzle";
-import { users } from "@/lib/db/schema";
+import NavBar from "@/libs/components/NavBar";
+import Footer from "@/libs/components/Footer";
+import { auth0 } from "@/libs/auth0";
+import { db } from "@/libs/db/drizzle";
+import { users } from "@/libs/db/schema";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],

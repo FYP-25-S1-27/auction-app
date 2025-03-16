@@ -22,8 +22,7 @@ export const users = pgTable("users", {
 });
 
 export const listing_category = pgTable("listing_category", {
-  id: serial().primaryKey().notNull(),
-  name: text().notNull(),
+  name: text().primaryKey(),
 });
 
 export const listings = pgTable(
@@ -31,7 +30,7 @@ export const listings = pgTable(
   {
     id: serial().primaryKey().notNull(),
     userUuid: text().notNull(),
-    categoryId: integer().notNull(),
+    category: text().notNull(),
     name: text().notNull(),
     description: text(),
     startingPrice: integer().notNull(),
@@ -48,8 +47,8 @@ export const listings = pgTable(
       name: "listings_user_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.categoryId],
-      foreignColumns: [listing_category.id],
+      columns: [table.category],
+      foreignColumns: [listing_category.name],
       name: "listings_category_id_fkey",
     }).onDelete("cascade"),
   ]
