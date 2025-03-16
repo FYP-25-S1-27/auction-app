@@ -1,7 +1,6 @@
 import { Fragment } from "react";
 import {
   Container,
-  Divider,
   Drawer,
   List,
   ListItem,
@@ -9,7 +8,6 @@ import {
   ListItemIcon,
   ListItemText,
   Toolbar,
-  Typography,
 } from "@mui/material";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 

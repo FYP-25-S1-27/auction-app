@@ -1,6 +1,9 @@
 // import pool from '@/lib/db'; // Ensure this is your PostgreSQL connection
 
-// export async function GET() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function GET(request) {
+  return new Response("Hello, world!", { status: 200 });
+}
 //   try {
 //     const client = await pool.connect();
 //     const query = `
