@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:seed": "dotenvx run -f ../../.env -- tsx ./src/lib/db/seed.ts",
+    "db:seed": "dotenvx run -f ../../.env -- tsx ./src/libs/db/seed.ts",
     "db:push": "dotenvx run -f ../../.env -- drizzle-kit push"
   },
   "dependencies": {
