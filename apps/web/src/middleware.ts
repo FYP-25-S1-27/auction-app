@@ -1,9 +1,20 @@
-import { type NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 
 import { auth0 } from "@/libs/auth0";
 
 export async function middleware(request: NextRequest) {
   const authRes = await auth0.middleware(request); // authentication routes — let the middleware handle it
+  if (request.nextUrl.pathname.startsWith("/auth")) {
+    return authRes;
+  }
+  const session = await auth0.getSession(request);
+
+  if (!session && request.nextUrl.pathname.startsWith("/admin")) {
+    // user is not authenticated, redirect to login page
+    return NextResponse.redirect(
+      new URL("/auth/login?returnTo=/admin", request.nextUrl.origin)
+    );
+  }
   return authRes;
 }
 
