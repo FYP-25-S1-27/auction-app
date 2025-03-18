@@ -1,11 +1,11 @@
 "use client";
 
-import { CustomUser } from "@/libs/types/user";
+import { CustomUser } from "@/libs/types/users";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { Button, Stack } from "@mui/material";
 import { useState, useMemo } from "react";
 import { blockUser } from "@/libs/actions/auth0-management/user";
-import { setIsAdmin } from "@/libs/actions/db/user";
+import { setIsAdmin } from "@/libs/actions/db/users";
 
 export function CustomAdminUserDataGrid({
   users: initialUsers,
