@@ -75,6 +75,13 @@ export default function NavBar() {
           <PopupState variant="popover" popupId="avatar-menu">
             {(popupState) => (
               <Fragment>
+                {/* To create Listing page */}
+                <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+                  <NextLink href="/createlisting" passHref>
+                    <span style={{ cursor: "pointer", fontSize: "16px", fontWeight: "bold", color: "#333" }}>Sell</span>
+                  </NextLink>
+                </div>
+
                 <IconButton {...bindTrigger(popupState)}>
                   <Avatar
                     {...bindTrigger(popupState)}
