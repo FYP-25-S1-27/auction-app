@@ -1,8 +1,8 @@
 // import pool from '@/lib/db';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(request) {
-  return new Response("Hello, world!", { status: 200 });
-}
+// export async function GET(request) {
+//   return new Response("Hello, world!", { status: 200 });
+// }
 // export async function GET() {
 //   try {
 //     const client = await pool.connect();
@@ -21,3 +21,17 @@ export async function GET(request) {
 //     });
 //   }
 // }
+
+import { db } from "@/libs/db/drizzle"; // Updated from lib to libs
+import { listings } from "@/libs/db/schema"; // Updated from lib to libs
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  try {
+    const allListings = await db.select().from(listings);
+    return NextResponse.json(allListings, { status: 200 });
+  } catch (error) {
+    console.error("Error fetching listings:", error);
+    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+  }
+}
