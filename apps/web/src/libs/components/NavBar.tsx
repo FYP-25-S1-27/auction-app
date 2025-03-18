@@ -18,7 +18,7 @@ import { useUser } from "@auth0/nextjs-auth0";
 import Search from "@mui/icons-material/Search";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Fragment, useEffect, useState } from "react";
-import { getRole } from "./action";
+import { getRole } from "@/libs/actions/db/users";
 
 export default function NavBar() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
