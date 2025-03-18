@@ -14,7 +14,7 @@ export default async function UsersPage() {
   const dbUsers = await db
     .select({
       uuid: users.uuid,
-      isAdmin: users.is_admin,
+      isAdmin: users.isAdmin,
       username: users.username,
     })
     .from(users);
