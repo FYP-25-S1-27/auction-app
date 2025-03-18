@@ -66,7 +66,7 @@ export default function NavBar() {
         />
         {auth.isLoading ? (
           <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
-            <Link href="/auth/login?screen_hint=signup">Register</Link>{" "}
+            <Link href="/auth/login?screen_hint=signup">Register</Link>
             {/* to be skeleton*/}
             <Link href="/auth/login">Login</Link>
           </Box>
@@ -91,7 +91,9 @@ export default function NavBar() {
                   <MenuItem onClick={popupState.close}>Profile</MenuItem>
                   <MenuItem onClick={popupState.close}>My account</MenuItem>
                   <MenuItem onClick={popupState.close}>
-                    <NextLink href="/auth/logout">Logout</NextLink>
+                    <Link href="/auth/logout" underline="none">
+                      Logout
+                    </Link>
                   </MenuItem>
                 </Menu>
               </Fragment>

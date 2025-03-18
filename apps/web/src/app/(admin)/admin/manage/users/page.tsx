@@ -12,7 +12,11 @@ export default async function UsersPage() {
   const getUsersRepsonse = auth0management.users.getAll();
   const auth0users = (await getUsersRepsonse).data || [];
   const dbUsers = await db
-    .select({ uuid: users.uuid, isAdmin: users.is_admin })
+    .select({
+      uuid: users.uuid,
+      isAdmin: users.is_admin,
+      username: users.username,
+    })
     .from(users);
   // Merge the two lists of users using uuid as the key
   const _users: CustomUser[] = auth0users.map((auth0user) => {
@@ -20,6 +24,7 @@ export default async function UsersPage() {
     return {
       ...auth0user,
       isAdmin: dbUser?.isAdmin ?? false,
+      username: dbUser?.username ?? "",
     };
   });
 
