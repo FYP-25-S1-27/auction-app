@@ -1,6 +1,6 @@
 {
-  "id": "2a15b2b5-16f8-4f7d-bad0-0e38c17266a0",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "7193188e-5b40-45c6-aca0-82f5677bff44",
+  "prevId": "2a15b2b5-16f8-4f7d-bad0-0e38c17266a0",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -243,13 +243,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": "'active'"
-        },
-        "is_active": {
-          "name": "is_active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
         },
         "end_time": {
           "name": "end_time",
