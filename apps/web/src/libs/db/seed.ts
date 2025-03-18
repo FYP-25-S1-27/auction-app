@@ -46,8 +46,8 @@ async function main() {
         uuid: user.user_id,
         username: user.nickname,
         bio: faker.person.bio(),
-        is_admin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
-        created_at: new Date(user.created_at.toString()),
+        isAdmin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
+        createdAt: new Date(user.created_at.toString()),
       });
     })
   );
@@ -105,7 +105,7 @@ async function main() {
         description: f.loremIpsum({ sentencesCount: 1 }),
         startingPrice: f.int({ minValue: 1, maxValue: 1000 }),
         currentPrice: f.int({ minValue: 1000, maxValue: 10000 }),
-        status: f.valuesFromArray({ values: ["active", "sold"] }),
+        status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
         endTime: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.future().toISOString()

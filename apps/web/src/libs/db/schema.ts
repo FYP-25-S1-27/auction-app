@@ -14,8 +14,8 @@ export const users = pgTable("users", {
   uuid: text().primaryKey().notNull(),
   username: text().notNull().unique(),
   bio: text(),
-  is_admin: boolean().default(false).notNull(),
-  created_at: timestamp()
+  isAdmin: boolean().default(false).notNull(),
+  createdAt: timestamp()
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -34,8 +34,7 @@ export const listings = pgTable(
     description: text(),
     startingPrice: integer().notNull(),
     currentPrice: integer(),
-    status: text().default("active"), // active, sold
-    is_active: boolean().default(true).notNull(),
+    status: text().default("active"), // ACTIVE, SOLD
     endTime: timestamp({ mode: "string" }).notNull(),
     createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },

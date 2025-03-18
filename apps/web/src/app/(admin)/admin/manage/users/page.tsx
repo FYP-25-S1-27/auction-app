@@ -2,7 +2,7 @@ import { auth0management } from "@/libs/actions/auth0-management";
 import { CustomAdminUserDataGrid } from "@/libs/components/admin/CustomAdminDataGrid";
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
-import { CustomUser } from "@/libs/types/user";
+import { CustomUser } from "@/libs/types/users";
 import { Container, Paper, Typography } from "@mui/material";
 import { connection } from "next/server";
 
@@ -14,7 +14,7 @@ export default async function UsersPage() {
   const dbUsers = await db
     .select({
       uuid: users.uuid,
-      isAdmin: users.is_admin,
+      isAdmin: users.isAdmin,
       username: users.username,
     })
     .from(users);
@@ -29,7 +29,7 @@ export default async function UsersPage() {
   });
 
   return (
-    <Container>
+    <Container sx={{ ml: 2 }}>
       <Typography variant="h4">Manage Users</Typography>
       <Paper>
         <CustomAdminUserDataGrid users={_users} />
