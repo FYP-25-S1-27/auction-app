@@ -15,7 +15,6 @@ export const users = pgTable("users", {
   username: text().notNull().unique(),
   bio: text(),
   is_admin: boolean().default(false).notNull(),
-  is_active: boolean().default(true).notNull(),
   created_at: timestamp()
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
@@ -147,8 +146,7 @@ export const transactions = pgTable(
 export const wallets = pgTable(
   "wallets",
   {
-    id: serial().primaryKey().notNull(),
-    userUuid: text().notNull(),
+    userUuid: text().primaryKey(),
     balance: numeric({ precision: 10, scale: 2 }).default("0").notNull(),
     lastUpdated: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
