@@ -78,7 +78,7 @@ export function CustomAdminUserDataGrid({
     { field: "email", headerName: "Email", width: 150 },
     { field: "username", headerName: "Username", width: 150 },
     {
-      field: "is_admin",
+      field: "isAdmin",
       headerName: "Admin",
       type: "boolean",
     },
