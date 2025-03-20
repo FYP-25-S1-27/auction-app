@@ -18,7 +18,6 @@ const ListingForm = () => {
   const [description, setDescription] = useState("");
   const [starting_price, setstarting_price] = useState("");
   const [end_time, setend_time] = useState<dayjs.Dayjs | null>(null);
-  const [start_time, setstart_time] = useState<dayjs.Dayjs | null>(null); // ADDED THIS LINE
   const [scheduled, setScheduled] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -85,13 +84,30 @@ const ListingForm = () => {
       }
     }
 
-    // ✅ Convert scheduled time and end_time to a proper ISO string before sending
+    // ✅ Convert `end_time` to a proper ISO string before sending
     const end_timeString = end_time ? end_time.toDate().toISOString() : null;
-    const start_timeString = start_time ? start_time.toDate().toISOString() : null; // ADD
 
-    const priceNumber = Number(starting_price);
-    if (!Number.isInteger(priceNumber)) {
-      alert("Starting price must be a whole number!");
+    const listingData = {
+      name,
+      category,
+      condition,
+      description,
+      starting_price: Number(starting_price), // Ensure it's a number
+      end_time: end_timeString, // ✅ Send as an ISO string
+      scheduled,
+    };
+
+    console.log("📩 Submitting:", listingData);
+
+    const response = await fetch("/api/listings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(listingData),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setError(data.error || "Something went wrong");
       return;
     }
 
@@ -260,9 +276,6 @@ const ListingForm = () => {
             label="Auction End Time"
             value={end_time}
             onChange={(newValue) => setend_time(newValue)}
-            slotProps={{
-              textField: { required: true },
-            }}
           />
         </LocalizationProvider>
 

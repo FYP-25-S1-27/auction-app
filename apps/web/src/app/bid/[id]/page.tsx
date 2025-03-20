@@ -16,9 +16,7 @@ import {
 
 const BidPage = () => {
   const { id } = useParams();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [listing, setListing] = useState<any>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [bids, setBids] = useState<any[]>([]);
   const [bidAmount, setBidAmount] = useState("");
   const [loading, setLoading] = useState(true);
@@ -41,7 +39,6 @@ const BidPage = () => {
       if (!bidsResponse.ok) throw new Error("Failed to fetch bid history");
       const bidsData = await bidsResponse.json();
       setBids(bidsData);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -52,15 +49,12 @@ const BidPage = () => {
   // Fetch listing & bid history on mount
   useEffect(() => {
     fetchData();
-  });
+  }, [id]);
 
   // ⏳ Countdown Timer
   useEffect(() => {
     if (listing?.end_time) {
-      const interval = setInterval(
-        () => updateTimeLeft(listing.end_time),
-        1000
-      );
+      const interval = setInterval(() => updateTimeLeft(listing.end_time), 1000);
       return () => clearInterval(interval); // Cleanup
     }
   }, [listing]);
@@ -106,7 +100,6 @@ const BidPage = () => {
 
       setBidAmount(""); // Reset bid input
       await fetchData(); // ✅ Refresh listing & bid history after successful bid
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -127,9 +120,7 @@ const BidPage = () => {
           <Typography variant="h5">Listing: {listing.name}</Typography>
           <Typography>Category: {listing.category}</Typography>
           <Typography>Starting Price: ${listing.starting_price}</Typography>
-          <Typography>
-            Current Price: ${listing.current_price || listing.starting_price}
-          </Typography>
+          <Typography>Current Price: ${listing.current_price || listing.starting_price}</Typography>
 
           {/* 🕒 Countdown Timer with Dynamic Color */}
           <Typography
@@ -165,10 +156,7 @@ const BidPage = () => {
             {bids.length > 0 ? (
               bids.map((bid) => (
                 <ListItem key={bid.id}>
-                  <ListItemText
-                    primary={`$${bid.bid_amount}`}
-                    secondary={`User: ${bid.user_uuid}`}
-                  />
+                  <ListItemText primary={`$${bid.bid_amount}`} secondary={`User: ${bid.user_uuid}`} />
                 </ListItem>
               ))
             ) : (

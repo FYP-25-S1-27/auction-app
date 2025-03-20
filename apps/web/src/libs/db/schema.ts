@@ -14,8 +14,9 @@ import { sql } from "drizzle-orm";
 export const users = pgTable("users", {
   uuid: text().primaryKey().notNull(),
   username: text().notNull().unique(),
-  isAdmin: boolean().default(false).notNull(),
-  createdAt: timestamp()
+  bio: text(),
+  is_admin: boolean().default(false).notNull(),
+  created_at: timestamp()
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -63,21 +64,19 @@ export const listings = pgTable(
   "listings_and_requests",
   {
     id: serial().primaryKey().notNull(),
-    userUuid: text().notNull(),
+    user_uuid: text().notNull(),
     category: text().notNull(),
     name: text().notNull(),
     description: text(),
-    startingPrice: integer().notNull(),
-    currentPrice: integer(),
-    type: listingTypes("listing_types").notNull().default("LISTING"), // LISTING, REQUEST
-    endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
-    startTime: timestamp({ mode: "string" }), // ADDED THIS
+    starting_price: integer().notNull(),
+    current_price: integer(),
+    end_time: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
     status: text().default("ACTIVE"), // ACTIVE, SOLD
-    createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
+    created_at: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "listings_user_id_fkey",
     }).onDelete("cascade"),
@@ -108,12 +107,12 @@ export const listingImages = pgTable(
 export const listingUserLikes = pgTable(
   "user_listing_likes",
   {
-    userUuid: text().notNull(),
+    user_uuid: text().notNull(),
     listingId: integer().notNull(),
   },
   (table) => [
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "user_listing_likes_user_id_fkey",
     }).onDelete("cascade"),
@@ -131,22 +130,19 @@ export const bids = pgTable(
   "bids_and_offers",
   {
     id: serial().primaryKey().notNull(),
-    listingId: integer().notNull(),
-    userUuid: text().notNull(),
-    bidAmount: integer().notNull(),
-    bidTime: timestamp({ mode: "string" })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    type: bidTypes("bid_types").notNull().default("BID"), // OFFER, BID
+    listing_id: integer().notNull(),
+    user_uuid: text().notNull(),
+    bid_amount: integer().notNull(),
+    bid_time: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`).notNull(),
   },
   (table) => [
     foreignKey({
-      columns: [table.listingId],
+      columns: [table.listing_id],
       foreignColumns: [listings.id],
       name: "bids_listing_id_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "bids_user_id_fkey",
     }).onDelete("cascade"),
@@ -187,13 +183,13 @@ export const transactions = pgTable(
 export const wallets = pgTable(
   "wallets",
   {
-    userUuid: text().primaryKey(),
+    user_uuid: text().primaryKey(),
     balance: numeric({ precision: 10, scale: 2 }).default("0").notNull(),
     lastUpdated: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "wallets_user_id_fkey",
     }).onDelete("cascade"),

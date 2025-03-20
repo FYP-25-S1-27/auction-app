@@ -36,11 +36,7 @@ export default async function RootLayout({
     if (user) {
       await db
         .insert(users)
-        .values({
-          uuid: user.sub ?? "",
-          username: user.nickname ?? "",
-          isAdmin: false,
-        })
+        .values({ uuid: user.sub ?? "", username: user.nickname ?? "", is_admin: false,})
         .onConflictDoNothing();
     }
   }
