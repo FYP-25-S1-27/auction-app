@@ -30,7 +30,7 @@ async function main() {
   console.log("Reseting database...");
   await reset(db, schema);
 
-  const PASSWORD = "password123";
+  const PASSWORD = "1Qwer#@!";
   console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
   for (let i = 0; i < 5; i++) {
     await seedAuth0Users(`test${i}.user@test.test`, PASSWORD);
