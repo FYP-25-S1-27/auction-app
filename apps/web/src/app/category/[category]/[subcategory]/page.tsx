@@ -12,12 +12,15 @@ export default function SubcategoryPage() {
   const params = useParams();
   const categorySlug = params.category as string;
   const subcategorySlug = params.subcategory as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [subcategoryData, setSubcategoryData] = useState<any>(null);
 
   useEffect(() => {
     async function fetchSubcategoryData() {
       try {
-        const response = await fetch(`/api/categories/${categorySlug}/${subcategorySlug}`);
+        const response = await fetch(
+          `/api/categories/${categorySlug}/${subcategorySlug}`
+        );
         if (!response.ok) throw new Error("Subcategory not found");
         const data = await response.json();
         setSubcategoryData(data);
@@ -30,14 +33,16 @@ export default function SubcategoryPage() {
     if (categorySlug && subcategorySlug) {
       fetchSubcategoryData();
     }
-  }, [categorySlug, subcategorySlug]);
+  });
 
   return (
     <Container sx={{ minHeight: "100vh" }} className="bg-white">
       <CategoryBar />
-      <CategorySubcategories category={categorySlug} selectedSubcategory={subcategorySlug} />
-      <Typography variant="h4" 
-      sx={{ color: "#007C5F", mb: 2 }}>
+      <CategorySubcategories
+        subcategories={[categorySlug]}
+        parentSlug={subcategorySlug}
+      />
+      <Typography variant="h4" sx={{ color: "#007C5F", mb: 2 }}>
         {subcategoryData?.name || "Loading..."}
       </Typography>
       <CategoryListings listings={subcategoryData?.listings || []} />

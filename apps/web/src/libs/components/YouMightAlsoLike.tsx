@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import { listings } from "../db/schema";
 
 const recommendedItems = [
   {
@@ -48,7 +49,7 @@ export default async function YouMightAlsoLike({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   recommendedListings,
 }: {
-  recommendedListings: typeof setListings;
+  recommendedListings?: (typeof listings.$inferSelect)[];
 }) {
   return (
     <Box sx={{ py: 6 }}>
