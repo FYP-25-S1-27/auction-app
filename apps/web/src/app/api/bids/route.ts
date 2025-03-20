@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     }
 
     // Check if bid is higher than current price
-    const current_price = listing[0].currentPrice || listing[0].startingPrice;
+    const current_price = listing[0].current_price || listing[0].starting_price;
     console.log("💰 Current Price:", current_price);
 
     if (bid_amount <= current_price) {
@@ -55,7 +55,7 @@ export async function POST(req: Request) {
     // Update listing price
     await db
       .update(listings)
-      .set({ currentPrice: bid_amount })
+      .set({ current_price: bid_amount })
       .where(eq(listings.id, listing_id));
 
     return NextResponse.json(newBid[0], { status: 201 });
