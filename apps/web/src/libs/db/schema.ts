@@ -34,7 +34,7 @@ export const listings = pgTable(
     description: text(),
     startingPrice: integer().notNull(),
     currentPrice: integer(),
-    endTime: timestamp("endTime", { mode: "date" }).notNull(),
+    endTime: timestamp({ mode: "date" }).notNull(),
     status: text().default("ACTIVE"), // ACTIVE, SOLD
     createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },

@@ -15,6 +15,13 @@
       "when": 1742315264386,
       "tag": "0001_lucky_cammi",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1742447384438,
+      "tag": "0002_loud_marten_broadcloak",
+      "breakpoints": true
     }
   ]
 }

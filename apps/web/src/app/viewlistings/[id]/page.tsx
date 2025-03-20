@@ -14,6 +14,7 @@ import {
 const EditListing = () => {
   const { id } = useParams();
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,6 +30,7 @@ const EditListing = () => {
 
         const data = await response.json();
         setFormData(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -58,6 +60,7 @@ const EditListing = () => {
       }
 
       router.push("/mylistings");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setError(error.message);
     }
@@ -68,66 +71,70 @@ const EditListing = () => {
       <Typography variant="h4" sx={{ mt: 3 }}>
         Edit Listing
       </Typography>
-  
+
       {loading && <CircularProgress sx={{ mt: 3 }} />}
       {error && <Alert severity="error">{error}</Alert>}
-  
+
       <form onSubmit={handleSubmit}>
-        <TextField 
-          name="name" 
-          label="Name" 
-          fullWidth 
-          value={formData.name || ""} 
-          onChange={handleChange} 
-          sx={{ mt: 3 }} 
+        <TextField
+          name="name"
+          label="Name"
+          fullWidth
+          value={formData.name || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
         />
-  
-        <TextField 
-          name="category" 
-          label="Category" 
-          fullWidth 
-          value={formData.category || ""} 
-          onChange={handleChange} 
-          sx={{ mt: 3 }} 
+
+        <TextField
+          name="category"
+          label="Category"
+          fullWidth
+          value={formData.category || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
         />
-  
-        <TextField 
-          name="description" 
-          label="Description" 
-          fullWidth 
-          value={formData.description || ""} 
-          onChange={handleChange} 
-          sx={{ mt: 3 }} 
-          multiline 
+
+        <TextField
+          name="description"
+          label="Description"
+          fullWidth
+          value={formData.description || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+          multiline
           rows={3}
         />
-  
-        <TextField 
-          name="startingPrice" 
-          label="Starting Price" 
-          fullWidth 
+
+        <TextField
+          name="startingPrice"
+          label="Starting Price"
+          fullWidth
           type="number"
-          value={formData.startingPrice || ""} 
-          onChange={handleChange} 
-          sx={{ mt: 3 }} 
+          value={formData.startingPrice || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
         />
-  
-        <TextField 
-          name="endTime" 
-          label="End Time" 
-          fullWidth 
-          value={formData.endTime || ""} 
-          onChange={handleChange} 
-          sx={{ mt: 3 }} 
+
+        <TextField
+          name="endTime"
+          label="End Time"
+          fullWidth
+          value={formData.endTime || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
         />
-  
-        <Button type="submit" variant="contained" color="primary" sx={{ mt: 3 }}>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ mt: 3 }}
+        >
           Save Changes
         </Button>
       </form>
     </Container>
   );
-  
 };
 
 export default EditListing;

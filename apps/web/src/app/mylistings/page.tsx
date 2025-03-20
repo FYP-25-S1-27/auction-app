@@ -13,9 +13,12 @@ import {
   CircularProgress,
   Alert,
 } from "@mui/material";
+import { listings } from "@/libs/db/schema";
 
 const MyListings = () => {
-  const [listings, setListings] = useState<any[]>([]);
+  const [_listings, setListings] = useState<(typeof listings.$inferSelect)[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -31,6 +34,7 @@ const MyListings = () => {
 
         const data = await response.json();
         setListings(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -41,11 +45,11 @@ const MyListings = () => {
     fetchListings();
   }, []);
 
-  const handleEdit = (listingId: string) => {
+  const handleEdit = (listingId: number) => {
     router.push(`/viewlistings/${listingId}`);
   };
 
-  const handleDelete = async (listingId: string) => {
+  const handleDelete = async (listingId: number) => {
     if (!confirm("Are you sure you want to delete this listing?")) return;
 
     try {
@@ -57,7 +61,10 @@ const MyListings = () => {
         throw new Error("Failed to delete listing");
       }
 
-      setListings((prevListings) => prevListings.filter((item) => item.id !== listingId));
+      setListings((prevListings) =>
+        prevListings.filter((item) => item.id !== Number(listingId))
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setError(error.message);
     }
@@ -73,14 +80,21 @@ const MyListings = () => {
       {error && <Alert severity="error">{error}</Alert>}
 
       <List sx={{ mt: 3 }}>
-        {listings.map((listing) => (
-          <ListItem key={listing.id} sx={{ display: "flex", justifyContent: "space-between" }}>
+        {_listings.map((listing) => (
+          <ListItem
+            key={listing.id}
+            sx={{ display: "flex", justifyContent: "space-between" }}
+          >
             <ListItemText
               primary={listing.name}
               secondary={`Category: ${listing.category} | Price: $${listing.startingPrice}`}
             />
             <Box>
-              <Button variant="contained" color="primary" onClick={() => handleEdit(listing.id)}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleEdit(listing.id)}
+              >
                 Edit
               </Button>
               <Button

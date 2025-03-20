@@ -27,7 +27,6 @@
     "@mui/x-date-pickers": "^7.28.0",
     "@mui/x-date-pickers-pro": "^7.28.0",
     "@tailwindcss/postcss": "^4.0.12",
-    "@vercel/postgres": "^0.10.0",
     "auth0": "^4.19.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",

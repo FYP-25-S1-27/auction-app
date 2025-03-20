@@ -5,12 +5,16 @@ import { eq } from "drizzle-orm";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const listingId = parseInt(params.id);
+    const { id } = await params;
+    const listingId = parseInt(id);
     if (isNaN(listingId)) {
-      return NextResponse.json({ error: "Invalid listing ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid listing ID" },
+        { status: 400 }
+      );
     }
 
     const body = await req.json();
@@ -42,9 +46,15 @@ export async function PUT(
 
     console.log("✅ Listing updated successfully!");
 
-    return NextResponse.json({ message: "Listing updated successfully!" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Listing updated successfully!" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("❌ Error updating listing:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
