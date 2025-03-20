@@ -4,7 +4,6 @@ import * as schema from "./schema";
 import { auth0management } from "../actions/auth0-management";
 import { ManagementApiError } from "auth0";
 import { faker } from "@faker-js/faker";
-import { randomInt } from "node:crypto";
 
 const COUNT = 50;
 faker.seed(321);
@@ -28,31 +27,30 @@ async function seedAuth0Users(email: string, password: string) {
 }
 
 async function main() {
-  process.stdout.write("Reseting database...");
+  console.log("Reseting database...");
   await reset(db, schema);
-  console.log("done");
 
-  console.log("Creating Auth0 users...");
+  const PASSWORD = "password123";
+  console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
   for (let i = 0; i < 5; i++) {
-    await seedAuth0Users(`test${i}@test.test`, "1Qwer$#@!");
+    await seedAuth0Users(`test${i}.user@test.test`, PASSWORD);
   }
+  await seedAuth0Users(`test.admin@test.test`, PASSWORD);
   const auth0users = (await auth0management.users.getAll()).data || [];
 
   // Seed users
-  process.stdout.write("Seeding auth0 users...");
+  console.log("Seeding auth0 users to database...");
   await Promise.all(
     auth0users.map(async (user) => {
       await db.insert(schema.users).values({
         uuid: user.user_id,
         username: user.nickname,
         bio: faker.person.bio(),
-        is_admin: randomInt(0, 1) === 1,
-        created_at: new Date(user.created_at.toString()),
+        isAdmin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
+        createdAt: new Date(user.created_at.toString()),
       });
     })
-  ).then(() => {
-    console.log("done");
-  });
+  );
 
   const categories = [
     "Gadgets",
@@ -68,7 +66,7 @@ async function main() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { users, ...schemaFiltered } = schema; // Remove users table from schema
   // Seed remaining tables
-  process.stdout.write("Seeding remaining tables...");
+  console.log("Seeding remaining tables...");
   await seed(db, schemaFiltered, { count: COUNT, seed: 321 }).refine((f) => ({
     wallets: {
       columns: {
@@ -107,7 +105,7 @@ async function main() {
         description: f.loremIpsum({ sentencesCount: 1 }),
         startingPrice: f.int({ minValue: 1, maxValue: 1000 }),
         currentPrice: f.int({ minValue: 1000, maxValue: 10000 }),
-        status: f.valuesFromArray({ values: ["active", "sold"] }),
+        status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
         endTime: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.future().toISOString()
@@ -161,7 +159,6 @@ async function main() {
       },
     },
   }));
-  console.log("done");
 
   // Seed listing images
   // process.stdout.write("Seeding listing images...");

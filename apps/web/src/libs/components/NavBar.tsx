@@ -136,7 +136,7 @@ import { useUser } from "@auth0/nextjs-auth0";
 import Search from "@mui/icons-material/Search";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Fragment, useEffect, useState } from "react";
-import { getRole } from "./action";
+import { getRole } from "@/libs/actions/db/users";
 
 export default function NavBar() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -185,6 +185,7 @@ export default function NavBar() {
         {auth.isLoading ? (
           <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
             <Link href="/auth/login?screen_hint=signup">Register</Link>
+            {/* to be skeleton*/}
             <Link href="/auth/login">Login</Link>
           </Box>
         ) : auth.user ? (
@@ -233,7 +234,9 @@ export default function NavBar() {
                   <MenuItem onClick={popupState.close}>Profile</MenuItem>
                   <MenuItem onClick={popupState.close}>My account</MenuItem>
                   <MenuItem onClick={popupState.close}>
-                    <NextLink href="/auth/logout">Logout</NextLink>
+                    <Link href="/auth/logout" underline="none">
+                      Logout
+                    </Link>
                   </MenuItem>
                 </Menu>
               </Fragment>

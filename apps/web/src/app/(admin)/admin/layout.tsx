@@ -1,15 +1,6 @@
 import { Fragment } from "react";
-import {
-  Container,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-} from "@mui/material";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { Box } from "@mui/material";
+import ResponsiveDrawer from "@/libs/components/admin/CustomResponsiveDrawer";
 
 export default async function AdminLayout({
   children,
@@ -18,28 +9,14 @@ export default async function AdminLayout({
 }>) {
   return (
     <Fragment>
-      <Drawer variant="permanent">
-        <Toolbar />
-        <List>
-          <ListItem>
-            <ListItemButton href="/admin/manage/users">
-              <ListItemIcon>
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Users" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem>
-            <ListItemButton href="/admin/manage/listings">
-              <ListItemIcon>
-                <AccountCircleIcon />
-              </ListItemIcon>
-              <ListItemText primary="Listings" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-      </Drawer>
-      <Container>{children}</Container>
+      <ResponsiveDrawer>
+        <Box
+          component="main"
+          sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${240}px)` } }}
+        >
+          {children}
+        </Box>
+      </ResponsiveDrawer>
     </Fragment>
   );
 }
