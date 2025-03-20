@@ -16,3 +16,8 @@ export async function getRole(uuid: string) {
     .where(eq(users.uuid, uuid));
   return role;
 }
+
+export async function getUser(uuid: string) {
+  const user = await db.select().from(users).where(eq(users.uuid, uuid));
+  return user;
+}

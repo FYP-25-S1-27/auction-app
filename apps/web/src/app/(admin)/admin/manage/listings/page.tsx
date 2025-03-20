@@ -1,12 +1,20 @@
-import { Container } from "@mui/material";
+import { CustomAdminListingDataGrid } from "@/libs/components/admin/CustomAdminDataGrid";
+import { db } from "@/libs/db/drizzle";
+import { listings } from "@/libs/db/schema";
+import { Container, Paper, Typography } from "@mui/material";
 import { connection } from "next/server";
 
 export default async function ManageListingsPage() {
   await connection();
 
+  const dbListings = await db.select().from(listings);
+
   return (
-    <Container>
-      <h1>Listings</h1>
+    <Container sx={{ ml: 2 }}>
+      <Typography variant="h4">Manage Listings</Typography>
+      <Paper>
+        <CustomAdminListingDataGrid listings={dbListings} />
+      </Paper>
     </Container>
   );
 }
