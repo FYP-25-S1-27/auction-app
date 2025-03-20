@@ -5,12 +5,16 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const listingId = parseInt(params.id);
+    const { id } = await params;
+    const listingId = parseInt(id);
     if (isNaN(listingId)) {
-      return NextResponse.json({ error: "Invalid listing ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid listing ID" },
+        { status: 400 }
+      );
     }
 
     console.log("🔍 Fetching listing with ID:", listingId);
@@ -30,6 +34,9 @@ export async function GET(
     return NextResponse.json(listing[0], { status: 200 });
   } catch (error) {
     console.error("❌ Error fetching listing:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

@@ -1,6 +1,5 @@
 // import pool from '@/lib/db'; // Ensure this is your PostgreSQL connection
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 // export async function GET(request) {
 //   return new Response("Hello, world!", { status: 200 });
 // }
@@ -33,7 +32,6 @@
 //   }
 // }
 
-
 import { db } from "@/libs/db/drizzle"; // Changed from lib to libs
 import { listings } from "@/libs/db/schema"; // Changed from lib to libs
 import { lt } from "drizzle-orm";
@@ -49,6 +47,9 @@ export async function GET() {
     return NextResponse.json(endingSoonListings, { status: 200 });
   } catch (error) {
     console.error("Error fetching ending soon listings:", error);
-    return NextResponse.json({ message: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { message: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

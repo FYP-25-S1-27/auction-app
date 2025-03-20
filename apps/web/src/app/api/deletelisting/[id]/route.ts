@@ -5,12 +5,16 @@ import { eq } from "drizzle-orm";
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const listingId = parseInt(params.id);
+    const { id } = await params;
+    const listingId = parseInt(await id);
     if (isNaN(listingId)) {
-      return NextResponse.json({ error: "Invalid listing ID" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid listing ID" },
+        { status: 400 }
+      );
     }
 
     console.log("🗑️ Deleting listing with ID:", listingId);
@@ -30,9 +34,15 @@ export async function DELETE(
 
     console.log("✅ Listing deleted successfully!");
 
-    return NextResponse.json({ message: "Listing deleted successfully!" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Listing deleted successfully!" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("❌ Error deleting listing:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
