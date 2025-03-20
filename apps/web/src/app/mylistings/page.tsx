@@ -107,7 +107,7 @@ const MyListings = () => {
           >
             <ListItemText
               primary={listing.name}
-              secondary={`Category: ${listing.category} | Price: $${listing.startingPrice}`}
+              secondary={`Category: ${listing.category} | Price: $${listing.starting_price}`}
             />
             <Box>
               <Button
