@@ -17,9 +17,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import NextLink from "next/link";
 
-export default function ResponsiveDrawer({
-  children,
-}: Readonly<{ children: React.ReactNode }>) {
+export default function ResponsiveDrawer() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -115,7 +113,6 @@ export default function ResponsiveDrawer({
           {drawer}
         </Drawer>
       </Box>
-      {children}
     </Box>
   );
 }

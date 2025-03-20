@@ -42,7 +42,7 @@ export async function GET() {
     const endingSoonListings = await db
       .select()
       .from(listings)
-      .where(lt(listings.endTime, new Date()));
+      .where(lt(listings.endTime, new Date().toISOString()));
 
     return NextResponse.json(endingSoonListings, { status: 200 });
   } catch (error) {
