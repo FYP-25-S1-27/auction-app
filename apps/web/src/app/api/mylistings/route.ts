@@ -14,19 +14,19 @@
 //         console.error("❌ No session found. Returning Unauthorized.");
 //         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 //       }
-//       const userUuid = session.user.sub; // ✅ Extract Auth0 user UUID
+//       const user_uuid = session.user.sub; // ✅ Extract Auth0 user UUID
 //       */
 
 //       // ⚠️ Temporarily Hardcoded UUID (Uncomment this for testing)
-//       const userUuid = "auth0|67d91134f8221c2f7344d9de"; // Replace this with an actual UUID from DB
+//       const user_uuid = "auth0|67d91134f8221c2f7344d9de"; // Replace this with an actual UUID from DB
 
-//       console.log("✅ Fetching listings for User:", userUuid);
+//       console.log("✅ Fetching listings for User:", user_uuid);
 
 //       // ✅ Fetch user's listings from database
 //       const userListings = await db
 //         .select()
 //         .from(listings)
-//         .where(listings.userUuid.equals(userUuid));
+//         .where(listings.user_uuid.equals(user_uuid));
 
 //       console.log("📄 Retrieved Listings:", userListings);
 
@@ -54,14 +54,14 @@ export async function GET() {
     // }
 
     // ✅ Temporarily hardcoded user UUID
-    const userUuid = "auth0|67d91134f8221c2f7344d9de";
-    console.log("✅ Fetching listings for User:", userUuid);
+    const user_uuid = "auth0|67d91134f8221c2f7344d9de";
+    console.log("✅ Fetching listings for User:", user_uuid);
 
     // ✅ Query listings for the hardcoded user
     const userListings = await db
       .select()
       .from(listings)
-      .where(eq(listings.userUuid, userUuid)); // ✅ Corrected filter
+      .where(eq(listings.user_uuid, user_uuid)); // ✅ Corrected filter
 
     console.log("📄 Retrieved Listings:", userListings);
 
