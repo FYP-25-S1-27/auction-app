@@ -15,14 +15,22 @@ const categoryColors = {
   watches: "#7C007C", // Magenta
   "event-tickets": "#FF4500", // Orange
   "toys-collectables": "#FFD700", // Yellow
-  art: "#8B008B", // Purple 
+  art: "#8B008B", // Purple
 };
 
-const CategorySubcategories = ({ subcategories = [], parentSlug }) => {
+function CategorySubcategories({
+  subcategories,
+  parentSlug,
+}: {
+  subcategories: Array<string>;
+  parentSlug: string;
+}) {
   console.log("Subcategories Data:", subcategories); // Debugging log
 
   // Ensure category color exists, fallback to green if undefined
-  const backgroundColor = categoryColors[parentSlug?.toLowerCase()] || "#007C5F";
+  const backgroundColor =
+    categoryColors[parentSlug?.toLowerCase() as keyof typeof categoryColors] ||
+    "#007C5F";
 
   return (
     <Box
@@ -33,24 +41,27 @@ const CategorySubcategories = ({ subcategories = [], parentSlug }) => {
       sx={{ mb: 5 }}
     >
       {subcategories.map((sub) => (
-        <Link key={sub.slug} href={`/category/${parentSlug}/${sub.slug}`} passHref>
+        <Link key={sub} href={`/category/${parentSlug}/${sub}`} passHref>
           <Button
             variant="contained"
             sx={{
               backgroundColor, // Dynamic background color
-              color: "white", 
+              color: "white",
               fontWeight: "bold",
               textTransform: "none",
               borderRadius: "8px",
-              width: "200px", 
-              height: "60px", 
+              width: "200px",
+              height: "60px",
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
               "&:hover": { backgroundColor: "#005A3C" }, // Darken on hover
             }}
           >
-            <Typography variant="body1" sx={{ fontSize: "16px", fontWeight: "bold" }}>
+            <Typography
+              variant="body1"
+              sx={{ fontSize: "16px", fontWeight: "bold" }}
+            >
               {sub}
             </Typography>
           </Button>
@@ -58,6 +69,6 @@ const CategorySubcategories = ({ subcategories = [], parentSlug }) => {
       ))}
     </Box>
   );
-};
+}
 
 export default CategorySubcategories;

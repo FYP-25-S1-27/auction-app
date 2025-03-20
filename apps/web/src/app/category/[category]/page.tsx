@@ -11,6 +11,7 @@ export default function CategoryPage() {
   const router = useRouter();
   const params = useParams();
   const categorySlug = params.category as string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [categoryData, setCategoryData] = useState<any>(null);
 
   useEffect(() => {
@@ -29,20 +30,20 @@ export default function CategoryPage() {
     if (categorySlug) {
       fetchCategoryData();
     }
-  }, [categorySlug]);
+  });
 
   return (
     <Container sx={{ minHeight: "100vh" }} className="bg-white">
       <CategoryBar />
       <div className="container mx-auto p-6">
-        <Typography 
-          variant="h4" 
-          sx={{ color: "#007C5F", mb: 2 }} 
-        >
+        <Typography variant="h4" sx={{ color: "#007C5F", mb: 2 }}>
           {categoryData?.name || "Loading..."}
         </Typography>
         {categoryData?.subcategories && (
-          <CategorySubcategories subcategories={categoryData.subcategories} parentSlug={categorySlug} />
+          <CategorySubcategories
+            subcategories={categoryData.subcategories}
+            parentSlug={categorySlug}
+          />
         )}
         <CategoryListings listings={categoryData?.listings || []} />
       </div>
