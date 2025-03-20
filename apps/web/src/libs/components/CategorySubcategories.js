@@ -33,7 +33,7 @@ const CategorySubcategories = ({ subcategories = [], parentSlug }) => {
       sx={{ mb: 5 }}
     >
       {subcategories.map((sub) => (
-        <Link key={sub.slug} href={`/category/${parentSlug}/${sub.slug.toLowerCase()}`} passHref>
+        <Link key={sub.slug} href={`/category/${parentSlug}/${sub.slug}`} passHref>
           <Button
             variant="contained"
             sx={{
