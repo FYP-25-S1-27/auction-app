@@ -45,19 +45,19 @@ export const listings = pgTable(
   "listings",
   {
     id: serial().primaryKey().notNull(),
-    userUuid: text().notNull(),
+    user_uuid: text().notNull(),
     category: text().notNull(),
     name: text().notNull(),
     description: text(),
-    startingPrice: integer().notNull(),
-    currentPrice: integer(),
-    endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
+    starting_price: integer().notNull(),
+    current_price: integer(),
+    end_time: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
     status: text().default("ACTIVE"), // ACTIVE, SOLD
-    createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
+    created_at: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "listings_user_id_fkey",
     }).onDelete("cascade"),
@@ -88,12 +88,12 @@ export const listingImages = pgTable(
 export const listingUserLikes = pgTable(
   "user_listing_likes",
   {
-    userUuid: text().notNull(),
+    user_uuid: text().notNull(),
     listingId: integer().notNull(),
   },
   (table) => [
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "user_listing_likes_user_id_fkey",
     }).onDelete("cascade"),
@@ -164,13 +164,13 @@ export const transactions = pgTable(
 export const wallets = pgTable(
   "wallets",
   {
-    userUuid: text().primaryKey(),
+    user_uuid: text().primaryKey(),
     balance: numeric({ precision: 10, scale: 2 }).default("0").notNull(),
     lastUpdated: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [
     foreignKey({
-      columns: [table.userUuid],
+      columns: [table.user_uuid],
       foreignColumns: [users.uuid],
       name: "wallets_user_id_fkey",
     }).onDelete("cascade"),
