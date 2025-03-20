@@ -55,17 +55,17 @@ export async function POST(req: Request) {
     }
 
     // ✅ Ensure `endTime` is a valid Date
-    const endTimeDate = new Date(endTime);
-    console.log("🕒 Parsed endTime as Date:", endTimeDate);
-    console.log("📅 Converted endTime to ISO:", endTimeDate.toISOString());
+    // const endTimeDate = new Date(endTime);
+    // console.log("🕒 Parsed endTime as Date:", endTimeDate);
+    // console.log("📅 Converted endTime to ISO:", endTimeDate.toISOString());
 
-    if (isNaN(endTimeDate.getTime())) {
-      console.error("❌ Invalid date format:", endTime);
-      return NextResponse.json(
-        { error: "Invalid date format" },
-        { status: 400 }
-      );
-    }
+    // if (isNaN(endTimeDate.getTime())) {
+    //   console.error("❌ Invalid date format:", endTime);
+    //   return NextResponse.json(
+    //     { error: "Invalid date format" },
+    //     { status: 400 }
+    //   );
+    // }
 
     // ✅ Insert into the database
     await db.insert(listings).values({
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
       category,
       description,
       startingPrice: Number(startingPrice), // Ensure it's a number
-      endTime: endTimeDate, // ✅ Store as a proper Date object
+      endTime, // ✅ Store as a proper Date object
       //scheduled,
     });
 

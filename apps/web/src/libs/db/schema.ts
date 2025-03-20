@@ -34,7 +34,7 @@ export const listings = pgTable(
     description: text(),
     startingPrice: integer().notNull(),
     currentPrice: integer(),
-    endTime: timestamp({ mode: "date" }).notNull(),
+    endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
     status: text().default("ACTIVE"), // ACTIVE, SOLD
     createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
