@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 // Dummy data for categories
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const categories: Record<string, any> = {
   cars: {
     name: "Cars",
@@ -70,8 +71,18 @@ const categories: Record<string, any> = {
     name: "Toys & Collectables",
     subcategories: ["Action Figures", "LEGO"],
     listings: [
-      { id: 1, name: "Star Wars Action Figure", bid: "$100", timeLeft: "6 hours" },
-      { id: 2, name: "LEGO Millennium Falcon", bid: "$300", timeLeft: "3 days" },
+      {
+        id: 1,
+        name: "Star Wars Action Figure",
+        bid: "$100",
+        timeLeft: "6 hours",
+      },
+      {
+        id: 2,
+        name: "LEGO Millennium Falcon",
+        bid: "$300",
+        timeLeft: "3 days",
+      },
     ],
   },
   art: {
@@ -86,20 +97,24 @@ const categories: Record<string, any> = {
 
 // API route handler
 export async function GET(
-    request: Request,
-    { params }: { params?: { category?: string } }
-  ) {
-    console.log("Received category:", params?.category); // Debugging log
-  
-    if (!params || !params.category) {
-      return NextResponse.json({ error: "Category parameter missing" }, { status: 400 });
-    }
-  
-    const categoryKey = params.category.toLowerCase(); // Ensure case-insensitive matching
-  
-    if (!categories[categoryKey]) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
-    }
-  
-    return NextResponse.json(categories[categoryKey], { status: 200 });
+  request: Request,
+  { params }: { params: Promise<{ category: string }> }
+) {
+  const { category } = await params;
+  console.log("Received category:", category); // Debugging log
+
+  if (!category) {
+    return NextResponse.json(
+      { error: "Category parameter missing" },
+      { status: 400 }
+    );
   }
+
+  const categoryKey = category.toLowerCase(); // Ensure case-insensitive matching
+
+  if (!categories[categoryKey]) {
+    return NextResponse.json({ error: "Category not found" }, { status: 404 });
+  }
+
+  return NextResponse.json(categories[categoryKey], { status: 200 });
+}
