@@ -3,7 +3,7 @@ import { CustomAdminUserDataGrid } from "@/libs/components/admin/CustomAdminData
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
 import { CustomUser } from "@/libs/types/users";
-import { Container, Paper, Typography } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
 import { connection } from "next/server";
 
 export default async function UsersPage() {
@@ -29,11 +29,11 @@ export default async function UsersPage() {
   });
 
   return (
-    <Container sx={{ ml: 2 }}>
+    <div>
       <Typography variant="h4">Manage Users</Typography>
       <Paper>
         <CustomAdminUserDataGrid users={_users} />
       </Paper>
-    </Container>
+    </div>
   );
 }

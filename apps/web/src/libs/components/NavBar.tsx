@@ -167,8 +167,12 @@ export default function NavBar() {
 
   return (
     <AppBar
-      position="static"
-      sx={{ backgroundColor: "white", mt: 1 }}
+      position="fixed"
+      sx={{
+        backgroundColor: "white",
+        pt: 1,
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+      }}
       elevation={0}
     >
       <Container maxWidth="xl">
