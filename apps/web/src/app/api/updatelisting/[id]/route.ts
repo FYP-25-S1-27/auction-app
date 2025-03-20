@@ -18,7 +18,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { name, category, description, startingPrice, endTime } = body;
+    const { name, category, description, starting_price, end_time } = body;
 
     console.log("📝 Updating listing:", { listingId, ...body });
 
@@ -39,8 +39,8 @@ export async function PUT(
         name,
         category,
         description,
-        startingPrice: Number(startingPrice), // Ensure number
-        endTime, // Ensure valid date
+        starting_price: Number(starting_price), // Ensure number
+        end_time, // Ensure valid date
       })
       .where(eq(listings.id, listingId));
 

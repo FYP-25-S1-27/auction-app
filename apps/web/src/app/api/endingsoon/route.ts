@@ -6,19 +6,19 @@
 //   try {
 //     const client = await pool.connect();
 //     const query = `
-//       SELECT id, name, description, "currentPrice", "endTime"
+//       SELECT id, name, description, "current_price", "end_time"
 //       FROM listings
-//       WHERE "endTime" <= NOW() + INTERVAL '1 day'
-//       ORDER BY "currentPrice" DESC
+//       WHERE "end_time" <= NOW() + INTERVAL '1 day'
+//       ORDER BY "current_price" DESC
 //       LIMIT 40;
 //     `;
 
 //     // Query to fetch 40 listings ending in the next 24 hours, sorted by highest likes
 
 //     // const query = `
-//     // SELECT id, name, description, "currentPrice", "endTime", likes
+//     // SELECT id, name, description, "current_price", "end_time", likes
 //     // FROM listings
-//     // WHERE "endTime" <= NOW() + INTERVAL '1 day'
+//     // WHERE "end_time" <= NOW() + INTERVAL '1 day'
 //     // ORDER BY likes DESC
 //     // LIMIT 40;
 //     // `;
@@ -42,7 +42,7 @@ export async function GET() {
     const endingSoonListings = await db
       .select()
       .from(listings)
-      .where(lt(listings.endTime, new Date().toISOString()));
+      .where(lt(listings.end_time, new Date().toISOString()));
 
     return NextResponse.json(endingSoonListings, { status: 200 });
   } catch (error) {

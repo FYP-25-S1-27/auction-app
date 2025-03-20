@@ -106,20 +106,20 @@ const EditListing = () => {
         />
 
         <TextField
-          name="startingPrice"
+          name="starting_price"
           label="Starting Price"
           fullWidth
           type="number"
-          value={formData.startingPrice || ""}
+          value={formData.starting_price || ""}
           onChange={handleChange}
           sx={{ mt: 3 }}
         />
 
         <TextField
-          name="endTime"
+          name="end_time"
           label="End Time"
           fullWidth
-          value={formData.endTime || ""}
+          value={formData.end_time || ""}
           onChange={handleChange}
           sx={{ mt: 3 }}
         />

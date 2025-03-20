@@ -21,16 +21,16 @@
 // import { getRole } from "./action";
 
 // export default function NavBar() {
-//   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+//   const [is_admin, setis_admin] = useState<boolean>(false);
 
 //   const auth = useUser();
 //   useEffect(() => {
 //     if (auth.user) {
 //       getRole(auth.user.sub).then((x) => {
-//         if (x[0].isAdmin) {
-//           setIsAdmin(true);
+//         if (x[0].is_admin) {
+//           setis_admin(true);
 //         } else {
-//           setIsAdmin(false);
+//           setis_admin(false);
 //         }
 //       });
 //     }
@@ -90,7 +90,7 @@
 //                   />
 //                 </IconButton>
 //                 <Menu {...bindMenu(popupState)}>
-//                   {isAdmin && (
+//                   {is_admin && (
 //                     <MenuItem onClick={popupState.close}>
 //                       <NextLink href="/admin">Admin Panel</NextLink>
 //                     </MenuItem>
@@ -142,7 +142,7 @@ import { getRole } from "@/libs/actions/db/users";
 // import { listing_category } from "../db/schema";
 
 export default function NavBar() {
-  const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [is_admin, setis_admin] = useState<boolean>(false);
   // const [categories, setCategories] = useState<
   //   (typeof listing_category.$inferSelect)[]
   // >([]);
@@ -151,10 +151,10 @@ export default function NavBar() {
   useEffect(() => {
     if (auth.user) {
       getRole(auth.user.sub).then((x) => {
-        if (x[0].isAdmin) {
-          setIsAdmin(true);
+        if (x[0].is_admin) {
+          setis_admin(true);
         } else {
-          setIsAdmin(false);
+          setis_admin(false);
         }
       });
     }
@@ -265,7 +265,7 @@ export default function NavBar() {
                     <Avatar src={auth.user.picture} alt={auth.user.nickname} />
                   </IconButton>
                   <Menu {...bindMenu(popupState)}>
-                    {isAdmin && (
+                    {is_admin && (
                       <MenuItem onClick={popupState.close}>
                         <NextLink href="/admin">Admin Panel</NextLink>
                       </MenuItem>
