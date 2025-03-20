@@ -9,6 +9,7 @@ import NavBar from "@/libs/components/NavBar";
 import { auth0 } from "@/libs/auth0";
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
+import { Toolbar } from "@mui/material";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -47,6 +48,7 @@ export default async function RootLayout({
           <ThemeProvider theme={theme}>
             <Auth0Provider>
               <NavBar />
+              <Toolbar />
               {children}
             </Auth0Provider>
           </ThemeProvider>
