@@ -13,7 +13,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
 const EndingSoon = () => {
-  const [listings, setListings] = useState([]); // Ensure listings is initialized as an array
+  const [listings, setListings] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [timeLeft, setTimeLeft] = useState({});
   const [currentTime, setCurrentTime] = useState(new Date());
