@@ -14,7 +14,7 @@ export default async function UsersPage() {
   const dbUsers = await db
     .select({
       uuid: users.uuid,
-      isAdmin: users.isAdmin,
+      is_admin: users.is_admin,
       username: users.username,
     })
     .from(users);
@@ -23,7 +23,7 @@ export default async function UsersPage() {
     const dbUser = dbUsers.find((dbUser) => dbUser.uuid === auth0user.user_id);
     return {
       ...auth0user,
-      isAdmin: dbUser?.isAdmin ?? false,
+      is_admin: dbUser?.is_admin ?? false,
       username: dbUser?.username ?? "",
     };
   });

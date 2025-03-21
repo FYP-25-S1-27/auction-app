@@ -12,7 +12,7 @@ import {
 import { Button, Stack } from "@mui/material";
 import { useState, useMemo } from "react";
 import { blockUser } from "@/libs/actions/auth0-management/user";
-import { setIsAdmin } from "@/libs/actions/db/users";
+import { setis_admin } from "@/libs/actions/db/users";
 import { listings } from "@/libs/db/schema";
 import { deleteListing } from "@/libs/actions/db/listings";
 import SaveIcon from "@mui/icons-material/Save";
@@ -82,7 +82,7 @@ export function CustomAdminUserDataGrid({
 
     // Call the API to toggle admin rights
     selectedUsers.forEach((user_id) => {
-      setIsAdmin(user_id, !allSelectedAdmins);
+      setis_admin(user_id, !allSelectedAdmins);
     });
   };
 
@@ -91,7 +91,7 @@ export function CustomAdminUserDataGrid({
     { field: "email", headerName: "Email", width: 150 },
     { field: "username", headerName: "Username", width: 150 },
     {
-      field: "isAdmin",
+      field: "is_admin",
       headerName: "Admin",
       type: "boolean",
     },
@@ -194,16 +194,16 @@ export function CustomAdminListingDataGrid({
 
   const columns: GridColDef<(typeof listings)[number]>[] = [
     { field: "id", headerName: "ID", width: 90 },
-    { field: "userUuid", headerName: "Owner" },
+    { field: "user_uuid", headerName: "Owner" },
     { field: "category", headerName: "Category", width: 150 },
     { field: "name", headerName: "Name", width: 150 },
     {
-      field: "startingPrice",
+      field: "starting_price",
       headerName: "Price",
       valueFormatter: (value) => `$${value}`,
     },
     {
-      field: "currentPrice",
+      field: "current_price",
       headerName: "Current Price",
       valueFormatter: (value) => `$${value}`,
     },
@@ -215,13 +215,13 @@ export function CustomAdminListingDataGrid({
       valueOptions: ["ACTIVE", "SOLD"],
     },
     {
-      field: "endTime",
+      field: "end_time",
       headerName: "End Time",
       width: 150,
       valueFormatter: (value) => new Date(value as string).toLocaleString(),
     },
     {
-      field: "createdAt",
+      field: "created_at",
       headerName: "Created At",
       width: 150,
       valueFormatter: (value) => new Date(value as string).toLocaleString(),

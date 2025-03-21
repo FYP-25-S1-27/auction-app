@@ -23,8 +23,8 @@ const ListingForm = () => {
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
-  const [startingPrice, setStartingPrice] = useState("");
-  const [endTime, setEndTime] = useState<dayjs.Dayjs | null>(null);
+  const [starting_price, setstarting_price] = useState("");
+  const [end_time, setend_time] = useState<dayjs.Dayjs | null>(null);
   const [scheduled, setScheduled] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,25 +33,25 @@ const ListingForm = () => {
     setError(null); // Reset errors on new submit
 
     // **Validation Checks**
-    if (Number(startingPrice) < 0) {
+    if (Number(starting_price) < 0) {
       setError("Starting price cannot be negative.");
       return;
     }
-    if (endTime && endTime.isBefore(dayjs())) {
+    if (end_time && end_time.isBefore(dayjs())) {
       setError("End time cannot be before the current time.");
       return;
     }
 
-    // ✅ Convert `endTime` to a proper ISO string before sending
-    const endTimeString = endTime ? endTime.toDate().toISOString() : null;
+    // ✅ Convert `end_time` to a proper ISO string before sending
+    const end_timeString = end_time ? end_time.toDate().toISOString() : null;
 
     const listingData = {
       name,
       category,
       condition,
       description,
-      startingPrice: Number(startingPrice), // Ensure it's a number
-      endTime: endTimeString, // ✅ Send as an ISO string
+      starting_price: Number(starting_price), // Ensure it's a number
+      end_time: end_timeString, // ✅ Send as an ISO string
       scheduled,
     };
 
@@ -130,8 +130,8 @@ const ListingForm = () => {
         <TextField
           label="Starting Price"
           type="number"
-          value={startingPrice}
-          onChange={(e) => setStartingPrice(e.target.value)}
+          value={starting_price}
+          onChange={(e) => setstarting_price(e.target.value)}
           fullWidth
           required
           margin="normal"
@@ -141,8 +141,8 @@ const ListingForm = () => {
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
             label="Auction End Time"
-            value={endTime}
-            onChange={(newValue) => setEndTime(newValue)}
+            value={end_time}
+            onChange={(newValue) => setend_time(newValue)}
           />
         </LocalizationProvider>
 
