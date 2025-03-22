@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   TextField,
   Button,
@@ -14,8 +14,7 @@ import {
   Box,
   Switch,
   Alert,
-  Typography,
-  Snackbar,
+  CircularProgress,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -25,6 +24,7 @@ import { InferSelectModel } from "drizzle-orm";
 import { listingCategory } from "@/libs/db/schema";
 
 const ListingForm = () => {
+  const router = useRouter(); // ✅ Use Next.js router for navigation
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
@@ -34,52 +34,22 @@ const ListingForm = () => {
   const [scheduled, setScheduled] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [categoryHierarchy, setCategoryHierarchy] = useState<
-    CategoriesSchema[]
-  >([]);
-
-  // Get all categories
-  type CategoriesSchema = InferSelectModel<typeof listingCategory>;
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        const response = await fetch("/api/categories");
-        if (response.ok) {
-          const data: CategoriesSchema[] = await response.json();
-          const hierarchical = data.filter((cat) => cat.parent !== null);
-          setCategoryHierarchy(hierarchical);
-        } else {
-          console.error("Failed to fetch categories");
-        }
-      } catch (error) {
-        console.error("Error fetching categories:", error);
-      }
-    };
-    fetchCategories();
-  }, []);
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles((prev) => [...prev, ...acceptedFiles]);
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { "image/*": [], "video/*": [] },
-  });
+  const [loading, setLoading] = useState(false); // ✅ Loading state
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError(null); // Reset errors on new submit
+    setError(null);
+    setLoading(true); // ✅ Show loading while submitting
 
     // **Validation Checks**
     if (Number(starting_price) < 0) {
       setError("Starting price cannot be negative.");
+      setLoading(false);
       return;
     }
     if (end_time && end_time.isBefore(dayjs())) {
       setError("End time cannot be before the current time.");
+      setLoading(false);
       return;
     }
     if (scheduled) {
@@ -96,70 +66,39 @@ const ListingForm = () => {
       }
     }
 
-    // ✅ Convert `end_time` to a proper ISO string before sending
-    const end_timeString = end_time ? end_time.toDate().toISOString() : null;
+    // ✅ Convert `end_time` to ISO format before sending
+    const end_timeString = end_time ? end_time.toISOString() : null;
 
     const listingData = {
       name,
       category,
       condition,
       description,
-      starting_price: Number(starting_price), // Ensure it's a number
-      end_time: end_timeString, // ✅ Send as an ISO string
+      starting_price: Number(starting_price),
+      end_time: end_timeString,
       scheduled,
     };
 
     console.log("📩 Submitting:", listingData);
 
-    const response = await fetch("/api/listings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(listingData),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      setError(data.error || "Something went wrong");
-      return;
-    }
-
-    // Prepare form data for file upload
-    const formData = new FormData();
-    formData.append("name", name);
-    formData.append("category", category);
-    formData.append("condition", condition);
-    formData.append("description", description);
-    formData.append("starting_price", String(priceNumber));
-    formData.append("end_time", end_timeString || ""); // Send as string, handle null
-    formData.append("scheduled", String(scheduled));
-    if (scheduled) {
-      formData.append("start_time", start_timeString || "");
-    }
-
-    // Append files to form data
-    files.forEach((file) => {
-      formData.append("files", file);
-    });
-
-    console.log("📩 Submitting Form Data with Files");
-
     try {
       const response = await fetch("/api/listings", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(listingData),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Failed to create listing");
+        throw new Error(data.error || "Something went wrong");
       }
 
-      const data = await response.json();
-      console.log("✅ Server Response:", data);
-      setShowSuccess(true);
-    } catch (error) {
-      console.error("❌ Error submitting form:", error);
-      setError("Failed to create listing");
+      console.log("✅ Listing created successfully:", data);
+      router.push("/"); // ✅ Redirect to homepage upon success
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -231,17 +170,9 @@ const ListingForm = () => {
       </Box>
 
       <form onSubmit={handleSubmit}>
-        {/* Name */}
-        <TextField
-          label="Listing Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          fullWidth
-          required
-          margin="normal"
-        />
-        {/* Category */}
-        <FormControl fullWidth margin="normal" required>
+        <TextField label="Listing Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth required margin="normal" />
+
+        <FormControl fullWidth margin="normal">
           <InputLabel>Item Category</InputLabel>
           <Select
             value={category}
@@ -254,8 +185,8 @@ const ListingForm = () => {
             ))}
           </Select>
         </FormControl>
-        {/* Condition */}
-        <FormControl fullWidth margin="normal" required>
+
+        <FormControl fullWidth margin="normal">
           <InputLabel>Item Condition</InputLabel>
           <Select
             value={condition}
@@ -266,36 +197,14 @@ const ListingForm = () => {
             <MenuItem value="heavily_used">Heavily Used</MenuItem>
           </Select>
         </FormControl>
-        {/* Condition Description */}
-        <TextField
-          label="Condition Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          fullWidth
-          required
-          margin="normal"
-          multiline
-          rows={3}
-        />
-        {/* Starting Price */}
-        <TextField
-          label="Starting Price"
-          type="number"
-          value={starting_price}
-          onChange={(e) => setstarting_price(e.target.value)}
-          fullWidth
-          required
-          margin="normal"
-        />
-        {/* End Time */}
+
+        <TextField label="Condition Description" value={description} onChange={(e) => setDescription(e.target.value)} fullWidth required margin="normal" multiline rows={3} />
+
+        <TextField label="Starting Price" type="number" value={starting_price} onChange={(e) => setstarting_price(e.target.value)} fullWidth required margin="normal" />
+
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateTimePicker
-            label="Auction End Time"
-            value={end_time}
-            onChange={(newValue) => setend_time(newValue)}
-          />
+          <DateTimePicker label="Auction End Time" value={end_time} onChange={(newValue) => setend_time(newValue)} />
         </LocalizationProvider>
-        {/* Schedule Toggle */}
         <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
           <p>Schedule Your Listing</p>
           <Switch
@@ -312,10 +221,9 @@ const ListingForm = () => {
             disabled={!scheduled} // disable the field if not scheduled
           />
         </LocalizationProvider>
-        {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button variant="contained" color="primary" type="submit">
-            List Now
+          <Button type="submit" variant="contained" color="primary" disabled={loading}>
+            {loading ? <CircularProgress size={24} /> : "List Now"}
           </Button>
         </Box>
         &nbsp;
