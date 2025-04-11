@@ -22,6 +22,34 @@
       "when": 1742447384438,
       "tag": "0002_loud_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1744377095782,
+      "tag": "0003_woozy_mandarin",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1744381820535,
+      "tag": "0004_curious_patch",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1744382174345,
+      "tag": "0005_broad_human_fly",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1744383969406,
+      "tag": "0006_lucky_callisto",
+      "breakpoints": true
     }
   ]
 }

@@ -13,11 +13,28 @@ import { sql } from "drizzle-orm";
 export const users = pgTable("users", {
   uuid: text().primaryKey().notNull(),
   username: text().notNull().unique(),
-  bio: text(),
-  is_admin: boolean().default(false).notNull(),
-  created_at: timestamp()
+  isAdmin: boolean().default(false).notNull(),
+  createdAt: timestamp()
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
+});
+export const userProfile = pgTable("user_profile", {
+  userUuid: text()
+    .primaryKey()
+    .references(() => users.uuid, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  bio: text(),
+  phone: text(),
+  address: text(),
+  gender: text(),
+  age: integer(),
+  createdAt: timestamp()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull()
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
 });
 
 export const listing_category = pgTable("listing_category", {
@@ -95,7 +112,9 @@ export const bids = pgTable(
     listing_id: integer().notNull(),
     user_uuid: text().notNull(),
     bid_amount: integer().notNull(),
-    bid_time: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+    bid_time: timestamp({ mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     foreignKey({
