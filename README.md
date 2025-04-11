@@ -31,6 +31,14 @@ npm run dev
 - [Download DBeaver](https://dbeaver.io/download/) and follow the installation instructions.
 
 
+5. For database schema changes/migrations, please use:
+```bash
+npm run -w web db:generate # to generate sql files (apps/web/drizzle_output)
+
+npm run -w web db:migrate # to migrate schema using above sql files
+```
+
+
 ### Contribution workflow
 ```bash
 # Create a new branch
