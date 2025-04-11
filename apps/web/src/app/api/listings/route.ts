@@ -69,12 +69,12 @@ export async function POST(req: Request) {
 
     // ✅ Insert into the database
     await db.insert(listings).values({
-      user_uuid,
+      userUuid: user_uuid,
       name,
       category,
       description,
-      starting_price: Number(starting_price), // Ensure it's a number
-      end_time, // ✅ Store as a proper Date object
+      startingPrice: Number(starting_price), // Ensure it's a number
+      endTime: end_time, // ✅ Store as a proper Date object
       //scheduled,
     });
 

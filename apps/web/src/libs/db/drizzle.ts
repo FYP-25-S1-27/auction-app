@@ -1,8 +1,3 @@
-// import { drizzle } from "drizzle-orm/node-postgres";
-
-// export const db = drizzle(process.env.DB_CONNECTION_STRING!);
-import { Pool } from "pg";
-
 import { drizzle } from "drizzle-orm/node-postgres";
 
 export const db = drizzle({

@@ -103,7 +103,7 @@ async function main() {
     wallets: {
       count: auth0users.length,
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
           isUnique: true,
         }),
@@ -115,7 +115,7 @@ async function main() {
         }),
       },
     },
-    listing_category: {
+    listingCategory: {
       count: categories.length,
       columns: {
         name: f.valuesFromArray({
@@ -126,7 +126,7 @@ async function main() {
     },
     listings: {
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
         name: f.valuesFromArray({
@@ -135,45 +135,45 @@ async function main() {
           ), // Generate random product names
         }),
         description: f.loremIpsum({ sentencesCount: 1 }),
-        starting_price: f.int({ minValue: 1, maxValue: 1000 }),
-        current_price: f.int({ minValue: 1000, maxValue: 10000 }),
+        startingPrice: f.int({ minValue: 1, maxValue: 1000 }),
+        currentPrice: f.int({ minValue: 1000, maxValue: 10000 }),
         status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
-        end_time: f.valuesFromArray({
+        endTime: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.future().toISOString()
           ),
         }),
-        created_at: f.valuesFromArray({
+        createdAt: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.past().toISOString()
           ),
         }),
       },
       with: {
-        listing_images: 1,
+        listingImages: 1,
       },
     },
-    listing_images: {
+    listingImages: {
       columns: {
         imageUrl: f.default({
           defaultValue: "/list_img/image_placeholder.jpg",
         }),
       },
     },
-    listing_user_likes: {
+    listingUserLikes: {
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
       },
     },
     bids: {
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
         bidAmount: f.int({ minValue: 1, maxValue: 1000 }),
-        created_at: f.valuesFromArray({
+        createdAt: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.recent({ days: 2 }).toISOString()
           ),
