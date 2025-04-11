@@ -13,7 +13,6 @@ import { sql } from "drizzle-orm";
 export const users = pgTable("users", {
   uuid: text().primaryKey().notNull(),
   username: text().notNull().unique(),
-  bio: text(),
   isAdmin: boolean().default(false).notNull(),
   createdAt: timestamp()
     .default(sql`CURRENT_TIMESTAMP`)
@@ -24,6 +23,7 @@ export const userProfile = pgTable("user_profile", {
     .primaryKey()
     .references(() => users.uuid, { onDelete: "cascade", onUpdate: "cascade" })
     .notNull(),
+  bio: text(),
   phone: text(),
   address: text(),
   gender: text(),

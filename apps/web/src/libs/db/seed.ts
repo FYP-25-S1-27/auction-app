@@ -45,7 +45,6 @@ async function main() {
       await db.insert(schema.users).values({
         uuid: user.user_id,
         username: user.nickname,
-        bio: faker.person.bio(),
         isAdmin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
         createdAt: new Date(user.created_at.toString()),
       });
