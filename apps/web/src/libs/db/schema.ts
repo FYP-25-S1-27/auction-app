@@ -19,6 +19,23 @@ export const users = pgTable("users", {
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
+export const userProfile = pgTable("user_profile", {
+  userUuid: text()
+    .primaryKey()
+    .references(() => users.uuid, { onDelete: "cascade", onUpdate: "cascade" })
+    .notNull(),
+  phone: text(),
+  address: text(),
+  gender: text(),
+  age: integer(),
+  createdAt: timestamp()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull(),
+  updatedAt: timestamp()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .notNull()
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+});
 
 export const listing_category = pgTable("listing_category", {
   name: text().primaryKey(),

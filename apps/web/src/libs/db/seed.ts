@@ -68,7 +68,41 @@ async function main() {
   // Seed remaining tables
   console.log("Seeding remaining tables...");
   await seed(db, schemaFiltered, { count: COUNT, seed: 321 }).refine((f) => ({
+    userProfile: {
+      count: auth0users.length,
+      columns: {
+        userUuid: f.valuesFromArray({
+          values: auth0users.map((user) => user.user_id),
+          isUnique: true,
+        }),
+        gender: f.valuesFromArray({ values: ["MALE", "FEMALE"] }),
+        age: f.int({ minValue: 18, maxValue: 90 }),
+        phone: f.valuesFromArray({
+          values: Array.from({ length: auth0users.length }, () =>
+            faker.phone.number()
+          ),
+        }),
+        address: f.valuesFromArray({
+          values: Array.from({ length: auth0users.length }, () =>
+            faker.location.streetAddress()
+          ),
+        }),
+        createdAt: f.valuesFromArray({
+          values: Array.from(
+            { length: auth0users.length },
+            () => faker.date.past() as unknown as string // surpasses type safety, only use for seeding as we know it is a date
+          ),
+        }),
+        updatedAt: f.valuesFromArray({
+          values: Array.from(
+            { length: auth0users.length },
+            () => faker.date.recent({ days: 90 }) as unknown as string // surpasses type safety, only use for seeding as we know it is a date
+          ),
+        }),
+      },
+    },
     wallets: {
+      count: auth0users.length,
       columns: {
         userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
@@ -81,16 +115,15 @@ async function main() {
           ),
         }),
       },
-      count: auth0users.length,
     },
     listing_category: {
+      count: categories.length,
       columns: {
         name: f.valuesFromArray({
           values: categories,
           isUnique: true,
         }),
       },
-      count: categories.length,
     },
     listings: {
       columns: {
