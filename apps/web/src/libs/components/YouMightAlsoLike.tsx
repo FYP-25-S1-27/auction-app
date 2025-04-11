@@ -139,7 +139,7 @@ export default async function YouMightAlsoLike({
 //                 <CardMedia component="img" height="140" image="/images/placeholder.png" alt={item.name} />
 //                 <CardContent>
 //                   <Typography variant="body1">{item.name}</Typography>
-//                   <Typography color="text.secondary">Current Bid: ${item.currentPrice}</Typography>
+//                   <Typography color="text.secondary">Current Bid: ${item.current_price}</Typography>
 //                 </CardContent>
 //               </Card>
 //             </Grid>

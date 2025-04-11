@@ -103,7 +103,7 @@ async function main() {
     wallets: {
       count: auth0users.length,
       columns: {
-        userUuid: f.valuesFromArray({
+        user_uuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
           isUnique: true,
         }),
@@ -126,7 +126,7 @@ async function main() {
     },
     listings: {
       columns: {
-        userUuid: f.valuesFromArray({
+        user_uuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
         name: f.valuesFromArray({
@@ -135,15 +135,15 @@ async function main() {
           ), // Generate random product names
         }),
         description: f.loremIpsum({ sentencesCount: 1 }),
-        startingPrice: f.int({ minValue: 1, maxValue: 1000 }),
-        currentPrice: f.int({ minValue: 1000, maxValue: 10000 }),
+        starting_price: f.int({ minValue: 1, maxValue: 1000 }),
+        current_price: f.int({ minValue: 1000, maxValue: 10000 }),
         status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
-        endTime: f.valuesFromArray({
+        end_time: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.future().toISOString()
           ),
         }),
-        createdAt: f.valuesFromArray({
+        created_at: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.past().toISOString()
           ),
@@ -162,18 +162,18 @@ async function main() {
     },
     listing_user_likes: {
       columns: {
-        userUuid: f.valuesFromArray({
+        user_uuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
       },
     },
     bids: {
       columns: {
-        userUuid: f.valuesFromArray({
+        user_uuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
         bidAmount: f.int({ minValue: 1, maxValue: 1000 }),
-        createdAt: f.valuesFromArray({
+        created_at: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.recent({ days: 2 }).toISOString()
           ),
