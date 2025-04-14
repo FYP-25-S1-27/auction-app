@@ -1,1 +1,0 @@
-ALTER TABLE "listings" ALTER COLUMN "status" SET DEFAULT 'ACTIVE';
