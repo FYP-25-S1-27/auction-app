@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Typography, Container, Grid, Card, CardContent, CardMedia, IconButton } from "@mui/material";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 
@@ -20,6 +20,14 @@ const topPicksData = [
 const TopPicks = () => {
   const [currentPage, setCurrentPage] = useState(0);
 
+  // Auto-cycle timer
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPage((prev) => (prev + 1) % topPicksData.length);
+    }, 5000); // Switch every 5 seconds
+    return () => clearInterval(interval);
+  }, []);
+
   // Function to handle next button (arrow)
   const handleNext = () => {
     setCurrentPage((prev) => (prev + 1) % topPicksData.length);
@@ -40,19 +48,21 @@ const TopPicks = () => {
 
         {/* Progress Bar with Arrow */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 3 }}>
-          {topPicksData.map((_, index) => (
-            <Box
-              key={index}
-              sx={{
-                width: 25,
-                height: 5,
-                borderRadius: 2,
-                bgcolor: currentPage === index ? "#007C5F" : "#D3D3D3",
-                cursor: "pointer",
-              }}
-              onClick={() => handleProgressClick(index)}
-            />
-          ))}
+          <Box sx={{ width: "10%",gap: 1, display: "flex", justifyContent: "space-between" }}>
+            {topPicksData.map((_, index) => (
+              <Box
+                key={index}
+                sx={{
+                  width: "200%", // Increased length
+                  height: 5,
+                  bgcolor: currentPage === index ? "#007C5F" : "#D3D3D3",
+                  cursor: "pointer",
+                  borderRadius: "0px", // Squared edges
+                }}
+                onClick={() => handleProgressClick(index)}
+              />
+            ))}
+          </Box>
           {/* Arrow Button */}
           <IconButton onClick={handleNext} sx={{ p: 0, ml: 1 }}>
             <ArrowForwardIosIcon sx={{ fontSize: 16, color: "#007C5F" }} />

@@ -1,5 +1,5 @@
 import React from "react";
-import { AppBar, Toolbar, Typography, Box, InputBase, Container } from "@mui/material";
+import { AppBar, Toolbar, Box, InputBase, Container, Typography } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,18 +10,13 @@ const Navbar = () => {
       <Container maxWidth="lg">
         <Toolbar sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", px: 2 }}>
           
-          {/* Logo & Brand Name */}
+          {/* Logo Only */}
           <Link href="/" passHref style={{ textDecoration: "none" }}>
             <Box sx={{ display: "flex", alignItems: "center", cursor: "pointer" }}>
-              <Image src="/images/logo.png" alt="GoGavel Logo" width={32} height={32} />
-              <Typography 
-                variant="h5"
-                sx={{ ml: 1, color: "#007C5F", textDecoration: "none" }}
-              >
-                GoGavel
-              </Typography>
+              <Image src="/logo.svg" alt="GoGavel Logo" width={120} height={40} />
             </Box>
           </Link>
+
 
           {/* Search Bar */}
           <Box sx={{ flex: 1, display: "flex", justifyContent: "center", mx: 4 }}>
@@ -46,9 +41,6 @@ const Navbar = () => {
 
           {/* Right Side Options */}
           <Box sx={{ display: "flex", alignItems: "center" }}>
-            {/* <Typography variant="body1" sx={{ color: "black", mx: 2 }}>
-              Category ▼
-            </Typography> */}
             <Typography variant="body1" sx={{ color: "#007C5F", cursor: "pointer" }}>
               Register
             </Typography>
