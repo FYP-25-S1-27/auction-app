@@ -89,17 +89,8 @@ const EndingSoon = () => {
 
   return (
     <Box sx={{ py: 6 }}>
-      <Typography
-        variant="h6"
-        sx={{
-          mb: 2,
-          fontWeight: "bold",
-          color: "#007C5F",
-          textAlign: "center",
-        }}
-      >
-        Current Time:{" "}
-        {currentTime ? currentTime.toLocaleString() : "Loading..."}
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold", color: "#007C5F" }}>
+        Current Time: {currentTime.toLocaleString()}
       </Typography>
 
       <Typography
