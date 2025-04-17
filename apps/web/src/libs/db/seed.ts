@@ -119,7 +119,7 @@ async function main() {
       count: categories.length,
       columns: {
         name: f.valuesFromArray({
-          values: categories,
+          values: categories.map((category) => category.toUpperCase()),
           isUnique: true,
         }),
       },
