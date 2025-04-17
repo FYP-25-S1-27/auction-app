@@ -38,6 +38,8 @@ npm run -w web db:generate # to generate sql files (apps/web/drizzle_output)
 npm run -w web db:migrate # to migrate schema using above sql files
 ```
 
+1. To use or edit the files under the bruno/ folder, you can download https://www.usebruno.com/downloads (it can also be used to test our APIs)
+
 
 ### Contribution workflow
 ```bash
