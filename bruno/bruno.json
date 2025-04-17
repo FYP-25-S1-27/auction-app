@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "fyp-auction-app",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
