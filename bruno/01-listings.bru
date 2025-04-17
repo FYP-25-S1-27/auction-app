@@ -1,0 +1,20 @@
+meta {
+  name: 01-listings
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/api/listings?page=1
+  body: none
+  auth: none
+}
+
+params:query {
+  page: 1
+  ~pageSize: 2
+  ~name: unbranded%20steel
+  ~category: alcohol
+  ~maxPrice: 1700
+  ~minPrice: 1700
+}

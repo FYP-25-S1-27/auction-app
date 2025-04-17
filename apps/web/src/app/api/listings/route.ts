@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
+import { handleGet } from "./handlers/get";
+
+export const GET = handleGet;
 
 export async function POST(req: Request) {
   try {
