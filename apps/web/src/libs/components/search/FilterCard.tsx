@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
-import qs from "qs";
+import * as qs from "qs";
 
 interface FilterProps {
   initialFilters?: {

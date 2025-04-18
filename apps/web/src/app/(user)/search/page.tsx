@@ -2,7 +2,7 @@
 import ListingCard from "@/libs/components/listings/ListingCard";
 import FilterCard from "@/libs/components/search/FilterCard";
 import { Box, Grid2, Pagination, Stack } from "@mui/material";
-import qs from "qs";
+import * as qs from "qs";
 import { listings } from "@/libs/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
