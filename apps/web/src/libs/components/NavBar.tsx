@@ -20,7 +20,6 @@ import { useUser } from "@auth0/nextjs-auth0";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Fragment, useEffect, useState } from "react";
 import { getRole } from "@/libs/actions/db/users";
-import { useRouter } from "next/navigation";
 // import { getListingCategories } from "../actions/db/listing_category";
 // import { listing_category } from "../db/schema";
 
@@ -28,11 +27,10 @@ export default function NavBar() {
   const auth = useUser();
   const [is_admin, setis_admin] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const router = useRouter();
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/search?name=${searchQuery}`);
+      window.location.href = `/search?name=${searchQuery}`;
     }
   };
 
