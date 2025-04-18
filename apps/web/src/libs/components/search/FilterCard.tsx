@@ -35,6 +35,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
     initialFilters?.minPrice ?? 0,
     initialFilters?.maxPrice ?? 0,
   ]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     categories ? categories.map((category) => category.name) : []
   );
