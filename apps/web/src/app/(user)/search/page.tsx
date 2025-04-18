@@ -17,6 +17,7 @@ type GetListings = {
 };
 
 export default function SearchPage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listings, setListings] = useState<GetListings | null>(null);
   useEffect(() => {
