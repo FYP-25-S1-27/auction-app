@@ -69,7 +69,7 @@ export async function handleGet(request: NextRequest) {
     });
 
     // Execute the query with all applied filters
-    const results = await db
+    const items = await db
       .select()
       .from(listings)
       .where(filters.length > 0 ? and(...filters) : undefined)
@@ -77,7 +77,23 @@ export async function handleGet(request: NextRequest) {
       .limit(pageSize)
       .offset((page - 1) * pageSize);
 
-    return NextResponse.json(results);
+    // Get total count for pagination
+    // const countResult = await db
+    //   .select({ count: sql`count(*)` })
+    //   .from(listings);
+
+    // const totalItems = Number(countResult[0].count);
+    const totalPages = Math.ceil(items.length / pageSize);
+
+    return NextResponse.json({
+      items,
+      pagination: {
+        page,
+        pageSize,
+        totalItems: items.length,
+        totalPages,
+      },
+    });
   } catch (error) {
     console.error("Search error:", error);
     return NextResponse.json(
