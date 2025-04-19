@@ -107,39 +107,6 @@ async function main() {
           values: auth0users.map((user) => user.user_id),
           isUnique: true,
         }),
-        gender: f.valuesFromArray({ values: ["MALE", "FEMALE"] }),
-        age: f.int({ minValue: 18, maxValue: 90 }),
-        phone: f.valuesFromArray({
-          values: Array.from({ length: auth0users.length }, () =>
-            faker.phone.number()
-          ),
-        }),
-        address: f.valuesFromArray({
-          values: Array.from({ length: auth0users.length }, () =>
-            faker.location.streetAddress()
-          ),
-        }),
-        createdAt: f.valuesFromArray({
-          values: Array.from(
-            { length: auth0users.length },
-            () => faker.date.past() as unknown as string // surpasses type safety, only use for seeding as we know it is a date
-          ),
-        }),
-        updatedAt: f.valuesFromArray({
-          values: Array.from(
-            { length: auth0users.length },
-            () => faker.date.recent({ days: 90 }) as unknown as string // surpasses type safety, only use for seeding as we know it is a date
-          ),
-        }),
-      },
-    },
-    wallets: {
-      count: auth0users.length,
-      columns: {
-        user_uuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-          isUnique: true,
-        }),
         balance: f.int({ minValue: 0, maxValue: 1000 }),
         lastUpdated: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
@@ -159,7 +126,7 @@ async function main() {
     },
     listings: {
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
         name: f.valuesFromArray({
@@ -168,15 +135,15 @@ async function main() {
           ), // Generate random product names
         }),
         description: f.loremIpsum({ sentencesCount: 1 }),
-        starting_price: f.int({ minValue: 1, maxValue: 1000 }),
-        current_price: f.int({ minValue: 1000, maxValue: 10000 }),
+        startingPrice: f.int({ minValue: 1, maxValue: 1000 }),
+        currentPrice: f.int({ minValue: 1000, maxValue: 10000 }),
         status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
-        end_time: f.valuesFromArray({
+        endTime: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.future().toISOString()
           ),
         }),
-        created_at: f.valuesFromArray({
+        createdAt: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.past().toISOString()
           ),
@@ -195,18 +162,18 @@ async function main() {
     },
     listingUserLikes: {
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
       },
     },
     bids: {
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
         }),
         bidAmount: f.int({ minValue: 1, maxValue: 1000 }),
-        created_at: f.valuesFromArray({
+        createdAt: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.recent({ days: 2 }).toISOString()
           ),
