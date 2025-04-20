@@ -54,7 +54,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { Container, Typography, CircularProgress, Alert } from "@mui/material";
 import CategoryBar from "@/libs/components/CategoryBar";
 import CategoryListings from "@/libs/components/CategoryListings";
@@ -87,6 +87,7 @@ export default function CategoryPage() {
         if (!response.ok) throw new Error("Category not found");
         const data: CategoryData = await response.json();
         setCategoryData(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -132,9 +133,9 @@ export default function CategoryPage() {
             parentSlug={category}
           />
         )}
-      
-      {/* Display Listings */}
-      <CategoryListings listings={categoryData?.listings || []} />
+
+        {/* Display Listings */}
+        <CategoryListings listings={categoryData?.listings || []} />
       </div>
     </Container>
   );

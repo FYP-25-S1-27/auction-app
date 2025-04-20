@@ -115,10 +115,10 @@ import { eq } from "drizzle-orm";
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id: userId } = params;
+    const { id: userId } = await params;
 
     if (!userId || typeof userId !== "string") {
       return NextResponse.json({ error: "Invalid user ID" }, { status: 400 });
@@ -182,7 +182,7 @@ export async function PUT(
   } catch (error) {
     console.error("❌ Error updating profile:", error);
     return NextResponse.json(
-      { error: "Internal Server Error"},
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

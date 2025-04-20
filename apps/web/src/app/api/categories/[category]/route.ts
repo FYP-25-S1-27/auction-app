@@ -182,9 +182,9 @@ function capitalizeFirstLetter(string: string) {
 
 export async function GET(
   request: Request,
-  { params }: { params: { category: string } }
+  { params }: { params: Promise<{ category: string }> }
 ) {
-  const { category } = params;
+  const { category } = await params;
 
   if (!category) {
     return NextResponse.json(
@@ -205,7 +205,10 @@ export async function GET(
       .limit(1);
 
     if (!categoryData.length) {
-      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Category not found" },
+        { status: 404 }
+      );
     }
 
     // Fetch subcategories for the category

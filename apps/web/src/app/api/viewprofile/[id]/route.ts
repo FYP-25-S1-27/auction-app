@@ -5,10 +5,10 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const userId = id;
 
     if (!userId || typeof userId !== "string") {

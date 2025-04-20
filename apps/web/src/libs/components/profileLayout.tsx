@@ -2,7 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Box, Card, List, ListItemButton, ListItemText, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  List,
+  ListItemButton,
+  ListItemText,
+  Typography,
+} from "@mui/material";
 
 const tabs = [
   { label: "Profile Information", path: "/profile" },
@@ -12,15 +19,19 @@ const tabs = [
 ];
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [username, setUsername] = useState<string>("user");
   const router = useRouter();
   const pathname = usePathname();
   type JoinedUserProfile = {
     users: { uuid: string; username: string };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user_profile: { [key: string]: any };
   };
   const [userProfiles, setUserProfiles] = useState<JoinedUserProfile[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -31,6 +42,7 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
 
         const data: JoinedUserProfile[] = await res.json();
         setUserProfiles(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
       } finally {
@@ -41,14 +53,16 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
     fetchUsername();
   }, []);
 
-
   return (
-    <Box sx={{ minHeight: "100vh", backgroundColor: "#f5f5f5", padding: "24px" }}>
+    <Box
+      sx={{ minHeight: "100vh", backgroundColor: "#f5f5f5", padding: "24px" }}
+    >
       <Box sx={{ display: "flex", gap: 4, marginTop: 4 }}>
         {/* Sidebar */}
         <Card sx={{ padding: "24px", width: "300px", borderRadius: "12px" }}>
           <Typography variant="h5" sx={{ fontWeight: 700 }}>
-          Hello {userProfiles.length > 0 ? userProfiles[0].users.username : "user"}
+            Hello{" "}
+            {userProfiles.length > 0 ? userProfiles[0].users.username : "user"}
           </Typography>
           <List>
             {tabs.map((tab) => (
@@ -60,7 +74,9 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
                 <ListItemText
                   primary={tab.label}
                   primaryTypographyProps={{
-                    sx: { color: pathname === tab.path ? "#388e3c" : "#1976d2" },
+                    sx: {
+                      color: pathname === tab.path ? "#388e3c" : "#1976d2",
+                    },
                   }}
                 />
               </ListItemButton>

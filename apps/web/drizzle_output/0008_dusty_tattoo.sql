@@ -1,0 +1,2 @@
+ALTER TABLE "listing_category" ADD COLUMN "parent" text;--> statement-breakpoint
+ALTER TABLE "listing_category" ADD CONSTRAINT "listing_category_parent_fkey" FOREIGN KEY ("parent") REFERENCES "public"."listing_category"("name") ON DELETE cascade ON UPDATE no action;

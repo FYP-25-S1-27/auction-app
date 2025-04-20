@@ -73,14 +73,14 @@ interface SubcategoryData {
 }
 
 export default function SubcategoryPage() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router = useRouter();
   const { category, subcategory } = useParams<{
     category: string;
     subcategory: string;
   }>();
-  const [subcategoryData, setSubcategoryData] = useState<SubcategoryData | null>(
-    null
-  );
+  const [subcategoryData, setSubcategoryData] =
+    useState<SubcategoryData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -93,6 +93,7 @@ export default function SubcategoryPage() {
         if (!response.ok) throw new Error("Subcategory not found");
         const data: SubcategoryData = await response.json();
         setSubcategoryData(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
       } finally {

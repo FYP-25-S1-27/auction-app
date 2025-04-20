@@ -17,9 +17,13 @@ const calculateTimeLeft = (endTime) => {
   const minutes = Math.floor((diff / (1000 * 60)) % 60);
 
   if (days > 0) {
-    return `${days} day${days > 1 ? "s" : ""} ${hours} hour${hours > 1 ? "s" : ""}`;
+    return `${days} day${days > 1 ? "s" : ""} ${hours} hour${
+      hours > 1 ? "s" : ""
+    }`;
   } else if (hours > 0) {
-    return `${hours} hour${hours > 1 ? "s" : ""} ${minutes} minute${minutes > 1 ? "s" : ""}`;
+    return `${hours} hour${hours > 1 ? "s" : ""} ${minutes} minute${
+      minutes > 1 ? "s" : ""
+    }`;
   } else {
     return `${minutes} minute${minutes > 1 ? "s" : ""}`;
   }
@@ -46,10 +50,15 @@ const CategoryListings = ({ listings }) => {
               >
                 {/* Image Placeholder */}
                 {listing.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={listing.imageUrl}
                     alt={listing.name}
-                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
                   />
                 ) : (
                   "No image available"

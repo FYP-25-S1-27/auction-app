@@ -39,8 +39,8 @@ export async function PUT(
         name,
         category,
         description,
-        starting_price: Number(starting_price), // Ensure number
-        end_time: end_time, // Ensure valid date
+        startingPrice: Number(starting_price), // Ensure number
+        endTime: end_time, // Ensure valid date
       })
       .where(eq(listings.id, listingId));
 

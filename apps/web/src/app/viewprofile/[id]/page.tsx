@@ -2,15 +2,28 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Container, TextField, Button, CircularProgress, Alert, Typography,
-  Radio, RadioGroup, FormControlLabel, FormControl, FormLabel, } from "@mui/material";
+import {
+  Container,
+  TextField,
+  Button,
+  CircularProgress,
+  Alert,
+  Typography,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
+} from "@mui/material";
 
 const EditProfile = () => {
   const { id } = useParams();
   const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -24,6 +37,7 @@ const EditProfile = () => {
 
         const data = await response.json();
         setFormData(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -54,12 +68,13 @@ const EditProfile = () => {
       });
 
       console.log(formData);
-      
+
       if (!response.ok) {
         throw new Error("Failed to update profile");
       }
 
       router.push("/demo_profile?success=1");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setError(error.message);
     }
@@ -83,59 +98,74 @@ const EditProfile = () => {
           onChange={handleChange}
           sx={{ mt: 3 }}
         />
-        
-        <TextField
-            name="age"
-            label="Age"
-            fullWidth
-            value={formData.age || ""}
-            onChange={handleChange}
-            sx={{ mt: 3 }}
-          />
-        
-        <TextField
-            name="phone"
-            label="Phone"
-            type="number"
-            fullWidth
-            value={formData.phone || ""}
-            onChange={handleChange}
-            sx={{ mt: 3 }}
-          />
 
-          <FormControl component="fieldset" sx={{ mt: 3 }}>
-            <FormLabel component="legend">Gender</FormLabel>
-            <RadioGroup
-              row
-              aria-label="gender"
-              name="gender"
-              value={formData.gender || ""}
-              onChange={handleChange}
-            >
-              <FormControlLabel value="male" control={<Radio />} label="Male" />
-              <FormControlLabel value="female" control={<Radio />} label="Female" />
-              <FormControlLabel value="other" control={<Radio />} label="Other" />
-            </RadioGroup>
-          </FormControl>
+        <TextField
+          name="age"
+          label="Age"
+          fullWidth
+          value={formData.age || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
 
-          <TextField
-            name="address"
-            label="Address"
-            fullWidth
-            multiline
-            rows={3}
-            value={formData.address || ""}
+        <TextField
+          name="phone"
+          label="Phone"
+          type="number"
+          fullWidth
+          value={formData.phone || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
+
+        <FormControl component="fieldset" sx={{ mt: 3 }}>
+          <FormLabel component="legend">Gender</FormLabel>
+          <RadioGroup
+            row
+            aria-label="gender"
+            name="gender"
+            value={formData.gender || ""}
             onChange={handleChange}
-            sx={{ mt: 3 }}
-          />
-        
-        <Button variant="outlined" color="primary" sx={{ mt: 3}} onClick={() => router.push("/demo_profile")} > Cancel</Button>
+          >
+            <FormControlLabel value="male" control={<Radio />} label="Male" />
+            <FormControlLabel
+              value="female"
+              control={<Radio />}
+              label="Female"
+            />
+            <FormControlLabel value="other" control={<Radio />} label="Other" />
+          </RadioGroup>
+        </FormControl>
+
+        <TextField
+          name="address"
+          label="Address"
+          fullWidth
+          multiline
+          rows={3}
+          value={formData.address || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
+
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mt: 3 }}
+          onClick={() => router.push("/demo_profile")}
+        >
+          {" "}
+          Cancel
+        </Button>
 
         <Button
           type="submit"
           variant="contained"
           color="primary"
-          sx={{ mt: 3, ml: 2 }} > Save Changes
+          sx={{ mt: 3, ml: 2 }}
+        >
+          {" "}
+          Save Changes
         </Button>
       </form>
     </Container>
