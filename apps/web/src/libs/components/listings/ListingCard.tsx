@@ -6,7 +6,6 @@ import { InferSelectModel } from "drizzle-orm";
 
 type SelectListing = InferSelectModel<typeof listings>;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function ListingCard({ listing }: { listing: SelectListing }) {
   const endDateLocale = new Date(listing.endTime).toLocaleString();
 

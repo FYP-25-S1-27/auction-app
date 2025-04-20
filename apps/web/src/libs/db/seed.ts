@@ -51,19 +51,40 @@ async function main() {
     })
   );
 
-  const categories = [
-    "Gadgets",
-    "Books",
-    "Clothing",
-    "Furniture",
-    "Jewelry",
-    "Watches",
-    "Art",
-    "Alcohol",
-    "Cars",
-  ];
+  const categories = {
+    Gadgets: ["Smartphones", "Laptops", "Tablets"],
+    Books: ["Fiction", "Non-Fiction", "Comics"],
+    Clothing: ["Men's", "Women's", "Children's"],
+    Furniture: ["Living Room", "Bedroom", "Office"],
+    Jewelry: ["Rings", "Necklaces", "Bracelets"],
+    Watches: ["Luxury", "Smartwatches", "Casual"],
+    Art: ["Paintings", "Sculptures", "Photography"],
+    Alcohol: ["Wine", "Whiskey", "Beer"],
+    Cars: ["Sedans", "SUVs", "Trucks"],
+    Sports: ["Football", "Basketball", "Tennis"],
+    Toys: ["Action Figures", "Dolls", "Puzzles"],
+  };
+
+  console.log("Seeding categories...");
+  // Insert parent categories first
+  for (const category of Object.keys(categories)) {
+    await db.insert(schema.listingCategory).values({
+      name: category.toUpperCase(),
+      parent: null,
+    });
+  }
+
+  // Then insert subcategories
+  for (const [parent, subcats] of Object.entries(categories)) {
+    for (const subcat of subcats) {
+      await db.insert(schema.listingCategory).values({
+        name: subcat.toUpperCase(),
+        parent: parent.toUpperCase(),
+      });
+    }
+  }
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { users, ...schemaFiltered } = schema; // Remove users table from schema
+  const { users, listingCategory, ...schemaFiltered } = schema; // Remove tables from schemas
   // Seed remaining tables
   console.log("Seeding remaining tables...");
   await seed(db, schemaFiltered, { count: COUNT, seed: 321 }).refine((f) => ({
@@ -115,15 +136,6 @@ async function main() {
         }),
       },
     },
-    listingCategory: {
-      count: categories.length,
-      columns: {
-        name: f.valuesFromArray({
-          values: categories.map((category) => category.toUpperCase()),
-          isUnique: true,
-        }),
-      },
-    },
     listings: {
       columns: {
         userUuid: f.valuesFromArray({
@@ -133,6 +145,11 @@ async function main() {
           values: Array.from({ length: COUNT }, () =>
             faker.commerce.productName()
           ), // Generate random product names
+        }),
+        category: f.valuesFromArray({
+          values: Object.values(categories)
+            .flat()
+            .map((cat) => cat.toUpperCase()),
         }),
         description: f.loremIpsum({ sentencesCount: 1 }),
         startingPrice: f.int({ minValue: 1, maxValue: 1000 }),

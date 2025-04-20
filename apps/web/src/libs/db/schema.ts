@@ -37,9 +37,24 @@ export const userProfile = pgTable("user_profile", {
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
 });
 
-export const listingCategory = pgTable("listing_category", {
-  name: text().primaryKey(),
-});
+// export const listingCategory = pgTable("listing_category", {
+//   name: text().primaryKey(),
+// });
+
+export const listingCategory = pgTable(
+  "listing_category", 
+  {
+    name: text().primaryKey(),
+    parent: text(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.parent],
+      foreignColumns: [table.name],
+      name: "listing_category_parent_fkey",
+    }).onDelete("cascade"),
+  ]
+);
 
 export const listings = pgTable(
   "listings",
