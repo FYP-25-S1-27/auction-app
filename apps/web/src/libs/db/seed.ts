@@ -160,6 +160,16 @@ async function main() {
             faker.date.future().toISOString()
           ),
         }),
+        type: f.weightedRandom([
+          {
+            weight: 0.8,
+            value: f.default({ defaultValue: "LISTING" }),
+          },
+          {
+            weight: 0.2,
+            value: f.default({ defaultValue: "REQUEST" }),
+          },
+        ]),
         createdAt: f.valuesFromArray({
           values: Array.from({ length: COUNT }, () =>
             faker.date.past().toISOString()
