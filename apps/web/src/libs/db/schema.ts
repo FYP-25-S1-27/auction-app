@@ -7,6 +7,7 @@ import {
   numeric,
   timestamp,
   boolean,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -42,7 +43,7 @@ export const userProfile = pgTable("user_profile", {
 // });
 
 export const listingCategory = pgTable(
-  "listing_category", 
+  "listing_category",
   {
     name: text().primaryKey(),
     parent: text(),
@@ -56,8 +57,10 @@ export const listingCategory = pgTable(
   ]
 );
 
+export const listingTypes = pgEnum("listing_types", ["REQUEST", "LISTING"]);
+
 export const listings = pgTable(
-  "listings",
+  "listings_and_requests",
   {
     id: serial().primaryKey().notNull(),
     userUuid: text().notNull(),
@@ -66,6 +69,7 @@ export const listings = pgTable(
     description: text(),
     startingPrice: integer().notNull(),
     currentPrice: integer(),
+    type: listingTypes("listing_types").notNull().default("LISTING"), // LISTING, REQUEST
     endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
     status: text().default("ACTIVE"), // ACTIVE, SOLD
     createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
@@ -120,8 +124,10 @@ export const listingUserLikes = pgTable(
   ]
 );
 
+export const bidTypes = pgEnum("bid_types", ["OFFER", "BID"]);
+
 export const bids = pgTable(
-  "bids",
+  "bids_and_offers",
   {
     id: serial().primaryKey().notNull(),
     listingId: integer().notNull(),
@@ -130,6 +136,7 @@ export const bids = pgTable(
     bidTime: timestamp({ mode: "string" })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
+    type: bidTypes("bid_types").notNull().default("BID"), // OFFER, BID
   },
   (table) => [
     foreignKey({
