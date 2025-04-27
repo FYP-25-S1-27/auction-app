@@ -14,6 +14,10 @@ type GetListings = {
     pageSize: number;
     totalPages: number;
   };
+  metadata: {
+    minPrice: number;
+    maxPrice: number;
+  };
 };
 
 export default function SearchPage() {
@@ -38,24 +42,7 @@ export default function SearchPage() {
     };
     fetchCategories();
   }, []);
-  // get listings.items highest price
-  const maxPrice = listings
-    ? Math.max(
-        ...listings.items.map((listing) => {
-          return listing.currentPrice || listing.startingPrice;
-        })
-      )
-    : undefined;
-  // get listings.items lowest price
-  const minPrice = listings
-    ? Math.min(
-        ...listings.items.map((listing) => {
-          return listing.currentPrice || listing.startingPrice;
-        })
-      )
-    : undefined;
 
-  console.log(maxPrice, minPrice);
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -84,8 +71,8 @@ export default function SearchPage() {
         <div>
           <FilterCard
             initialFilters={{
-              maxPrice: maxPrice,
-              minPrice: minPrice,
+              maxPrice: listings?.metadata.maxPrice,
+              minPrice: listings?.metadata.minPrice,
             }}
           />
         </div>

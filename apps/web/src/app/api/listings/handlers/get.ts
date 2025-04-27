@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings } from "@/libs/db/schema";
-import { and, eq, gte, lte, ilike, SQL, desc, asc } from "drizzle-orm";
+import { and, eq, gte, lte, ilike, SQL, desc, asc, sql } from "drizzle-orm";
 
 export async function handleGet(request: NextRequest) {
   try {
@@ -67,7 +67,18 @@ export async function handleGet(request: NextRequest) {
           break;
       }
     });
+    // Fetch the true min and max prices for the entire dataset (without filters)
+    const priceStats = await db
+      .select({
+        minPrice: sql`MIN(${listings.currentPrice || listings.startingPrice})`,
+        maxPrice: sql`MAX(${listings.currentPrice || listings.startingPrice})`,
+      })
+      .from(listings)
+      .where(ilike(listings.name, `%${searchParams.get("name")}%`))
+      .limit(1);
 
+    const minPrice = priceStats[0]?.minPrice || 0;
+    const maxPrice = priceStats[0]?.maxPrice || 0;
     // Execute the query with all applied filters
     const items = await db
       .select()
@@ -92,6 +103,10 @@ export async function handleGet(request: NextRequest) {
         pageSize,
         totalItems: items.length,
         totalPages,
+      },
+      metadata: {
+        minPrice,
+        maxPrice,
       },
     });
   } catch (error) {

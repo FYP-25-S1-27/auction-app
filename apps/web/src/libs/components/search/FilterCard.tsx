@@ -6,11 +6,16 @@ import {
   FormControlLabel,
   FormGroup,
   Grid2,
-  Paper,
   Slider,
   Stack,
   Typography,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Box,
+  TextField,
 } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
 import qs from "qs";
@@ -41,7 +46,13 @@ export default function FilterCard({ initialFilters }: FilterProps) {
   );
 
   useEffect(() => {
-    if (
+    const searchParams = new URLSearchParams(window.location.search);
+    const minPrice = searchParams.get("minPrice");
+    const maxPrice = searchParams.get("maxPrice");
+
+    if (minPrice !== null && maxPrice !== null) {
+      setSelectedPriceRange([Number(minPrice), Number(maxPrice)]);
+    } else if (
       initialFilters?.minPrice !== undefined &&
       initialFilters?.maxPrice !== undefined
     ) {
@@ -105,42 +116,97 @@ export default function FilterCard({ initialFilters }: FilterProps) {
     window.location.search = queryString;
   };
   return (
-    <Paper sx={{ maxWidth: "25rem", minWidth: "20rem", padding: "2rem" }}>
+    <Box sx={{ maxWidth: "25rem", minWidth: "20rem", padding: "2rem" }}>
       <FormGroup>
         <form>
           <Typography variant="h4" color="primary">
             Filter by:
           </Typography>
-          <Typography>Price</Typography>
-          <Slider
-            value={selectedPriceRange}
-            onChange={handleChange}
-            valueLabelDisplay="auto"
-            max={initialFilters?.maxPrice || 1000}
-            min={initialFilters?.minPrice || 0}
-          />
-          <Typography>{selectedPriceRange}</Typography>
-          <Typography variant="h5" color="primary">
-            Category
-          </Typography>
+          <Accordion defaultExpanded>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="price-content"
+              id="price-header"
+            >
+              <Typography variant="h5" color="primary">
+                Price
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={2}>
+                {/* Slider for price range */}
+                <Slider
+                  valueLabelDisplay="auto"
+                  value={selectedPriceRange}
+                  onChange={handleChange}
+                  max={initialFilters?.maxPrice || 1000}
+                  min={initialFilters?.minPrice || 0}
+                />
 
-          <Grid2 container spacing={1}>
-            {isLoading ? (
-              <Typography>Loading categories...</Typography>
-            ) : categories ? (
-              categories.map((category) => {
-                return (
-                  <Grid2 key={category.name}>
-                    <FormControlLabel
-                      control={<Checkbox defaultChecked />}
-                      label={category.name}
-                      sx={{ width: "100%", marginRight: 0, minWidth: "10em" }}
-                    />
-                  </Grid2>
-                );
-              })
-            ) : null}
-          </Grid2>
+                {/* Manual input for min and max price */}
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    label="Min Price"
+                    type="number"
+                    value={selectedPriceRange[0]}
+                    onChange={(e) => {
+                      const newMin = Math.min(
+                        Number(e.target.value),
+                        selectedPriceRange[1]
+                      ); // Ensure min is not greater than max
+                      setSelectedPriceRange([newMin, selectedPriceRange[1]]);
+                    }}
+                    fullWidth
+                  />
+                  <TextField
+                    label="Max Price"
+                    type="number"
+                    value={selectedPriceRange[1]}
+                    onChange={(e) => {
+                      const newMax = Math.max(
+                        Number(e.target.value),
+                        selectedPriceRange[0]
+                      ); // Ensure max is not less than min
+                      setSelectedPriceRange([selectedPriceRange[0], newMax]);
+                    }}
+                    fullWidth
+                  />
+                </Stack>
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="category-content"
+              id="category-header"
+            >
+              <Typography variant="h5" color="primary">
+                Category
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              {isLoading ? (
+                <Typography>Loading categories...</Typography>
+              ) : categories ? (
+                categories.map((category) => {
+                  return (
+                    <Grid2 key={category.name}>
+                      <FormControlLabel
+                        control={<Checkbox defaultChecked />}
+                        label={category.name}
+                        sx={{
+                          width: "100%",
+                          marginRight: 0,
+                          minWidth: "10em",
+                        }}
+                      />
+                    </Grid2>
+                  );
+                })
+              ) : null}
+            </AccordionDetails>
+          </Accordion>
           <Stack direction={"row"} spacing={2}>
             <Button variant="contained" onClick={handleSubmit}>
               Apply
@@ -151,6 +217,6 @@ export default function FilterCard({ initialFilters }: FilterProps) {
           </Stack>
         </form>
       </FormGroup>
-    </Paper>
+    </Box>
   );
 }
