@@ -137,6 +137,7 @@ async function main() {
       },
     },
     listings: {
+      count: 100,
       columns: {
         userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
