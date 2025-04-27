@@ -96,6 +96,7 @@ export default function SearchPage() {
           color="primary"
           count={listings?.pagination.totalPages}
           onChange={handlePageChange}
+          page={listings?.pagination.page || 1}
         />
       </Box>
     </Box>

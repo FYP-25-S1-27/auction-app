@@ -68,17 +68,22 @@ export async function handleGet(request: NextRequest) {
       }
     });
     // Fetch the true min and max prices for the entire dataset (without filters)
-    const priceStats = await db
+    const priceMetadata = await db
       .select({
         minPrice: sql`MIN(${listings.currentPrice || listings.startingPrice})`,
         maxPrice: sql`MAX(${listings.currentPrice || listings.startingPrice})`,
       })
       .from(listings)
-      .where(ilike(listings.name, `%${searchParams.get("name")}%`))
+      .where(
+        searchParams.get("name")
+          ? ilike(listings.name, `%${searchParams.get("name")}%`)
+          : undefined
+      )
       .limit(1);
 
-    const minPrice = priceStats[0]?.minPrice || 0;
-    const maxPrice = priceStats[0]?.maxPrice || 0;
+    const minPrice = priceMetadata[0]?.minPrice || 0;
+    const maxPrice = priceMetadata[0]?.maxPrice || 0;
+
     // Execute the query with all applied filters
     const items = await db
       .select()
@@ -89,12 +94,13 @@ export async function handleGet(request: NextRequest) {
       .offset((page - 1) * pageSize);
 
     // Get total count for pagination
-    // const countResult = await db
-    //   .select({ count: sql`count(*)` })
-    //   .from(listings);
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(listings)
+      .where(filters.length > 0 ? and(...filters) : undefined);
 
-    // const totalItems = Number(countResult[0].count);
-    const totalPages = Math.ceil(items.length / pageSize);
+    const totalItems = Number(countResult[0].count);
+    const totalPages = Math.ceil(totalItems / pageSize);
 
     return NextResponse.json({
       items,
