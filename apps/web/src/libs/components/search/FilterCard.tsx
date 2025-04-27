@@ -116,11 +116,16 @@ export default function FilterCard({ initialFilters }: FilterProps) {
     window.location.search = queryString;
   };
   return (
-    <Box sx={{ maxWidth: "25rem", minWidth: "20rem", padding: "2rem" }}>
+    <Box
+      sx={{
+        maxWidth: "25rem",
+        minWidth: "20rem",
+      }}
+    >
       <FormGroup>
         <form>
           <Typography variant="h4" color="primary">
-            Filter by:
+            Filter by
           </Typography>
           <Accordion defaultExpanded>
             <AccordionSummary
@@ -207,7 +212,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
               ) : null}
             </AccordionDetails>
           </Accordion>
-          <Stack direction={"row"} spacing={2}>
+          <Stack direction={"row"} spacing={2} marginTop={"1rem"}>
             <Button variant="contained" onClick={handleSubmit}>
               Apply
             </Button>
