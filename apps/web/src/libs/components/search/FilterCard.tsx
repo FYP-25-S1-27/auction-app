@@ -5,7 +5,6 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
-  Grid2,
   Slider,
   Stack,
   Typography,
@@ -14,11 +13,13 @@ import {
   AccordionDetails,
   Box,
   TextField,
+  Grid,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
 import qs from "qs";
+import { useSearchParams } from "next/navigation";
 
 interface FilterProps {
   initialFilters?: {
@@ -33,44 +34,25 @@ interface FilterProps {
 type GetCategories = InferSelectModel<typeof listingCategory>[];
 
 export default function FilterCard({ initialFilters }: FilterProps) {
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [categories, setCategories] = useState<GetCategories | null>(null);
-
-  const [selectedPriceRange, setSelectedPriceRange] = useState<number[]>([
-    initialFilters?.minPrice ?? 0,
-    initialFilters?.maxPrice ?? 0,
-  ]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    categories ? categories.map((category) => category.name) : []
+    searchParams.get("category") ? searchParams.get("category")!.split(",") : []
   );
 
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const minPrice = searchParams.get("minPrice");
-    const maxPrice = searchParams.get("maxPrice");
+  const [selectedPriceRange, setSelectedPriceRange] = useState<number[]>([
+    Number(searchParams.get("minPrice")) || initialFilters?.minPrice || 0,
+    Number(searchParams.get("maxPrice")) || initialFilters?.maxPrice || 1000,
+  ]);
 
-    if (minPrice !== null && maxPrice !== null) {
-      setSelectedPriceRange([Number(minPrice), Number(maxPrice)]);
-    } else if (
-      initialFilters?.minPrice !== undefined &&
-      initialFilters?.maxPrice !== undefined
-    ) {
-      setSelectedPriceRange([initialFilters.minPrice, initialFilters.maxPrice]);
-    }
-  }, [initialFilters?.minPrice, initialFilters?.maxPrice]);
-  // Fetch categories when component mounts
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        // Use absolute URL or environment variable
         const response = await fetch(
           `${window.location.origin}/api/categories`
         );
-        // Alternative approach using environment variable:
-        // const response = await fetch(`${process.env.NEXT_PUBLIC_APP_BASE_URL}/api/categories`);
-
-        const data = await response.json();
+        const data: GetCategories = await response.json();
         setCategories(data);
       } catch (error) {
         console.error("Error fetching categories:", error);
@@ -82,46 +64,39 @@ export default function FilterCard({ initialFilters }: FilterProps) {
     fetchCategories();
   }, []);
 
-  const handleChange = (
-    event: Event,
-    newValue: number | number[],
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    activeThumb: number
-  ) => {
-    if (Array.isArray(newValue)) {
-      setSelectedPriceRange(newValue);
-    }
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategories(
+      (prev) =>
+        prev.includes(category)
+          ? prev.filter((c) => c !== category) // Remove if already selected
+          : [...prev, category] // Add if not selected
+    );
   };
+
   const handleReset = () => {
-    //
+    setSelectedPriceRange([
+      initialFilters?.minPrice ?? 0,
+      initialFilters?.maxPrice ?? 0,
+    ]);
+    setSelectedCategories([]);
   };
 
   const handleSubmit = () => {
-    // Get existing search params - remove the leading ? character
-    const searchString = window.location.search.substring(1);
-    const existingParams = qs.parse(searchString);
+    const existingParams = Object.fromEntries(searchParams.entries());
 
-    // Merge existing params with new filter values
     const newParams = {
-      ...existingParams,
-      minPrice: selectedPriceRange[0].toString(),
-      maxPrice: selectedPriceRange[1].toString(),
-      // Add category when ready
-      // category: selectedCategories.join(","),
+      ...existingParams, // Preserve existing query parameters
+      minPrice: selectedPriceRange[0].toString(), // Update minPrice
+      maxPrice: selectedPriceRange[1].toString(), // Update maxPrice
+      category: selectedCategories.join(","), // Include selected categories
     };
 
-    // Generate the query string
     const queryString = qs.stringify(newParams);
-
-    window.location.search = queryString;
+    window.location.search = queryString; // Update the query string
   };
+
   return (
-    <Box
-      sx={{
-        maxWidth: "25rem",
-        minWidth: "20rem",
-      }}
-    >
+    <Box sx={{ maxWidth: "30rem", minWidth: "25rem" }}>
       <FormGroup>
         <form>
           <Typography variant="h4" color="primary">
@@ -139,16 +114,15 @@ export default function FilterCard({ initialFilters }: FilterProps) {
             </AccordionSummary>
             <AccordionDetails>
               <Stack spacing={2}>
-                {/* Slider for price range */}
                 <Slider
                   valueLabelDisplay="auto"
                   value={selectedPriceRange}
-                  onChange={handleChange}
+                  onChange={(e, newValue) =>
+                    Array.isArray(newValue) && setSelectedPriceRange(newValue)
+                  }
                   max={initialFilters?.maxPrice || 1000}
                   min={initialFilters?.minPrice || 0}
                 />
-
-                {/* Manual input for min and max price */}
                 <Stack direction="row" spacing={2}>
                   <TextField
                     label="Min Price"
@@ -158,7 +132,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
                       const newMin = Math.min(
                         Number(e.target.value),
                         selectedPriceRange[1]
-                      ); // Ensure min is not greater than max
+                      );
                       setSelectedPriceRange([newMin, selectedPriceRange[1]]);
                     }}
                     fullWidth
@@ -171,7 +145,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
                       const newMax = Math.max(
                         Number(e.target.value),
                         selectedPriceRange[0]
-                      ); // Ensure max is not less than min
+                      );
                       setSelectedPriceRange([selectedPriceRange[0], newMax]);
                     }}
                     fullWidth
@@ -191,25 +165,28 @@ export default function FilterCard({ initialFilters }: FilterProps) {
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              {isLoading ? (
-                <Typography>Loading categories...</Typography>
-              ) : categories ? (
-                categories.map((category) => {
-                  return (
-                    <Grid2 key={category.name}>
+              <Grid container spacing={5}>
+                {isLoading ? (
+                  <Typography>Loading categories...</Typography>
+                ) : categories ? (
+                  categories.map((category) => (
+                    <Grid key={category.name}>
                       <FormControlLabel
-                        control={<Checkbox defaultChecked />}
+                        control={
+                          <Checkbox
+                            checked={selectedCategories.includes(category.name)}
+                            onChange={() => handleCategoryChange(category.name)}
+                          />
+                        }
                         label={category.name}
-                        sx={{
-                          width: "100%",
-                          marginRight: 0,
-                          minWidth: "10em",
-                        }}
+                        sx={{ width: "100%", marginRight: 0, minWidth: "10em" }}
                       />
-                    </Grid2>
-                  );
-                })
-              ) : null}
+                    </Grid>
+                  ))
+                ) : (
+                  <Typography>No categories available</Typography>
+                )}
+              </Grid>
             </AccordionDetails>
           </Accordion>
           <Stack direction={"row"} spacing={2} marginTop={"1rem"}>

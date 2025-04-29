@@ -20,17 +20,19 @@ import { useUser } from "@auth0/nextjs-auth0";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Fragment, useEffect, useState } from "react";
 import { getRole } from "@/libs/actions/db/users";
+import { useSearchParams } from "next/navigation";
 // import { getListingCategories } from "../actions/db/listing_category";
 // import { listing_category } from "../db/schema";
 
 export default function NavBar() {
+  const searchParams = useSearchParams();
   const auth = useUser();
   const [is_admin, setis_admin] = useState<boolean>(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchNameQuery, setSearchNameQuery] = useState<string>("");
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      window.location.href = `/search?name=${searchQuery}`;
+    if (searchNameQuery.trim()) {
+      window.location.href = `/search?name=${searchNameQuery}`;
     }
   };
 
@@ -44,7 +46,11 @@ export default function NavBar() {
         }
       });
     }
-  }, [auth.user]);
+    const x = searchParams.get("name");
+    if (x) {
+      setSearchNameQuery(x);
+    }
+  }, [auth.user, searchParams]);
 
   return (
     <AppBar
@@ -76,9 +82,9 @@ export default function NavBar() {
               label="Search"
               variant="outlined"
               fullWidth
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />{" "}
+              value={searchNameQuery}
+              onChange={(e) => setSearchNameQuery(e.target.value)}
+            />
             <Button type="submit" variant="contained" color="primary">
               Search
             </Button>
