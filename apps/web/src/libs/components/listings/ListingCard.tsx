@@ -20,6 +20,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
         <Typography gutterBottom variant="body1" component="div">
           {listing.name}
         </Typography>
+        <Typography variant="subtitle2">{listing.category}</Typography>
         <Typography variant="subtitle1">${listing.currentPrice}</Typography>
         <Typography variant="subtitle2" color="text.secondary">
           ${listing.startingPrice}
@@ -27,7 +28,6 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
         <Typography variant="body2" color="text.secondary">
           {endDateLocale}
         </Typography>
-        {/* <Typography variant="subtitle1">{listing.users.username}</Typography> */}
       </CardContent>
     </Card>
   );
