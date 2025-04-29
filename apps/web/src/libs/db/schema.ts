@@ -67,6 +67,7 @@ export const listings = pgTable(
     startingPrice: integer().notNull(),
     currentPrice: integer(),
     endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
+    startTime: timestamp({ mode: "string" }), // ADDED THIS
     status: text().default("ACTIVE"), // ACTIVE, SOLD
     createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
@@ -189,5 +190,32 @@ export const wallets = pgTable(
       foreignColumns: [users.uuid],
       name: "wallets_user_id_fkey",
     }).onDelete("cascade"),
+  ]
+);
+
+export const user_category_interests = pgTable(
+  "user_category_interests",
+  {
+    userUuid: text("useruuid")
+      .notNull()
+      .references(() => userProfile.userUuid, { onDelete: "cascade" }), 
+    categoryName: text("categoryname")
+      .notNull()
+      .references(() => listingCategory.name, { onDelete: "cascade" }), 
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userUuid],
+      foreignColumns: [userProfile.userUuid],
+      name: "user_interests_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.categoryName],
+      foreignColumns: [listingCategory.name],
+      name: "user_interests_category_id_fkey",
+    }).onDelete("cascade"),
+    {
+      primaryKey: [table.userUuid, table.categoryName], // Composite primary key
+    },
   ]
 );

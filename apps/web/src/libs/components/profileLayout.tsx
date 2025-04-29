@@ -13,9 +13,9 @@ import {
 
 const tabs = [
   { label: "Profile Information", path: "/profile" },
-  { label: "Payment Methods", path: "/profile/payment" },
-  { label: "Address book", path: "/profile/address" },
   { label: "Interests", path: "/profile/interests" },
+  { label: "Change password", path: "/profile/payment" },
+  { label: "Wallet", path: "/profile/address" },
 ];
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {

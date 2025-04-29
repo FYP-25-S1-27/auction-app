@@ -52,7 +52,7 @@ const CategoryListings = ({ listings }) => {
                 {listing.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={listing.imageUrl}
+                    src={`/list_img/${listing.imageUrl}`}
                     alt={listing.name}
                     style={{
                       width: "100%",
