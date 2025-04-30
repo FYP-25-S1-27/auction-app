@@ -16,7 +16,7 @@ const EndingSoon = () => {
   const [listings, setListings] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [timeLeft, setTimeLeft] = useState({});
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(null);
 
   // Fetch Listings
   useEffect(() => {
@@ -98,7 +98,8 @@ const EndingSoon = () => {
           textAlign: "center",
         }}
       >
-        Current Time: {currentTime.toLocaleString()}
+        Current Time:{" "}
+        {currentTime ? currentTime.toLocaleString() : "Loading..."}
       </Typography>
 
       <Typography

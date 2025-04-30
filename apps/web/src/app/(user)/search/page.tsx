@@ -1,11 +1,19 @@
 "use client";
 import ListingCard from "@/libs/components/listings/ListingCard";
 import FilterCard from "@/libs/components/search/FilterCard";
-import { Box, Grid2, Pagination, Stack } from "@mui/material";
+import {
+  Box,
+  Breadcrumbs,
+  Grid2,
+  Link,
+  Pagination,
+  Stack,
+} from "@mui/material";
 import qs from "qs";
 import { listings } from "@/libs/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
+import NextLink from "next/link";
 
 type GetListings = {
   items: InferSelectModel<typeof listings>[];
@@ -13,6 +21,10 @@ type GetListings = {
     page: number;
     pageSize: number;
     totalPages: number;
+  };
+  metadata: {
+    minPrice: number;
+    maxPrice: number;
   };
 };
 
@@ -38,24 +50,7 @@ export default function SearchPage() {
     };
     fetchCategories();
   }, []);
-  // get listings.items highest price
-  const maxPrice = listings
-    ? Math.max(
-        ...listings.items.map((listing) => {
-          return listing.currentPrice || listing.startingPrice;
-        })
-      )
-    : undefined;
-  // get listings.items lowest price
-  const minPrice = listings
-    ? Math.min(
-        ...listings.items.map((listing) => {
-          return listing.currentPrice || listing.startingPrice;
-        })
-      )
-    : undefined;
 
-  console.log(maxPrice, minPrice);
   const handlePageChange = (
     event: React.ChangeEvent<unknown>,
     value: number
@@ -79,38 +74,54 @@ export default function SearchPage() {
   };
 
   return (
-    <Box sx={{ marginY: "4rem", marginX: "5rem" }}>
-      <Stack direction="row" spacing={4}>
-        <div>
-          <FilterCard
-            initialFilters={{
-              maxPrice: maxPrice,
-              minPrice: minPrice,
-            }}
+    <>
+      <Box sx={{ marginY: "2rem", marginX: "5rem" }}>
+        <Breadcrumbs>
+          <Link component={NextLink} href="/" underline="hover" color="inherit">
+            Home
+          </Link>
+          <Link
+            component={NextLink}
+            href="/search"
+            underline="hover"
+            color="text.primary"
+          >
+            Search
+          </Link>
+        </Breadcrumbs>
+        <Stack direction="row" spacing={4}>
+          <div>
+            <FilterCard
+              initialFilters={{
+                maxPrice: listings?.metadata.maxPrice,
+                minPrice: listings?.metadata.minPrice,
+              }}
+            />
+          </div>
+          <div>
+            <Grid2 container spacing={4}>
+              {listings
+                ? listings.items.map((listing, i) => {
+                    return <ListingCard listing={listing} key={i} />;
+                  })
+                : null}
+            </Grid2>
+          </div>
+        </Stack>
+        <Box
+          justifyContent={"center"}
+          width={"100%"}
+          display={"flex"}
+          marginTop={"2rem"}
+        >
+          <Pagination
+            color="primary"
+            count={listings?.pagination.totalPages}
+            onChange={handlePageChange}
+            page={listings?.pagination.page || 1}
           />
-        </div>
-        <div>
-          <Grid2 container spacing={4}>
-            {listings
-              ? listings.items.map((listing, i) => {
-                  return <ListingCard listing={listing} key={i} />;
-                })
-              : null}
-          </Grid2>
-        </div>
-      </Stack>
-      <Box
-        justifyContent={"center"}
-        width={"100%"}
-        display={"flex"}
-        marginTop={"2rem"}
-      >
-        <Pagination
-          color="primary"
-          count={listings?.pagination.totalPages}
-          onChange={handlePageChange}
-        />
+        </Box>
       </Box>
-    </Box>
+    </>
   );
 }
