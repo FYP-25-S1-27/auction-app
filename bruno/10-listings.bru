@@ -1,18 +1,18 @@
 meta {
-  name: 01-listings
+  name: 10-listings
   type: http
   seq: 2
 }
 
 get {
-  url: {{host}}/api/listings?name=unbranded%20steel&maxPrice=1700
+  url: {{host}}/api/listings
   body: none
   auth: none
 }
 
 params:query {
-  name: unbranded%20steel
-  maxPrice: 1700
+  ~name: steel
+  ~maxPrice: 1700
   ~page: 1
   ~pageSize: 2
   ~category: alcohol
