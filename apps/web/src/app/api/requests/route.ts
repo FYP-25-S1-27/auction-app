@@ -1,39 +1,52 @@
 import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
-import { requests } from "@/libs/db/schema"; // Make sure this matches your schema file
-import { headers } from "next/headers";
+import { requests } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
-
-// 🟡 If you haven’t created a 'requests' table in your DB schema yet, I can help generate that too.
+import { headers } from "next/headers";
 
 export async function POST(req: Request) {
   try {
     const session = await auth0.getSession(headers());
-    if (!session || !session.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    let userUuid: string | null = null;
+
+    if (session && session.user) {
+      userUuid = session.user.sub;
+    } else {
+      console.warn("⚠️ No session found. Using hardcoded UUID for testing.");
+      userUuid = "auth0|67d91134f8221c2f7344d9de"; // Replace this after Auth0 integration is done
     }
 
-    const user_uuid = session.user.sub;
-    const { name, budget, description, category } = await req.json();
+    const { title, description, category } = await req.json();
 
-    if (!name || !budget || !description || !category) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    if (!title || !category) {
+      return NextResponse.json({ error: "Title and category are required." }, { status: 400 });
     }
 
     const newRequest = await db
       .insert(requests)
       .values({
-        user_uuid,
-        name,
-        budget,
+        title,
         description,
         category,
+        userUuid,
+        type: "request",
       })
       .returning();
 
+    console.log("✅ Request created:", newRequest[0]);
     return NextResponse.json(newRequest[0], { status: 201 });
   } catch (error) {
     console.error("❌ Error creating request:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function GET() {
+  try {
+    const allRequests = await db.select().from(requests);
+    return NextResponse.json(allRequests, { status: 200 });
+  } catch {
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

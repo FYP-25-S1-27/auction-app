@@ -20,6 +20,7 @@ export async function GET(req: Request, context: { params: { id: string } }) {
         user_uuid: bids.user_uuid,
         bid_amount: bids.bid_amount,
         bid_time: bids.bid_time,
+        bid_types: "BID"
       })
       .from(bids)
       .where(eq(bids.listing_id, listing_id))
