@@ -8,6 +8,7 @@ import { seedCategoriesListingsAndImages } from "./helper/categories_listing_and
 import { seedBids } from "./helper/bids";
 import { seedTransactions } from "./helper/transactions";
 import { seedUserLikes } from "./helper/listing_user_likes";
+import { seedUserInterests } from "./helper/user_category_interests";
 
 const COUNT = 50;
 faker.seed(321);
@@ -80,10 +81,12 @@ async function main() {
     bids, // handled by helper/bids
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     transactions, // handled by helper/transactions
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    user_category_interests, // handled by helper/user_category_interests
     ...schemaFiltered
   } = schema; // Remove tables from schemas
   // Seed remaining tables
-  console.log("Seeding remaining tables...");
+  console.log("Seeding remaining tables (except user interests)...");
   await seed(db, schemaFiltered, { count: COUNT, seed: 321 }).refine((f) => ({
     userProfile: {
       count: auth0users.length,
@@ -133,25 +136,10 @@ async function main() {
         }),
       },
     },
-    // listingUserLikes: {
-    //   columns: {
-    //     userUuid: f.valuesFromArray({
-    //       values: auth0users.map((user) => user.user_id),
-    //     }),
-    //   },
-    // },
-    // transactions: {
-    //   columns: {
-    //     buyerUuid: f.valuesFromArray({
-    //       values: auth0users.map((user) => user.user_id),
-    //     }),
-    //     sellerUuid: f.valuesFromArray({
-    //       values: auth0users.map((user) => user.user_id),
-    //     }),
-    //   },
-    // },
   }));
 
+  console.log("Seeding user category interests..."); // placed here as it relies on profiles being created first
+  await seedUserInterests(_userIds);
   return 0;
 }
 
