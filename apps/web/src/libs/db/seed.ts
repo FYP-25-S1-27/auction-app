@@ -4,6 +4,10 @@ import * as schema from "./schema";
 import { auth0management } from "../actions/auth0-management";
 import { ManagementApiError } from "auth0";
 import { faker } from "@faker-js/faker";
+import { seedCategoriesListingsAndImages } from "./helper/categories_listing_and_images";
+import { seedBids } from "./helper/bids";
+import { seedTransactions } from "./helper/transactions";
+import { seedUserLikes } from "./helper/listing_user_likes";
 
 const COUNT = 50;
 faker.seed(321);
@@ -51,40 +55,33 @@ async function main() {
     })
   );
 
-  const categories = {
-    Gadgets: ["Smartphones", "Laptops", "Tablets"],
-    Books: ["Fiction", "Non-Fiction", "Comics"],
-    Clothing: ["Men's", "Women's", "Children's"],
-    Furniture: ["Living Room", "Bedroom", "Office"],
-    Jewelry: ["Rings", "Necklaces", "Bracelets"],
-    Watches: ["Luxury", "Smartwatches", "Casual"],
-    Art: ["Paintings", "Sculptures", "Photography"],
-    Alcohol: ["Wine", "Whiskey", "Beer"],
-    Cars: ["Sedans", "SUVs", "Trucks"],
-    Sports: ["Football", "Basketball", "Tennis"],
-    Toys: ["Action Figures", "Dolls", "Puzzles"],
-  };
+  const _userIds = auth0users.map((user) => user.user_id);
+  console.log("Seeding categories, accompanying listings and images...");
+  const { listingIds } = await seedCategoriesListingsAndImages(_userIds);
+  console.log("Seeding bids...");
+  await seedBids(listingIds, _userIds);
+  console.log("Seeding transactions...");
+  await seedTransactions(listingIds, _userIds);
+  console.log("Seeding listing user likes...");
+  await seedUserLikes(listingIds, _userIds);
 
-  console.log("Seeding categories...");
-  // Insert parent categories first
-  for (const category of Object.keys(categories)) {
-    await db.insert(schema.listingCategory).values({
-      name: category.toUpperCase(),
-      parent: null,
-    });
-  }
-
-  // Then insert subcategories
-  for (const [parent, subcats] of Object.entries(categories)) {
-    for (const subcat of subcats) {
-      await db.insert(schema.listingCategory).values({
-        name: subcat.toUpperCase(),
-        parent: parent.toUpperCase(),
-      });
-    }
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { users, listingCategory, ...schemaFiltered } = schema; // Remove tables from schemas
+  const {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    users, // handled above
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    listingCategory, // handled by helper/categories_listing_and_images
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    listings, // handled by helper/categories_listing_and_images
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    listingImages, // handled by helper/categories_listing_and_images
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    listingUserLikes, // handled by helper/listing_user_likes
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    bids, // handled by helper/bids
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    transactions, // handled by helper/transactions
+    ...schemaFiltered
+  } = schema; // Remove tables from schemas
   // Seed remaining tables
   console.log("Seeding remaining tables...");
   await seed(db, schemaFiltered, { count: COUNT, seed: 321 }).refine((f) => ({
@@ -136,99 +133,24 @@ async function main() {
         }),
       },
     },
-    listings: {
-      count: 100,
-      columns: {
-        userUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-        name: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.commerce.productName()
-          ), // Generate random product names
-        }),
-        category: f.valuesFromArray({
-          values: Object.values(categories)
-            .flat()
-            .map((cat) => cat.toUpperCase()),
-        }),
-        description: f.loremIpsum({ sentencesCount: 1 }),
-        startingPrice: f.int({ minValue: 1, maxValue: 1000 }),
-        currentPrice: f.int({ minValue: 1000, maxValue: 10000 }),
-        status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
-        endTime: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.future().toISOString()
-          ),
-        }),
-        type: f.weightedRandom([
-          {
-            weight: 0.8,
-            value: f.default({ defaultValue: "LISTING" }),
-          },
-          {
-            weight: 0.2,
-            value: f.default({ defaultValue: "REQUEST" }),
-          },
-        ]),
-        createdAt: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.past().toISOString()
-          ),
-        }),
-      },
-      with: {
-        listingImages: 1,
-      },
-    },
-    listingImages: {
-      columns: {
-        imageUrl: f.default({
-          defaultValue: "/list_img/image_placeholder.jpg",
-        }),
-      },
-    },
-    listingUserLikes: {
-      columns: {
-        userUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-      },
-    },
-    bids: {
-      columns: {
-        userUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-        bidAmount: f.int({ minValue: 1, maxValue: 1000 }),
-        createdAt: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.recent({ days: 2 }).toISOString()
-          ),
-        }),
-      },
-    },
-    transactions: {
-      columns: {
-        buyerUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-        sellerUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-      },
-    },
+    // listingUserLikes: {
+    //   columns: {
+    //     userUuid: f.valuesFromArray({
+    //       values: auth0users.map((user) => user.user_id),
+    //     }),
+    //   },
+    // },
+    // transactions: {
+    //   columns: {
+    //     buyerUuid: f.valuesFromArray({
+    //       values: auth0users.map((user) => user.user_id),
+    //     }),
+    //     sellerUuid: f.valuesFromArray({
+    //       values: auth0users.map((user) => user.user_id),
+    //     }),
+    //   },
+    // },
   }));
-
-  // Seed listing images
-  // process.stdout.write("Seeding listing images...");
-  // const listings = await db.select().from(schema.listings);
-  // for (const listing of listings) {
-  //   await db.insert(schema.listing_images).values({
-  //     listingId: listing.id,
-  //     imageUrl: "/list_img/image_placeholder.jpg",
-  //   });
-  // }
 
   return 0;
 }
