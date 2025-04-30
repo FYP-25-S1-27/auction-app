@@ -196,29 +196,34 @@ export const wallets = pgTable(
   ]
 );
 
-export const user_category_interests = pgTable(
-  "user_category_interests",
+export const requests = pgTable("requests", {
+  id: serial().primaryKey().notNull(),
+  title: text().notNull(),
+  description: text(),
+  category: text().notNull(),
+  userUuid: text().notNull(),
+  createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`).notNull(),
+});
+
+export const offers = pgTable(
+  "offers",
   {
-    userUuid: text("useruuid")
-      .notNull()
-      .references(() => userProfile.userUuid, { onDelete: "cascade" }), 
-    categoryName: text("categoryname")
-      .notNull()
-      .references(() => listingCategory.name, { onDelete: "cascade" }), 
+    id: serial().primaryKey().notNull(),
+    requestId: integer().notNull(),
+    userUuid: text().notNull(),
+    offerAmount: numeric({ precision: 10, scale: 2 }).notNull(),
+    offerTime: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`).notNull(),
   },
   (table) => [
     foreignKey({
       columns: [table.userUuid],
-      foreignColumns: [userProfile.userUuid],
-      name: "user_interests_user_id_fkey",
+      foreignColumns: [users.uuid],
+      name: "offers_user_uuid_fkey",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.categoryName],
-      foreignColumns: [listingCategory.name],
-      name: "user_interests_category_id_fkey",
+      columns: [table.requestId],
+      foreignColumns: [requests.id],
+      name: "offers_request_id_fkey",
     }).onDelete("cascade"),
-    {
-      primaryKey: [table.userUuid, table.categoryName], // Composite primary key
-    },
   ]
 );

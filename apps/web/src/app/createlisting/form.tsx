@@ -3,14 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  TextField,
+  Box,
   Button,
   Container,
+  TextField,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
-  Box,
   Switch,
   Alert,
   CircularProgress,
@@ -23,30 +23,29 @@ import { InferSelectModel } from "drizzle-orm";
 import { listingCategory } from "@/libs/db/schema";
 
 const ListingForm = () => {
-  const router = useRouter(); // ✅ Use Next.js router for navigation
+  const router = useRouter();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
-  const [starting_price, setstarting_price] = useState("");
-  const [end_time, setend_time] = useState<dayjs.Dayjs | null>(null);
+  const [startingPrice, setStartingPrice] = useState("");
+  const [endTime, setEndTime] = useState<dayjs.Dayjs | null>(null);
   const [scheduled, setScheduled] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false); // ✅ Loading state
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError(null);
-    setLoading(true); // ✅ Show loading while submitting
+    setLoading(true);
 
-    // **Validation Checks**
-    if (Number(starting_price) < 0) {
+    if (Number(startingPrice) < 0) {
       setError("Starting price cannot be negative.");
       setLoading(false);
       return;
     }
-    if (end_time && end_time.isBefore(dayjs())) {
+    if (endTime && endTime.isBefore(dayjs())) {
       setError("End time cannot be before the current time.");
       setLoading(false);
       return;
@@ -62,17 +61,17 @@ const ListingForm = () => {
       }
     }
 
-    // ✅ Convert `end_time` to ISO format before sending
-    const end_timeString = end_time ? end_time.toISOString() : null;
+    const endTimeString = endTime ? endTime.toDate().toISOString() : null;
 
     const listingData = {
       name,
       category,
       condition,
       description,
-      starting_price: Number(starting_price),
-      end_time: end_timeString,
+      starting_price: Number(startingPrice),
+      end_time: endTimeString,
       scheduled,
+      listing_types: "LISTING", // ✅ Important addition
     };
 
     console.log("📩 Submitting:", listingData);
@@ -90,7 +89,7 @@ const ListingForm = () => {
       }
 
       console.log("✅ Listing created successfully:", data);
-      router.push("/"); // ✅ Redirect to homepage upon success
+      router.push("/");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -156,7 +155,14 @@ const ListingForm = () => {
       </Box>
 
       <form onSubmit={handleSubmit}>
-        <TextField label="Listing Name" value={name} onChange={(e) => setName(e.target.value)} fullWidth required margin="normal" />
+        <TextField
+          label="Listing Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+        />
 
         <FormControl fullWidth margin="normal">
           <InputLabel>Item Category</InputLabel>
@@ -184,12 +190,33 @@ const ListingForm = () => {
           </Select>
         </FormControl>
 
-        <TextField label="Condition Description" value={description} onChange={(e) => setDescription(e.target.value)} fullWidth required margin="normal" multiline rows={3} />
+        <TextField
+          label="Condition Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+          multiline
+          rows={3}
+        />
 
-        <TextField label="Starting Price" type="number" value={starting_price} onChange={(e) => setstarting_price(e.target.value)} fullWidth required margin="normal" />
+        <TextField
+          label="Starting Price"
+          type="number"
+          value={startingPrice}
+          onChange={(e) => setStartingPrice(e.target.value)}
+          fullWidth
+          required
+          margin="normal"
+        />
 
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateTimePicker label="Auction End Time" value={end_time} onChange={(newValue) => setend_time(newValue)} />
+          <DateTimePicker
+            label="Auction End Time"
+            value={endTime}
+            onChange={(newValue) => setEndTime(newValue)}
+          />
         </LocalizationProvider>
 
         <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>

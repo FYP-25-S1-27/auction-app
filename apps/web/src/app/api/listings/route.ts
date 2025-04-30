@@ -73,7 +73,7 @@ export async function POST(req: Request) {
       description,
       starting_price: Number(starting_price), // Ensure it's a number
       end_time, // ✅ Store as a proper Date object
-      //scheduled,
+      type: "listing",
     });
 
     console.log("✅ Listing created successfully!");

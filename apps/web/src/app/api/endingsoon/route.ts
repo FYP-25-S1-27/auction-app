@@ -1,55 +1,28 @@
-// import pool from '@/lib/db'; // Ensure this is your PostgreSQL connection
-
-// export async function GET(request) {
-//   return new Response("Hello, world!", { status: 200 });
-// }
-//   try {
-//     const client = await pool.connect();
-//     const query = `
-//       SELECT id, name, description, "current_price", "end_time"
-//       FROM listings
-//       WHERE "end_time" <= NOW() + INTERVAL '1 day'
-//       ORDER BY "current_price" DESC
-//       LIMIT 40;
-//     `;
-
-//     // Query to fetch 40 listings ending in the next 24 hours, sorted by highest likes
-
-//     // const query = `
-//     // SELECT id, name, description, "current_price", "end_time", likes
-//     // FROM listings
-//     // WHERE "end_time" <= NOW() + INTERVAL '1 day'
-//     // ORDER BY likes DESC
-//     // LIMIT 40;
-//     // `;
-//     const result = await client.query(query);
-//     client.release();
-
-//     return Response.json(result.rows, { status: 200 });
-//   } catch (error) {
-//     console.error("Error fetching 'ending soon' listings:", error);
-//     return Response.json({ message: "Internal Server Error" }, { status: 500 });
-//   }
-// }
-
-import { db } from "@/libs/db/drizzle"; // Changed from lib to libs
-import { listings } from "@/libs/db/schema"; // Changed from lib to libs
-import { lt } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { db } from "@/libs/db/drizzle";
+import { listings } from "@/libs/db/schema";
+import { and, eq, lt, gte } from "drizzle-orm";
 
 export async function GET() {
   try {
+    const now = new Date().toISOString();
+
     const endingSoonListings = await db
       .select()
       .from(listings)
-      .where(lt(listings.end_time, new Date().toISOString()));
+      .where(
+        and(
+          eq(listings.status, "ACTIVE"),            // Still active
+          eq(listings.listing_types, "LISTING"),      // Only auction listings (not requests)
+          gte(listings.end_time, now)                // End time must still be in the future
+        )
+      )
+      .orderBy(lt(listings.end_time, now))           // Closest to ending first
+      .limit(8);                                     // Limit to top 8 listings
 
     return NextResponse.json(endingSoonListings, { status: 200 });
   } catch (error) {
-    console.error("Error fetching ending soon listings:", error);
-    return NextResponse.json(
-      { message: "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("❌ Error fetching ending soon listings:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }

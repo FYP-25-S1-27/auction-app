@@ -1,38 +1,44 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Box,
   Button,
   Container,
   TextField,
-  Typography,
   MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 
 const CreateRequestForm = () => {
+  const router = useRouter();
   const [productName, setProductName] = useState("");
   const [budget, setBudget] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSuccess(false);
+    setLoading(true);
 
     const requestData = {
       name: productName,
-      budget: Number(budget),
+      starting_price: Number(budget),
       description,
       category,
+      listing_types: "REQUEST", // ✅ Important for requests
     };
 
     try {
-      const res = await fetch("/api/requests", {
+      const res = await fetch("/api/listings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(requestData),
@@ -41,70 +47,63 @@ const CreateRequestForm = () => {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create request");
 
-      setSuccess(true);
-      setProductName("");
-      setBudget("");
-      setDescription("");
-      setCategory("");
+      router.push("/");
     } catch (err: any) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
-      <Typography variant="h4" gutterBottom>
-        Create a Product Request
-      </Typography>
+      <h2>Create Product Request</h2>
 
       {error && <Alert severity="error">{error}</Alert>}
-      {success && <Alert severity="success">Request submitted successfully!</Alert>}
 
       <form onSubmit={handleSubmit}>
         <TextField
-          fullWidth
-          required
           label="Product Name"
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <TextField
           fullWidth
           required
+          margin="normal"
+        />
+
+        <TextField
           label="Budget (SGD)"
           type="number"
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <TextField
           fullWidth
           required
+          margin="normal"
+        />
+
+        <TextField
           label="Description"
           multiline
           rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          sx={{ mb: 2 }}
-        />
-        <TextField
           fullWidth
           required
-          select
-          label="Category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          sx={{ mb: 2 }}
-        >
-          <MenuItem value="Electronics">Electronics</MenuItem>
-          <MenuItem value="Books">Books</MenuItem>
-          <MenuItem value="Clothing">Clothing</MenuItem>
-        </TextField>
+          margin="normal"
+        />
+
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Category</InputLabel>
+          <Select value={category} onChange={(e) => setCategory(e.target.value)} required>
+            <MenuItem value="Electronics">Electronics</MenuItem>
+            <MenuItem value="Books">Books</MenuItem>
+            <MenuItem value="Clothing">Clothing</MenuItem>
+          </Select>
+        </FormControl>
 
         <Box sx={{ mt: 2 }}>
-          <Button type="submit" variant="contained" color="primary" fullWidth>
-            Submit Request
+          <Button type="submit" variant="contained" fullWidth disabled={loading}>
+            {loading ? <CircularProgress size={24} /> : "Submit Request"}
           </Button>
         </Box>
       </form>
