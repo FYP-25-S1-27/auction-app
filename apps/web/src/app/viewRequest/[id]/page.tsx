@@ -2,20 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Container, Typography, Button, Box, CircularProgress, Alert } from "@mui/material";
-import OfferForm from "./offerForm"; // ✅ Import the pop-up form
+import {
+  Box,
+  Button,
+  Container,
+  Typography,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+import OfferForm from "./offerForm";
 
 const ViewRequestPage = () => {
   const { id } = useParams();
   const [request, setRequest] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openOfferForm, setOpenOfferForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [showOfferForm, setShowOfferForm] = useState(false);
 
   useEffect(() => {
     const fetchRequest = async () => {
       try {
-        const res = await fetch(`/api/listings/${id}`);
+        const res = await fetch(`/api/requests/${id}`);
         if (!res.ok) throw new Error("Failed to fetch request");
         const data = await res.json();
         setRequest(data);
@@ -29,30 +36,43 @@ const ViewRequestPage = () => {
     fetchRequest();
   }, [id]);
 
+  const handleOpenOfferForm = () => setShowOfferForm(true);
+  const handleCloseOfferForm = () => setShowOfferForm(false);
+
   return (
     <Container maxWidth="md" sx={{ mt: 5 }}>
-      {loading && <CircularProgress />}
-      {error && <Alert severity="error">{error}</Alert>}
-
-      {request && (
+      {loading ? (
+        <CircularProgress />
+      ) : error ? (
+        <Alert severity="error">{error}</Alert>
+      ) : (
         <>
           <Typography variant="h4" gutterBottom>
             {request.name}
           </Typography>
-          <Typography variant="h6">Budget: ${request.starting_price}</Typography>
-          <Typography>Description: {request.description}</Typography>
+          <Typography variant="subtitle1" gutterBottom>
+            Category: {request.category}
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Description: {request.description}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Budget: ${request.starting_price}
+          </Typography>
 
-          <Button variant="contained" sx={{ mt: 3 }} onClick={() => setOpenOfferForm(true)}>
-            Place Offer
-          </Button>
+          <Box>
+            <Button variant="contained" color="primary" onClick={handleOpenOfferForm}>
+              Make an Offer
+            </Button>
+          </Box>
 
-          {/* Offer Form Pop-up */}
-          <OfferForm
-            open={openOfferForm}
-            handleClose={() => setOpenOfferForm(false)}
-            listingId={request.id}
-            requestedPrice={request.starting_price}
-          />
+          {showOfferForm && (
+            <OfferForm
+              requestId={request.id}
+              matchAmount={request.starting_price}
+              onClose={handleCloseOfferForm}
+            />
+          )}
         </>
       )}
     </Container>
