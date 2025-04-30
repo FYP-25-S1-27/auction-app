@@ -4,7 +4,7 @@ import { listings, listingImages, listingCategory } from "../schema";
 
 faker.seed(321);
 
-const categories = {
+export const CATEGORIES = {
   ALCOHOL: ["WINE", "WHISKEY", "BEER"],
   ART: ["PAINTINGS", "SCULPTURES", "PHOTOGRAPHY"],
   BOOKS: ["FICTION", "NON-FICTION", "COMICS"],
@@ -23,7 +23,7 @@ export async function seedCategoriesListingsAndImages(
 ): Promise<{ listingIds: number[] }> {
   let listingIds: number[] = [];
   // insert categories
-  for (const [parent, subcats] of Object.entries(categories)) {
+  for (const [parent, subcats] of Object.entries(CATEGORIES)) {
     await db.insert(listingCategory).values({
       name: parent.toUpperCase(),
       parent: null,
