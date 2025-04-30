@@ -1,90 +1,88 @@
 "use client";
 
+import { useState } from "react";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
+  TextField,
   DialogActions,
   Button,
-  TextField,
-  Typography,
+  Stack,
+  Alert,
 } from "@mui/material";
-import { useState } from "react";
 
-const OfferForm = ({
-  open,
-  handleClose,
-  listingId,
-  requestedPrice,
-}: {
+interface OfferFormProps {
   open: boolean;
-  handleClose: () => void;
-  listingId: number;
-  requestedPrice: number;
-}) => {
-  const [customOffer, setCustomOffer] = useState("");
-  const [quantity, setQuantity] = useState("1");
+  onClose: () => void;
+  requestId: number;
+  refreshOffers: () => void;
+}
 
-  const submitOffer = async (price: number) => {
+const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) => {
+  const [offerAmount, setOfferAmount] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
+    setError(null);
+    setLoading(true);
+
     try {
-      const res = await fetch("/api/offers", {
+      const response = await fetch("/api/offers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          listing_id: listingId,
-          offer_price: price,
-          quantity: Number(quantity),
+          listing_id: requestId, // using the same field because 'listing_id' now refers to request or listing
+          bid_amount: Number(offerAmount),
+          bid_type: "OFFER", // important to distinguish offers from bids!
         }),
       });
 
-      if (!res.ok) throw new Error("Failed to submit offer");
-      alert("Offer submitted!");
-      handleClose();
-    } catch (err) {
-      console.error(err);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to submit offer");
+      }
+
+      setOfferAmount("");
+      refreshOffers(); // Refresh the offers list after successful offer
+      onClose(); // Close the modal
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Submit an Offer</DialogTitle>
-      <DialogContent>
-        <Typography gutterBottom>Buyer Requested Price: ${requestedPrice}</Typography>
+  const handleMatchOffer = async () => {
+    setOfferAmount("0"); // Assuming 0 means match? You can adjust if you have a specific value
+    await handleSubmit();
+  };
 
-        <Button
-          variant="contained"
-          fullWidth
-          sx={{ mb: 2 }}
-          onClick={() => submitOffer(requestedPrice)}
-        >
+  return (
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>Make an Offer</DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 1 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+
+          <TextField
+            label="Offer Amount (SGD)"
+            type="number"
+            value={offerAmount}
+            onChange={(e) => setOfferAmount(e.target.value)}
+            fullWidth
+            required
+          />
+        </Stack>
+      </DialogContent>
+
+      <DialogActions>
+        <Button onClick={handleMatchOffer} color="secondary" variant="outlined">
           Match Offer
         </Button>
-
-        <Typography align="center" gutterBottom>or</Typography>
-
-        <TextField
-          label="Custom Offer Price"
-          type="number"
-          fullWidth
-          sx={{ mb: 2 }}
-          value={customOffer}
-          onChange={(e) => setCustomOffer(e.target.value)}
-        />
-
-        <TextField
-          label="Quantity"
-          type="number"
-          fullWidth
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => submitOffer(Number(customOffer))} variant="contained">
-          Submit Offer
-        </Button>
-        <Button onClick={handleClose} color="secondary">
-          Cancel
+        <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
+          {loading ? "Submitting..." : "Submit Offer"}
         </Button>
       </DialogActions>
     </Dialog>
