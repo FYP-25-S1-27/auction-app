@@ -23,8 +23,6 @@ const EditProfile = () => {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -59,15 +57,16 @@ const EditProfile = () => {
       const response = await fetch(`/api/updateprofile/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-        // body: JSON.stringify({
-        //   phone: formData.phone,
-        //   // address: formData.address,
-        //   // age: formData.age,
-        // }),
+        body: JSON.stringify({
+          username: formData.username,
+          user_profile: {
+            age: formData.age,
+            phone: formData.phone,
+            address: formData.address,
+            gender: formData.gender,
+          },
+        }),
       });
-
-      console.log(formData);
 
       if (!response.ok) {
         throw new Error("Failed to update profile");
@@ -127,13 +126,8 @@ const EditProfile = () => {
             value={formData.gender || ""}
             onChange={handleChange}
           >
-            <FormControlLabel value="male" control={<Radio />} label="Male" />
-            <FormControlLabel
-              value="female"
-              control={<Radio />}
-              label="Female"
-            />
-            <FormControlLabel value="other" control={<Radio />} label="Other" />
+            <FormControlLabel value="MALE" control={<Radio />} label="Male" />
+            <FormControlLabel value="FEMALE" control={<Radio />} label="Female"/>
           </RadioGroup>
         </FormControl>
 

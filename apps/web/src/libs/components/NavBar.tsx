@@ -144,7 +144,11 @@ export default function NavBar() {
                         <NextLink href="/admin">Admin Panel</NextLink>
                       </MenuItem>
                     )}
-                    <MenuItem onClick={popupState.close}>Profile</MenuItem>
+                    <MenuItem onClick={popupState.close}>
+                      <Link href="/demo_profile" underline="none">
+                        Profile
+                      </Link>
+                    </MenuItem>
                     <MenuItem onClick={popupState.close}>My account</MenuItem>
                     <MenuItem onClick={popupState.close}>
                       <Link href="/auth/logout" underline="none">

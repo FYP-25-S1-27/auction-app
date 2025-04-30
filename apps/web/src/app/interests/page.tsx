@@ -1,10 +1,11 @@
 "use client";
 
-import { Box, Button, Chip, Divider, Typography } from "@mui/material";
+import { Alert, Box, Button, Chip, Divider, Typography, Snackbar } from "@mui/material";
 import { useEffect, useState } from "react";
 import ProfileLayout from "@/libs/components/profileLayout";
 import { InferSelectModel } from "drizzle-orm";
 import { listingCategory } from "@/libs/db/schema";
+import { useUser } from "@auth0/nextjs-auth0";
 
 type CategoriesSchema = InferSelectModel<typeof listingCategory>;
 
@@ -23,8 +24,11 @@ export default function InterestsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [categoryHierarchy, setCategoryHierarchy] = useState<any[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const auth = useUser();
 
   useEffect(() => {
+    if (!auth.user) return;
     const fetchCategories = async () => {
       try {
         const response = await fetch("/api/categories");
@@ -42,27 +46,95 @@ export default function InterestsPage() {
       }
     };
 
-    fetchCategories();
-  }, []);
+    const fetchUserInterests = async () => {
+      try {
+      
+        const response = await fetch(
+          `/api/userinterests?userUuid=${auth.user.sub}`
+        );
+        if (response.ok) {
+          const data: string[] = await response.json();
+          setSelected(data);
+        } else {
+          console.error("Failed to fetch user interests");
+        }
+      } catch (error) {
+        console.error("Error fetching user interests:", error);
+      }
+    };
 
-  const handleToggle = (interest: string) => {
-    setSelected((prev) =>
-      prev.includes(interest)
-        ? prev.filter((i) => i !== interest)
-        : [...prev, interest]
-    );
+    fetchCategories();
+    fetchUserInterests();
+  }, [auth.user]);
+
+  const handleToggle = async (interest: string) => {
+    if (!auth.user) return;
+    if (selected.includes(interest)) {
+      // Remove interest
+      setSelected((prev) => prev.filter((i) => i !== interest));
+      try {
+        const response = await fetch(
+          `/api/userinterests?userUuid=${auth.user.sub}&interest=${interest}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (!response.ok) {
+          console.error("Failed to delete interest");
+        }
+      } catch (error) {
+        console.error("Error deleting interest:", error);
+      }
+    } else {
+      // Add interest
+      setSelected((prev) => [...prev, interest]);
+      try {
+        const response = await fetch("/api/userinterests", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userUuid: auth.user.sub,
+            interests: [interest],
+          }),
+        });
+        if (!response.ok) {
+          console.error("Failed to add interest");
+        }
+      } catch (error) {
+        console.error("Error adding interest:", error);
+      }
+    }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    if (!auth.user) return;
     const data = {
+      userUuid: auth.user.sub,
       interests: selected,
     };
-    console.log("Saved Interests:", data);
-    // TODO: Replace with API call to save
-  };
+    try {
+      const response = await fetch("/api/userinterests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      console.log("Response status:", response.status);
+      console.log("Response body:", await response.json());
 
-  const handleCancel = () => {
-    setSelected([]);
+      if (response.ok) {
+        console.log("Interests saved successfully");
+        setShowSuccess(true);
+        setTimeout(() => setShowSuccess(false), 5000);
+      } else {
+        console.error("Failed to save interests");
+      }
+    } catch (error) {
+      console.error("Error saving interests:", error);
+    }
   };
 
   return (
@@ -75,6 +147,21 @@ export default function InterestsPage() {
         </Typography>
         <Divider sx={{ mb: 3 }} />
 
+        <Snackbar
+            open={showSuccess}
+            autoHideDuration={5000}
+            onClose={() => setShowSuccess(false)}
+            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          >
+            <Alert
+              onClose={() => setShowSuccess(false)}
+              severity="success"
+              sx={{ width: "100%" }}
+            >
+              Interests saved successfully!
+            </Alert>
+          </Snackbar>
+
         {/* Categories */}
         {categoryHierarchy.map((category) => (
           <Box key={category.name} sx={{ mb: 4 }}>
@@ -82,17 +169,6 @@ export default function InterestsPage() {
               {category.name}
             </Typography>
             <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-              {/* Use keyof to ensure category is a valid key of interestsByCategory */}
-              {/* {interestsByCategory[category as keyof typeof interestsByCategory]?.map((interest) => (
-              <Chip
-                key={interest}
-                label={interest}
-                variant={selected.includes(interest) ? "filled" : "outlined"}
-                color={selected.includes(interest) ? "success" : "default"}
-                onClick={() => handleToggle(interest)}
-                clickable
-              />
-            ))} */}
               {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               {category.children.map((childCategory: any) => (
                 <Chip
@@ -118,9 +194,6 @@ export default function InterestsPage() {
 
         {/* Action Buttons */}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4, gap: 2 }}>
-          <Button variant="outlined" onClick={handleCancel}>
-            Cancel
-          </Button>
           <Button variant="contained" color="success" onClick={handleSave}>
             Save
           </Button>

@@ -17,6 +17,7 @@ const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Profile Information");
   const auth = useUser();
 
+  const [interests, setInterests] = useState<string[]>([]);
   const [userProfiles, setUserProfiles] = useState<JoinedUserProfile[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [loading, setLoading] = useState(true);
@@ -30,11 +31,18 @@ const ProfilePage = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch("/api/profile");
+        if (!auth.user) return;
+        const response = await fetch("/api/profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ user_uuid: auth.user.sub }),
+        });
         if (!response.ok) throw new Error("Failed to fetch profile");
-
-        const data: JoinedUserProfile[] = await response.json();
-        setUserProfiles(data);
+        const { profile, interests } = await response.json();
+        setUserProfiles(profile);
+        setInterests(interests);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
@@ -42,8 +50,9 @@ const ProfilePage = () => {
         setLoading(false);
       }
     };
-
+    if (auth.user) {
     fetchProfile();
+    }
 
     if (success === "1") {
       setShowSuccess(true);
@@ -54,7 +63,7 @@ const ProfilePage = () => {
       router.replace("/demo_profile", { scroll: false });
       return () => clearTimeout(timeout);
     }
-  }, [success, router]);
+  }, [auth.user, success, router]);
 
   const handleEdit = (useruuid: string) => {
     router.push(`/viewprofile/${useruuid}`);
@@ -102,7 +111,8 @@ const ProfilePage = () => {
                 {user_profile?.phone || "Not provided"}
               </Typography>
               <Typography variant="body2">
-                <strong>Interests:</strong> Sports, Cars
+                <strong>Interests: </strong>
+                {interests.length > 0 ? interests.join(", ") : "No interests listed"}
               </Typography>
               <Typography variant="body2" sx={{ gridColumn: "span 2" }}>
                 <strong>Address:</strong>{" "}

@@ -1,26 +1,37 @@
 import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
-import { users, userProfile } from "@/libs/db/schema";
-// import { auth0 } from "@/libs/auth0";
+import { users, userProfile, user_category_interests} from "@/libs/db/schema";
 import { eq } from "drizzle-orm"; 
 
-export async function GET() {
+export async function POST(req: Request) {
     try {
 
-    // ✅ Temporarily hardcoded user UUID (#TODO)
-    const user_uuid = "google-oauth2|101106278116232230288";
-    console.log("✅ Fetching user id:", user_uuid);
+    const { user_uuid } = await req.json();
+    if (!user_uuid) {
+      return NextResponse.json({ error: "No user ID provided" }, { status: 400 });
+    }
 
-    // ✅ Query listings for the hardcoded user
+    // ✅ Query user profile for the user
     const userUsers = await db
         .select()
         .from(users)
         .leftJoin(userProfile, eq(users.uuid, userProfile.userUuid))
         .where(eq(users.uuid, user_uuid)); // ✅ Corrected filter
 
-    console.log("📄 Retrieved Users:", userUsers);
+    // Query user interests for the user
+    const interests = await db
+        .select({ name: user_category_interests.categoryName })
+        .from(user_category_interests)
+        .where(eq(user_category_interests.userUuid, user_uuid));
+    
+    const interestNames = interests.map((i) => i.name);
 
-    return NextResponse.json(userUsers, { status: 200 });
+    return NextResponse.json(
+        {
+            profile: userUsers,
+            interests: interestNames,
+        }
+    );
     } catch (error) {
     console.error("❌ Error fetching profile:", error);
     return NextResponse.json(
