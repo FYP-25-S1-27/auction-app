@@ -1,10 +1,9 @@
-import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings, transactions, users } from  "@/libs/db/schema";
 import { eq, or, aliasedTable } from "drizzle-orm";
 import { auth0 } from "@/libs/auth0";
 
-export async function GET(req: NextResponse) {
+export async function GET() {
   try {
     // Get user session
     const session = await auth0.getSession();

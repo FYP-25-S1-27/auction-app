@@ -54,10 +54,10 @@ export async function POST(request: Request) {
     await db.insert(user_category_interests).values(insertData).onConflictDoNothing();
 
     return NextResponse.json({ message: "Interests added successfully" }, { status: 200 });
-  } catch (error: any) {
-    console.error("Error adding interests:", error?.message || error);
+  } catch (error) {
+    console.error("Error adding interests:", error);
     return NextResponse.json(
-      { error: "Failed to add interests", details: error?.message },
+      { error: "Failed to add interests"},
       { status: 500 }
     );
   }

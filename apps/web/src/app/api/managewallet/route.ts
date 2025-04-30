@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { wallets } from  "@/libs/db/schema";
 import { eq } from "drizzle-orm";
 import { auth0 } from "@/libs/auth0";
 
-export async function GET(req: NextResponse) {
+export async function GET() {
     try {
       // Get user session
       const session = await auth0.getSession();
@@ -39,7 +39,7 @@ export async function GET(req: NextResponse) {
   }
 }
 
-export async function POST(req: NextResponse) {
+export async function POST(req: NextRequest) {
     try {
       // Get user session
       const session = await auth0.getSession();
@@ -59,26 +59,32 @@ export async function POST(req: NextResponse) {
           { status: 400 }
         );
       }
-  
+
       // Fetch the current wallet balance
       const existingwallet = await db
         .select()
         .from(wallets)
         .where(eq(wallets.userUuid, user_uuid))
         .limit(1);
+      
+      const lastUpdated = new Date().toISOString();
   
       if (existingwallet.length === 0) {
         await db.insert(wallets).values({
             userUuid: user_uuid,
-            balance: amount,
+            balance: amount.toFixed(2),
+            lastUpdated,
         });
+        return new Response(
+          JSON.stringify({ balance: amount.toFixed(2), lastUpdated}),
+          { status: 200 }
+        );
       }
   
       const wallet = existingwallet[0];
   
       // Update the wallet balance
       const updatedBalance = parseFloat(wallet.balance) + amount;
-      const lastUpdated = new Date().toISOString();
   
       const updatewallet = await db
         .update(wallets)

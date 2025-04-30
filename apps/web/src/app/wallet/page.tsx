@@ -66,8 +66,9 @@ import {
         const error = await res.json();
         setErrorMsg(error.message || "Your wallet balance unable to top up.");
       }
-    } catch (err) {
+    } catch (error) {
       setErrorMsg("Failed to connect to the server.");
+      console.error("Error in wallet balance:", error);
     } finally {
       setLoading(false);
     }

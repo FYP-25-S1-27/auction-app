@@ -51,8 +51,9 @@ export default function ChangePasswordPage() {
       } else {
         setError(data.message || "Failed to change password. Password is too weak.");
       }
-    } catch (err) {
-      setError("Something went wrong.");
+    } catch (error){
+      console.error("Error changing password:", error);
+      setError("Something went wrong.", );
     }
   };
 

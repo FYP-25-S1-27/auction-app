@@ -12,10 +12,10 @@ import {
 } from "@mui/material";
 
 const tabs = [
-  { label: "Profile Information", path: "/profile" },
-  { label: "Interests", path: "/profile/interests" },
-  { label: "Change password", path: "/profile/payment" },
-  { label: "Wallet", path: "/profile/address" },
+  { label: "Profile Information", path: "/demo_profile" },
+  { label: "Interests", path: "/interests" },
+  { label: "Change password", path: "/password" },
+  { label: "Wallet", path: "/wallet" },
 ];
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {

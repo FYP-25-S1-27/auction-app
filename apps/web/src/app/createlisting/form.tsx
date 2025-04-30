@@ -23,7 +23,7 @@ const ListingForm = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [categoryHierarchy, setCategoryHierarchy] = useState<any[]>([]);
+  const [categoryHierarchy, setCategoryHierarchy] = useState<CategoriesSchema[]>([]);
 
   // Get all categories
   type CategoriesSchema = InferSelectModel<typeof listingCategory>;
