@@ -1,17 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Container, Tab, Grid, Stack } from "@mui/material";
+import { Box, Typography, Container, Tab, Stack } from "@mui/material";
 import TabContext from "@mui/lab/TabContext";
 import TabList from "@mui/lab/TabList";
 import TabPanel from "@mui/lab/TabPanel";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { TopListingsInCategory } from "@/app/api/toppicks/route";
 import ListingCard from "./listings/ListingCard";
 
 export default function TopPicks() {
   const [topPicks, setTopPicks] = useState<TopListingsInCategory>([]);
   const [currentTab, setCurrentTab] = useState(1);
-  const [count, setCount] = useState(0);
   const [tabCount, setTabCount] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
