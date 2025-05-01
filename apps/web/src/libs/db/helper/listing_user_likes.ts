@@ -3,7 +3,7 @@ import { db } from "../drizzle";
 import { listingUserLikes } from "../schema";
 
 faker.seed(321);
-const COUNT = 100;
+const COUNT = 200;
 
 export async function seedUserLikes(listingIds: number[], userIds: string[]) {
   for (let i = 0; i < COUNT; i++) {
