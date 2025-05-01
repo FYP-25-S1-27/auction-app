@@ -1,16 +1,17 @@
 meta {
-  name: 10-listings
+  name: listings
   type: http
   seq: 2
 }
 
 get {
-  url: {{host}}/api/listings
+  url: {{host}}/api/listings?id=1719
   body: none
   auth: none
 }
 
 params:query {
+  id: 1719
   ~name: steel
   ~maxPrice: 1700
   ~page: 1

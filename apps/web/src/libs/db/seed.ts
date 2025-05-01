@@ -11,6 +11,7 @@ import { seedUserLikes } from "./helper/listing_user_likes";
 import { seedUserInterests } from "./helper/user_category_interests";
 
 const COUNT = 50;
+const USER_COUNT = 50;
 faker.seed(321);
 
 async function seedAuth0Users(email: string, password: string) {
@@ -37,7 +38,7 @@ async function main() {
 
   const PASSWORD = "1Qwer#@!";
   console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < USER_COUNT; i++) {
     await seedAuth0Users(`test${i}.user@test.test`, PASSWORD);
   }
   await seedAuth0Users(`test.admin@test.test`, PASSWORD);

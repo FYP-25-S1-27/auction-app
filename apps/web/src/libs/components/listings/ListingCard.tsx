@@ -26,19 +26,26 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
   }, [listing.id]);
 
   return (
-    <Card sx={{ maxWidth: 240 }}>
+    <Card
+      sx={{
+        maxWidth: "16rem",
+        height: "24rem",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
       <CardMedia
         component="img"
         image={imageUrl}
         alt={listing.name}
         sx={{
           width: "100%", // Make the image take the full width of the card
-          height: "50%", // Set a fixed height for the image
+          minHeight: 140, // Set a fixed height for the image
           objectFit: "cover",
           borderRadius: "0.5rem",
         }}
       />
-      <CardContent>
+      <CardContent sx={{ marginTop: "auto" }}>
         <Typography gutterBottom variant="body1" component="div">
           {listing.name}
         </Typography>
