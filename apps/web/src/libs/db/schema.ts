@@ -15,7 +15,6 @@ import { sql } from "drizzle-orm";
 export const users = pgTable("users", {
   uuid: text().primaryKey().notNull(),
   username: text().notNull().unique(),
-  bio: text(),
   is_admin: boolean().default(false).notNull(),
   created_at: timestamp()
     .default(sql`CURRENT_TIMESTAMP`)

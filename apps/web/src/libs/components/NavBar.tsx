@@ -116,6 +116,7 @@
 // }
 
 "use client";
+
 import Image from "next/image";
 import logo from "@public/logo.svg";
 import NextLink from "next/link";
@@ -131,24 +132,19 @@ import {
   AppBar,
   Toolbar,
   Button,
-  // Typography,
 } from "@mui/material";
 import { useUser } from "@auth0/nextjs-auth0";
 import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Fragment, useEffect, useState } from "react";
-import { getRole } from "@/libs/actions/db/users";
+import { insertUser, getRole } from "@/libs/actions/db/users";
 import { useSearchParams } from "next/navigation";
-// import { getListingCategories } from "../actions/db/listing_category";
-// import { listing_category } from "../db/schema";
 
 export default function NavBar() {
-  const [is_admin, setis_admin] = useState<boolean>(false);
-  // const [categories, setCategories] = useState<
-  //   (typeof listing_category.$inferSelect)[]
-  // >([]);
   const auth = useUser();
   const [is_admin, setis_admin] = useState<boolean>(false);
   const [searchNameQuery, setSearchNameQuery] = useState<string>("");
+  const searchParams = useSearchParams();
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchNameQuery.trim()) {
@@ -157,15 +153,16 @@ export default function NavBar() {
   };
 
   useEffect(() => {
-    if (auth.user) {
-      getRole(auth.user.sub).then((x) => {
-        if (x[0].is_admin) {
-          setis_admin(true);
-        } else {
-          setis_admin(false);
-        }
-      });
-    }
+    const setupUser = async () => {
+      if (auth.user) {
+        await insertUser(auth.user.sub, auth.user.nickname);
+        const x = await getRole(auth.user.sub);
+        setis_admin(x[0]?.is_admin ?? false);
+      }
+    };
+
+    setupUser();
+
     const x = searchParams.get("name");
     if (x) {
       setSearchNameQuery(x);
@@ -210,16 +207,14 @@ export default function NavBar() {
             </Button>
           </Box>
           {auth.isLoading ? (
-            <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
+            <Box component="div" sx={{ display: "flex", gap: 2 }}>
               <Link href="/auth/login?screen_hint=signup">Register</Link>
-              {/* to be skeleton*/}
               <Link href="/auth/login">Login</Link>
             </Box>
           ) : auth.user ? (
             <PopupState variant="popover" popupId="avatar-menu">
               {(popupState) => (
                 <Fragment>
-                  {/* Sell & My Listings Links */}
                   <div
                     style={{
                       display: "flex",
@@ -254,7 +249,6 @@ export default function NavBar() {
                     </NextLink>
                   </div>
 
-                  {/* User Avatar Menu */}
                   <IconButton {...bindTrigger(popupState)}>
                     <Avatar src={auth.user.picture} alt={auth.user.nickname} />
                   </IconButton>
@@ -281,7 +275,7 @@ export default function NavBar() {
               )}
             </PopupState>
           ) : (
-            <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
+            <Box component="div" sx={{ display: "flex", gap: 2 }}>
               <Link href="/auth/login?screen_hint=signup">Register</Link>
               <Link href="/auth/login">Login</Link>
             </Box>

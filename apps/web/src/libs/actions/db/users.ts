@@ -21,3 +21,9 @@ export async function getUser(uuid: string) {
   const user = await db.select().from(users).where(eq(users.uuid, uuid));
   return user;
 }
+
+export async function insertUser(uuid: string, nickname: string) {
+  await db.insert(users)
+    .values({ uuid, username: nickname, is_admin: false })
+    .onConflictDoNothing(); // ensures it won’t fail if user exists
+}
