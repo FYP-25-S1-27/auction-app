@@ -1,6 +1,7 @@
 "use client";
 
-import { Card, CardContent, CardMedia, Typography } from "@mui/material";
+import { Card, CardContent, CardMedia, Typography, IconButton, Box } from "@mui/material";
+import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { listings } from "@/libs/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
@@ -10,6 +11,7 @@ type SelectListing = InferSelectModel<typeof listings>;
 export default function ListingCard({ listing }: { listing: SelectListing }) {
   const endDateLocale = new Date(listing.endTime).toLocaleString();
   const [imageUrl, setImageUrl] = useState<string>("/images/placeholder.png");
+  const [liked, setLiked] = useState(false);
 
   useEffect(() => {
     const fetchImage = async (listingId: number) => {
@@ -25,6 +27,46 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
     fetchImage(listing.id);
   }, [listing.id]);
 
+  useEffect(() => {
+    const fetchLikes = async () => {
+      try {
+        const res = await fetch(`/api/listing_likes?listingId=${listing.id}`);
+        const data = await res.json();
+        setLiked(data.liked);
+      } catch (err) {
+        console.error("Failed to fetch like status", err);
+      }
+    };
+  
+    fetchLikes();
+  }, [listing.id]);
+  
+  const likedListing = async () => {
+    const method = liked ? "DELETE" : "POST";
+  
+    try {
+      const res = await fetch("/api/listing_likes", {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ listingId: listing.id }),
+      });
+
+      if (res.status === 401) {
+        // Redirect to login if never login
+        window.location.href = "/auth/login";
+        return;
+      }
+  
+      if (res.ok) {
+        setLiked((prev) => !prev);
+      } else {
+        console.error("Failed to update like");
+      }
+    } catch (err) {
+      console.error("Failed to toggle like", err);
+    }
+  };
+
   return (
     <Card
       sx={{
@@ -34,6 +76,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
         flexDirection: "column",
       }}
     >
+      <Box sx={{ position: "relative"}}>
       <CardMedia
         component="img"
         image={imageUrl}
@@ -45,6 +88,21 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
           borderRadius: "0.5rem",
         }}
       />
+      <IconButton
+        onClick={likedListing}
+        sx={{
+          position: "absolute",
+          top: 8,
+          right: 8,
+          backgroundColor: "white",
+          "&:hover": {
+            backgroundColor: "white",
+          },
+        }}
+      >
+        {liked ? <Favorite sx={{ color: "#007C5F" }} /> : <FavoriteBorder sx={{ color: "#007C5F" }}/>}
+      </IconButton>
+      </Box>
       <CardContent sx={{ marginTop: "auto" }}>
         <Typography gutterBottom variant="body1" component="div">
           {listing.name}

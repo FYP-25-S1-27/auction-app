@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Container,
   Typography,
@@ -22,6 +22,21 @@ const MyListings = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const updated = searchParams.get("updated") === "true"; 
+  const [showSuccess, setShowSuccess] = useState(updated); 
+
+  useEffect(() => {
+    if (updated) {
+      // Clear success message after 5 seconds
+      const timeout = setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+
+      router.replace("/mylistings", { scroll: false });
+      return () => clearTimeout(timeout);
+    }
+  }, [updated, router]);
 
   useEffect(() => {
     const fetchListings = async () => {
@@ -78,6 +93,11 @@ const MyListings = () => {
 
       {loading && <CircularProgress sx={{ mt: 3 }} />}
       {error && <Alert severity="error">{error}</Alert>}
+      {showSuccess && (
+        <Alert severity="success">
+          Your listing had updated successfully!
+        </Alert>
+      )}
 
       <List sx={{ mt: 3 }}>
         {_listings.map((listing) => (

@@ -32,6 +32,7 @@ export async function handlePost(req: Request) {
     const start_time = formData.get("start_time") as string;
     const scheduled = formData.get("scheduled") as string;
     const files: File[] = Array.from(formData.getAll("files") as File[]);
+    const type = formData.get("type") as string; 
 
     console.log("📩 Received Data:", {
       name,
@@ -41,6 +42,7 @@ export async function handlePost(req: Request) {
       end_time,
       scheduled,
       start_time, // ADD 
+      type,
       files: files.map((f) => f.name), // Log file names
     });
 
@@ -71,6 +73,7 @@ export async function handlePost(req: Request) {
         endTime: end_time,
         startTime: start_time ? start_time : null, // ADD THIS LINE
         status: scheduled === 'true' ? "SCHEDULED" : "ACTIVE", // ADD THIS LINE
+        type: 'LISTING', 
       })
       .returning({ id: listings.id });
 
@@ -83,18 +86,19 @@ export async function handlePost(req: Request) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        const filename = `${user_uuid}-${file.name}`;
-        const filePath = path.join(
-          "/Applications/XAMPP/auction-app-main/apps/web/public/list_img/",
-          filename
+        const publicUrl = `/user_uploaded/${file.name}`;
+        const fileDir = path.join(
+          "/Applications/XAMPP/auction-app-main/apps/web/public/user_uploaded/"
         );
+        const filePath = path.join(fileDir, file.name);
+
+        await fs.mkdir(fileDir, { recursive: true });
 
         // Save the file 
         await fs.writeFile(filePath, buffer);
 
         // Image URL 
-        const imageUrl = `${filename}`; 
-        imageUrls.push(imageUrl);
+        imageUrls.push(publicUrl);
       }
     }
 

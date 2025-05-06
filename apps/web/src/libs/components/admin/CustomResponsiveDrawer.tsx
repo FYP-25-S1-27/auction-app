@@ -68,6 +68,17 @@ export default function ResponsiveDrawer() {
             <ListItemText primary="Listings" />
           </ListItemButton>
         </ListItem>
+        <ListItem>
+          <ListItemButton
+            href="/admin/manage/categories"
+            LinkComponent={NextLink}
+          >
+            <ListItemIcon>
+              <AccountCircleIcon />
+            </ListItemIcon>
+            <ListItemText primary="Categories" />
+          </ListItemButton>
+        </ListItem>
       </List>
     </div>
   );

@@ -8,7 +8,7 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Typography,
+  Typography, Select, MenuItem, InputLabel, FormControl
 } from "@mui/material";
 
 const EditListing = () => {
@@ -18,6 +18,7 @@ const EditListing = () => {
   const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -29,7 +30,17 @@ const EditListing = () => {
         }
 
         const data = await response.json();
-        setFormData(data);
+        const formatDateTime = (datetime: string) => {
+          return datetime.replace(" ", "T").slice(0, 16);
+        };
+  
+        const formattedData = {
+          ...data,
+          endTime: data.endTime ? formatDateTime(data.endTime) : "",
+          startingPrice: data.startingPrice || "",
+        };
+        
+        setFormData(formattedData);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         setError(error.message);
@@ -41,25 +52,49 @@ const EditListing = () => {
     fetchListing();
   }, [id]);
 
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories");
+        const data: { name: string; parent: number | null }[] = await res.json();
+        const subcategories = data
+        .filter((cat) => cat.parent !== null)
+        .map((cat) => cat.name);
+  
+        setCategories(subcategories);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    }; 
+    fetchCategories();
+  }, []);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const listingdata = {
+      name: formData.name,
+      category: formData.category,
+      description: formData.description,
+      starting_price: Number(formData.startingPrice),
+      end_time: formData.endTime,
+    };
 
     try {
       const response = await fetch(`/api/updatelisting/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(listingdata),
       });
 
       if (!response.ok) {
         throw new Error("Failed to update listing");
       }
 
-      router.push("/mylistings");
+      router.push("/mylistings?updated=true");
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       setError(error.message);
@@ -85,14 +120,22 @@ const EditListing = () => {
           sx={{ mt: 3 }}
         />
 
-        <TextField
-          name="category"
-          label="Category"
-          fullWidth
-          value={formData.category || ""}
-          onChange={handleChange}
-          sx={{ mt: 3 }}
-        />
+        <FormControl fullWidth sx={{ mt: 3 }}>
+          <InputLabel id="categoryLabel">Category</InputLabel>
+          <Select
+            labelId="categoryLabel"
+            name="category"
+            value={formData.category || ""}
+            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            label="Category"
+          >
+            {categories.map((cat) => (
+              <MenuItem key={cat} value={cat}>
+                {cat}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
 
         <TextField
           name="description"
@@ -106,22 +149,24 @@ const EditListing = () => {
         />
 
         <TextField
-          name="starting_price"
+          name="startingPrice"
           label="Starting Price"
           fullWidth
           type="number"
-          value={formData.starting_price || ""}
+          value={formData.startingPrice || ""}
           onChange={handleChange}
           sx={{ mt: 3 }}
         />
 
         <TextField
-          name="end_time"
-          label="End Time"
+          name="endTime"
+          label="End Date and Time"
           fullWidth
-          value={formData.end_time || ""}
+          type="datetime-local"
+          value={formData.endTime || ""}
           onChange={handleChange}
           sx={{ mt: 3 }}
+          InputLabelProps={{ shrink: true }}
         />
 
         <Button
@@ -130,7 +175,7 @@ const EditListing = () => {
           color="primary"
           sx={{ mt: 3 }}
         >
-          Save Changes
+          Update Listing
         </Button>
       </form>
     </Container>
