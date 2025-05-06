@@ -12,9 +12,18 @@ import {
 } from "@mui/material";
 import OfferForm from "./offerForm";
 
+// ✅ Define the Request interface
+interface Request {
+  id: number;
+  name: string;
+  category: string;
+  description: string;
+  starting_price: number;
+}
+
 const ViewRequestPage = () => {
   const { id } = useParams();
-  const [request, setRequest] = useState<any>(null);
+  const [request, setRequest] = useState<Request | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showOfferForm, setShowOfferForm] = useState(false);
@@ -24,10 +33,14 @@ const ViewRequestPage = () => {
       try {
         const res = await fetch(`/api/requests/${id}`);
         if (!res.ok) throw new Error("Failed to fetch request");
-        const data = await res.json();
+        const data: Request = await res.json();
         setRequest(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred.");
+        }
       } finally {
         setLoading(false);
       }
@@ -45,7 +58,7 @@ const ViewRequestPage = () => {
         <CircularProgress />
       ) : error ? (
         <Alert severity="error">{error}</Alert>
-      ) : (
+      ) : request ? (
         <>
           <Typography variant="h4" gutterBottom>
             {request.name}
@@ -74,6 +87,8 @@ const ViewRequestPage = () => {
             />
           )}
         </>
+      ) : (
+        <Typography>No request found.</Typography>
       )}
     </Container>
   );

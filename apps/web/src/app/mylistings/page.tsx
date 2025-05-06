@@ -34,8 +34,12 @@ const MyListingsPage = () => {
         if (!res.ok) throw new Error("Failed to load listings");
         const data = await res.json();
         setListings(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred.");
+        }
       } finally {
         setLoading(false);
       }
@@ -50,9 +54,13 @@ const MyListingsPage = () => {
       if (!res.ok) throw new Error("Failed to delete listing");
 
       setListings((prev) => prev.filter((item) => item.id !== id));
-    } catch (err: any) {
-      alert(err.message);
-    }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
+    }    
   };
 
   if (loading) return <CircularProgress sx={{ mt: 5 }} />;

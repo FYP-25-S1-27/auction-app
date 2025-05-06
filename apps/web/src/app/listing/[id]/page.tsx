@@ -15,17 +15,32 @@ import {
 } from "@mui/material";
 import BidFormModal from "./form";
 
+// ✅ Listing interface replacing `any`
+interface Listing {
+  id: number;
+  name: string;
+  description: string;
+  starting_price: number;
+  current_price?: number;
+  end_time?: string;
+  image_urls?: string[];
+  shipping_fee?: number;
+  delivery_estimate?: string;
+  seller_name?: string;
+  seller_description?: string;
+}
+
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
-  const [listing, setListing] = useState<any>(null);
+  const [listing, setListing] = useState<Listing | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
   // Fetch listing data from the server
   const fetchListing = async () => {
     try {
       const res = await fetch(`/api/listings/${id}`);
-      const data = await res.json();
+      const data: Listing = await res.json();
       console.log("📦 Updated listing data:", data);
       setListing(data);
     } catch (err) {
@@ -63,13 +78,14 @@ const ViewListingPage = () => {
         <Grid item xs={12} md={7}>
           <Grid container spacing={2}>
             <Grid item xs={3}>
-              {(listing.image_urls || [1, 2, 3, 4]).map((img: string | number, i: number) => (
+              {(listing.image_urls || [1, 2, 3, 4]).map((img, i) => (
                 <Box key={i} mb={2}>
                   <Paper
                     sx={{
                       height: 60,
                       backgroundColor: "#eee",
-                      backgroundImage: typeof img === "string" ? `url(${img})` : "none",
+                      backgroundImage:
+                        typeof img === "string" ? `url(${img})` : "none",
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                     }}
@@ -82,7 +98,9 @@ const ViewListingPage = () => {
                 sx={{
                   height: 400,
                   backgroundColor: "#ddd",
-                  backgroundImage: listing.image_urls?.[0] ? `url(${listing.image_urls[0]})` : "none",
+                  backgroundImage: listing.image_urls?.[0]
+                    ? `url(${listing.image_urls[0]})`
+                    : "none",
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}
@@ -125,7 +143,8 @@ const ViewListingPage = () => {
 
             <Typography fontWeight="bold">Delivery</Typography>
             <Typography>
-              {listing.delivery_estimate ?? "Estimated between Tue, 1 Mar and Wed, 7 Mar"}
+              {listing.delivery_estimate ??
+                "Estimated between Tue, 1 Mar and Wed, 7 Mar"}
             </Typography>
           </Box>
         </Grid>
@@ -137,7 +156,14 @@ const ViewListingPage = () => {
         <Typography>{listing.description}</Typography>
 
         {/* Seller Info */}
-        <Box sx={{ mt: 4, p: 2, backgroundColor: "#f9f9f9", borderRadius: 2 }}>
+        <Box
+          sx={{
+            mt: 4,
+            p: 2,
+            backgroundColor: "#f9f9f9",
+            borderRadius: 2,
+          }}
+        >
           <Typography variant="h6">About this seller</Typography>
           <Box display="flex" alignItems="center" gap={2} mt={2}>
             <Paper sx={{ width: 50, height: 50, borderRadius: "50%" }} />
@@ -169,7 +195,11 @@ const ViewListingPage = () => {
         onClose={() => setShowSuccess(false)}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
-        <Alert onClose={() => setShowSuccess(false)} severity="success" sx={{ width: "100%" }}>
+        <Alert
+          onClose={() => setShowSuccess(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
           Your bid was successfully placed!
         </Alert>
       </Snackbar>

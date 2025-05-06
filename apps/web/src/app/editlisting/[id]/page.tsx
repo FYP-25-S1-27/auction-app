@@ -11,17 +11,39 @@ import {
   Typography,
 } from "@mui/material";
 
+interface ListingFormData {
+  name: string;
+  category: string;
+  description: string;
+  starting_price: number;
+  end_time: string;
+}
+
 const EditListingPage = () => {
   const { id } = useParams();
   const router = useRouter();
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<ListingFormData>({
+    name: "",
+    category: "",
+    description: "",
+    starting_price: 0,
+    end_time: "",
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/listings/${id}`)
       .then((res) => res.json())
-      .then((data) => setFormData(data))
+      .then((data: Partial<ListingFormData>) => {
+        setFormData({
+          name: data.name || "",
+          category: data.category || "",
+          description: data.description || "",
+          starting_price: data.starting_price || 0,
+          end_time: data.end_time || "",
+        });
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id]);
@@ -45,8 +67,12 @@ const EditListingPage = () => {
       }
 
       router.push("/mylistings");
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
     }
   };
 
@@ -62,7 +88,7 @@ const EditListingPage = () => {
             name="name"
             label="Name"
             fullWidth
-            value={formData.name || ""}
+            value={formData.name}
             onChange={handleChange}
             sx={{ mt: 3 }}
           />
@@ -70,7 +96,7 @@ const EditListingPage = () => {
             name="category"
             label="Category"
             fullWidth
-            value={formData.category || ""}
+            value={formData.category}
             onChange={handleChange}
             sx={{ mt: 3 }}
           />
@@ -78,7 +104,7 @@ const EditListingPage = () => {
             name="description"
             label="Description"
             fullWidth
-            value={formData.description || ""}
+            value={formData.description}
             onChange={handleChange}
             multiline
             rows={3}
@@ -89,7 +115,7 @@ const EditListingPage = () => {
             label="Starting Price"
             fullWidth
             type="number"
-            value={formData.starting_price || ""}
+            value={formData.starting_price}
             onChange={handleChange}
             sx={{ mt: 3 }}
           />
@@ -97,7 +123,7 @@ const EditListingPage = () => {
             name="end_time"
             label="End Time"
             fullWidth
-            value={formData.end_time || ""}
+            value={formData.end_time}
             onChange={handleChange}
             sx={{ mt: 3 }}
           />

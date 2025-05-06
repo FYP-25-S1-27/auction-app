@@ -47,8 +47,12 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
       setOfferAmount("");
       refreshOffers(); // Refresh the offers list after successful offer
       onClose(); // Close the modal
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown error occurred.");
+      }
     } finally {
       setLoading(false);
     }

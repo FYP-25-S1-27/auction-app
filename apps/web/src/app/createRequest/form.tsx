@@ -94,7 +94,11 @@ const CreateRequestForm = () => {
 
         <FormControl fullWidth margin="normal">
           <InputLabel>Category</InputLabel>
-          <Select value={category} onChange={(e) => setCategory(e.target.value)} required>
+          <Select
+            value={category}
+            onChange={(e: React.ChangeEvent<{ value: unknown }>) => setCategory(e.target.value as string)}
+            required
+          >
             <MenuItem value="Electronics">Electronics</MenuItem>
             <MenuItem value="Books">Books</MenuItem>
             <MenuItem value="Clothing">Clothing</MenuItem>

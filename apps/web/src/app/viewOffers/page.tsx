@@ -1,10 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Container, Typography, List, ListItem, ListItemText, CircularProgress, Alert } from "@mui/material";
+import {
+  Container,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  CircularProgress,
+  Alert,
+} from "@mui/material";
+
+// ✅ Define Offer interface
+interface Offer {
+  id: number;
+  offerAmount: number;
+  requestId: number;
+  offerTime: string;
+}
 
 const ViewOffersPage = () => {
-  const [offers, setOffers] = useState<any[]>([]);
+  const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,10 +29,14 @@ const ViewOffersPage = () => {
       try {
         const res = await fetch("/api/offers");
         if (!res.ok) throw new Error("Failed to fetch offers");
-        const data = await res.json();
+        const data: Offer[] = await res.json();
         setOffers(data);
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred.");
+        }
       } finally {
         setLoading(false);
       }
