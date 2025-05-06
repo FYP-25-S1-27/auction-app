@@ -16,13 +16,13 @@ import {
   Alert,
   CircularProgress,
   Snackbar,
-  Typography,
+  // Typography,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
-import Image from "next/image";
+// import Image from "next/image";
 
 // const [files, setFiles] = useState<File[]>([]); // REMOVE IF NOT NEEDED
 

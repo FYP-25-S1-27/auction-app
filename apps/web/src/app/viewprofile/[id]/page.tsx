@@ -15,7 +15,7 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 const EndingSoon = () => {
   const [listings, setListings] = useState([]); // Ensure listings is initialized as an array
   const [currentPage, setCurrentPage] = useState(0);
-  // const [timeLeft, setTimeLeft] = useState({}); // ⬅️ COMMENTED OUT: No longer used
+  const [timeLeft, setTimeLeft] = useState({}); // ⬅️ COMMENTED OUT: No longer used
   const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
   // Fetch Listings
