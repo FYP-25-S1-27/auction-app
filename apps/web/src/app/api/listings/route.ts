@@ -2,8 +2,16 @@ import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
-import { handleGet } from "./handlers/get";
-import { handlePost } from "./handlers/post";
+// import { handleGet } from "./handlers/get";
+// import { handlePost } from "./handlers/post";
+
+// export async function GET(request: Request) {
+//   return handleGet(request);
+// }
+
+// export async function POST(request: Request) {
+//   return handlePost(request);
+// }
 
 export async function POST(req: Request) {
   try {

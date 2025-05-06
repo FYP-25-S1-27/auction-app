@@ -20,9 +20,24 @@ const EditProfile = () => {
   const { id } = useParams();
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [formData, setFormData] = useState<any>({});
+  // const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  type ProfileFormData = {
+    username: string;
+    age: string;
+    phone: string;
+    address: string;
+    gender: "MALE" | "FEMALE";
+  };
+  const [formData, setFormData] = useState<ProfileFormData>({
+    username: "",
+    age: "",
+    phone: "",
+    address: "",
+    gender: "MALE",
+  });
 
   useEffect(() => {
     const fetchListing = async () => {
