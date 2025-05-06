@@ -22,8 +22,9 @@ import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
-// import { InferSelectModel } from "drizzle-orm";
-// import { listingCategory } from "@/libs/db/schema";
+import Image from "next/image";
+
+// const [files, setFiles] = useState<File[]>([]); // REMOVE IF NOT NEEDED
 
 const ListingForm = () => {
   const router = useRouter();
@@ -34,7 +35,6 @@ const ListingForm = () => {
   const [startingPrice, setStartingPrice] = useState("");
   const [endTime, setEndTime] = useState<dayjs.Dayjs | null>(null);
   const [scheduled, setScheduled] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [start_time, setstart_time] = useState<dayjs.Dayjs | null>(null);
@@ -60,10 +60,7 @@ const ListingForm = () => {
         setError("Scheduled listings must have a start time in the future.");
         return;
       }
-      if (
-        end_time &&
-        (start_time.isAfter(end_time) || start_time.isSame(end_time))
-      ) {
+      if (endTime && (start_time.isAfter(endTime) || start_time.isSame(endTime))) {
         setError("Scheduled time must be before end time.");
         return;
       }
@@ -79,10 +76,8 @@ const ListingForm = () => {
       starting_price: Number(startingPrice),
       end_time: endTimeString,
       scheduled,
-      listing_types: "LISTING", // ✅ Important addition
+      listing_types: "LISTING",
     };
-
-    console.log("📩 Submitting:", listingData);
 
     try {
       const response = await fetch("/api/listings", {
@@ -96,7 +91,6 @@ const ListingForm = () => {
         throw new Error(data.error || "Something went wrong");
       }
 
-      console.log("✅ Listing created successfully:", data);
       router.push("/");
     } catch (err) {
       if (err instanceof Error) {
@@ -104,8 +98,7 @@ const ListingForm = () => {
       } else {
         setError("An unknown error occurred.");
       }
-    }
-     finally {
+    } finally {
       setLoading(false);
     }
   };
@@ -119,7 +112,6 @@ const ListingForm = () => {
 
         {error && <Alert severity="error">{error}</Alert>}
 
-        {/* success message */}
         <Snackbar
           open={showSuccess}
           autoHideDuration={5000}
@@ -136,6 +128,7 @@ const ListingForm = () => {
         </Snackbar>
 
         <h2>UPLOAD PHOTOS AND VIDEO</h2>
+        {/* 
         <Box
           {...getRootProps()}
           sx={{
@@ -159,22 +152,18 @@ const ListingForm = () => {
             <Box
               key={i}
               position="relative"
-              sx={{
-                width: 100,
-                height: 100,
-                borderRadius: 2,
-                overflow: "hidden",
-                boxShadow: 1,
-              }}
+              sx={{ width: 100, height: 100, borderRadius: 2, overflow: "hidden", boxShadow: 1 }}
             >
-              <img
+              <Image
                 src={URL.createObjectURL(file)}
                 alt={file.name}
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                fill
+                style={{ objectFit: "cover" }}
               />
             </Box>
           ))}
         </Box>
+        */}
       </Box>
 
       <form onSubmit={handleSubmit}>
@@ -243,18 +232,15 @@ const ListingForm = () => {
         </LocalizationProvider>
         <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
           <p>Schedule Your Listing</p>
-          <Switch
-            checked={scheduled}
-            onChange={(e) => setScheduled(e.target.checked)}
-          />
+          <Switch checked={scheduled} onChange={(e) => setScheduled(e.target.checked)} />
         </Box>
-        {/* Scheduled Start Time (ADDED THIS) */}
+
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
             label="Listing Start Time"
             value={start_time}
             onChange={(newValue) => setstart_time(newValue)}
-            disabled={!scheduled} // disable the field if not scheduled
+            disabled={!scheduled}
           />
         </LocalizationProvider>
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
@@ -262,7 +248,6 @@ const ListingForm = () => {
             {loading ? <CircularProgress size={24} /> : "List Now"}
           </Button>
         </Box>
-        &nbsp;
       </form>
     </Container>
   );

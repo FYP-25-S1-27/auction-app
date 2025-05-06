@@ -1,184 +1,142 @@
 "use client";
-
-import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 import {
-  Container,
-  TextField,
-  Button,
-  CircularProgress,
-  Alert,
+  Box,
   Typography,
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
-  FormLabel,
+  Grid,
+  Card,
+  CardContent,
+  CardMedia,
+  IconButton,
 } from "@mui/material";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
-const EditProfile = () => {
-  const { id } = useParams();
-  const router = useRouter();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  // const [formData, setFormData] = useState<any>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const EndingSoon = () => {
+  const [listings, setListings] = useState([]); // Ensure listings is initialized as an array
+  const [currentPage, setCurrentPage] = useState(0);
+  // const [timeLeft, setTimeLeft] = useState({}); // ⬅️ COMMENTED OUT: No longer used
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
 
-  type ProfileFormData = {
-    username: string;
-    age: string;
-    phone: string;
-    address: string;
-    gender: "MALE" | "FEMALE";
-  };
-  const [formData, setFormData] = useState<ProfileFormData>({
-    username: "",
-    age: "",
-    phone: "",
-    address: "",
-    gender: "MALE",
-  });
-
+  // Fetch Listings
   useEffect(() => {
-    const fetchListing = async () => {
+    const fetchListings = async () => {
       try {
-        const response = await fetch(`/api/viewprofile/${id}`);
-
+        const response = await fetch("/api/endingsoon");
         if (!response.ok) {
-          throw new Error("Failed to fetch profile");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
-
         const data = await response.json();
-        setFormData(data);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (error: any) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
+        console.log("Fetched data:", data);
+        if (Array.isArray(data)) {
+          setListings(data);
+        } else {
+          console.error("API response is not an array:", data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch 'ending soon' listings:", error);
       }
     };
 
-    fetchListing();
-  }, [id]);
+    fetchListings();
+  }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  // ⏳ Timer - Only updating current time
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // updateTimers(listings); // ⬅️ COMMENTED OUT
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [listings]);
+
+  // const updateTimers = (listings) => {
+  //   const now = new Date().getTime();
+  //   const newTimeLeft = {};
+
+  //   listings.forEach((listing) => {
+  //     const end = new Date(listing.end_time).getTime();
+  //     const difference = end - now;
+
+  //     if (difference <= 0) {
+  //       newTimeLeft[listing.id] = "Auction Ended";
+  //     } else {
+  //       const hours = Math.floor(difference / (1000 * 60 * 60));
+  //       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+  //       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+  //       newTimeLeft[listing.id] = `${hours}h ${minutes}m ${seconds}s`;
+  //     }
+  //   });
+
+  //   setTimeLeft(newTimeLeft);
+  // };
+
+  // Pagination
+  const listingsPerPage = 5;
+  const totalPages = Math.min(8, Math.ceil(listings.length / listingsPerPage));
+
+  const handleNext = () => {
+    setCurrentPage((prev) => (prev + 1 < totalPages ? prev + 1 : 0));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      const response = await fetch(`/api/updateprofile/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: formData.username,
-          user_profile: {
-            age: formData.age,
-            phone: formData.phone,
-            address: formData.address,
-            gender: formData.gender,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update profile");
-      }
-
-      router.push("/demo_profile?success=1");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setError(error.message);
-    }
+  const handlePrev = () => {
+    setCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : totalPages - 1));
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" sx={{ mt: 3 }}>
-        Edit Profile
+    <Box sx={{ py: 6 }}>
+      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold", color: "#007C5F" }}>
+        Current Time: {currentTime ? currentTime.toLocaleString() : "Loading..."}
+      </Typography>
+      <Typography
+        variant="h5"
+        sx={{ mb: 3, fontWeight: "bold", color: "#007C5F" }}
+      >
+        Auctions Ending Soon
       </Typography>
 
-      {loading && <CircularProgress sx={{ mt: 3 }} />}
-      {error && <Alert severity="error">{error}</Alert>}
+      <Grid container spacing={3} sx={{ alignItems: "center" }}>
+        <Grid item>
+          <IconButton onClick={handlePrev} sx={{ color: "#007C5F" }}>
+            <ArrowBackIosNewIcon />
+          </IconButton>
+        </Grid>
 
-      <form onSubmit={handleSubmit}>
-        <TextField
-          name="username"
-          label="Username"
-          fullWidth
-          value={formData.username || ""}
-          onChange={handleChange}
-          sx={{ mt: 3 }}
-        />
+        {Array.isArray(listings) && listings.length > 0 ? (
+          listings.slice(currentPage * listingsPerPage, (currentPage + 1) * listingsPerPage).map((listing, index) => (
+            <Grid item xs={12} sm={6} md={2.4} key={index}>
+              <Card sx={{ boxShadow: 3 }}>
+                <CardMedia component="img" height="140" image={"/images/placeholder.png"} alt={listing.name} />
+                <CardContent>
+                  <Typography variant="body1">{listing.name}</Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
+                    Current Bid: ${listing.current_price}
+                  </Typography>
+                  <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "bold" }}>
+                    Ends: {new Date(listing.end_time).toLocaleString()}
+                  </Typography>
+                  {/* <Typography variant="caption" color="error">
+                    {timeLeft[listing.id]}
+                  </Typography> */}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))
+        ) : (
+          <Typography variant="body1" sx={{ color: "text.secondary" }}>
+            No listings available.
+          </Typography>
+        )}
 
-        <TextField
-          name="age"
-          label="Age"
-          fullWidth
-          value={formData.age || ""}
-          onChange={handleChange}
-          sx={{ mt: 3 }}
-        />
-
-        <TextField
-          name="phone"
-          label="Phone"
-          type="number"
-          fullWidth
-          value={formData.phone || ""}
-          onChange={handleChange}
-          sx={{ mt: 3 }}
-        />
-
-        <FormControl component="fieldset" sx={{ mt: 3 }}>
-          <FormLabel component="legend">Gender</FormLabel>
-          <RadioGroup
-            row
-            aria-label="gender"
-            name="gender"
-            value={formData.gender || ""}
-            onChange={handleChange}
-          >
-            <FormControlLabel value="MALE" control={<Radio />} label="Male" />
-            <FormControlLabel value="FEMALE" control={<Radio />} label="Female"/>
-          </RadioGroup>
-        </FormControl>
-
-        <TextField
-          name="address"
-          label="Address"
-          fullWidth
-          multiline
-          rows={3}
-          value={formData.address || ""}
-          onChange={handleChange}
-          sx={{ mt: 3 }}
-        />
-
-        <Button
-          variant="outlined"
-          color="primary"
-          sx={{ mt: 3 }}
-          onClick={() => router.push("/demo_profile")}
-        >
-          {" "}
-          Cancel
-        </Button>
-
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          sx={{ mt: 3, ml: 2 }}
-        >
-          {" "}
-          Save Changes
-        </Button>
-      </form>
-    </Container>
+        <Grid item>
+          <IconButton onClick={handleNext} sx={{ color: "#007C5F" }}>
+            <ArrowForwardIosIcon />
+          </IconButton>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 
-export default EditProfile;
+export default EndingSoon;

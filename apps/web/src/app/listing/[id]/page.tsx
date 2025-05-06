@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import {
   Box,
@@ -15,7 +15,7 @@ import {
 } from "@mui/material";
 import BidFormModal from "./form";
 
-// ✅ Listing interface replacing `any`
+// ✅ Interface for listing
 interface Listing {
   id: number;
   name: string;
@@ -36,8 +36,8 @@ const ViewListingPage = () => {
   const [listing, setListing] = useState<Listing | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
 
-  // Fetch listing data from the server
-  const fetchListing = async () => {
+  // ✅ useCallback ensures stable function reference
+  const fetchListing = useCallback(async () => {
     try {
       const res = await fetch(`/api/listings/${id}`);
       const data: Listing = await res.json();
@@ -46,16 +46,16 @@ const ViewListingPage = () => {
     } catch (err) {
       console.error("Error fetching listing:", err);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
     if (id) fetchListing();
-  }, [id]);
+  }, [id, fetchListing]);
 
   const handleBidPlaced = () => {
-    fetchListing(); // Refresh listing
-    setModalOpen(false); // Close modal
-    setShowSuccess(true); // Trigger Snackbar
+    fetchListing();
+    setModalOpen(false);
+    setShowSuccess(true);
   };
 
   if (!listing) return <Typography>Loading...</Typography>;
