@@ -1,5 +1,5 @@
-import { handleGet } from "./handlers/get";
-import { handlePost } from "./handlers/post";
+// import { handleGet } from "./handlers/get";
+// import { handlePost } from "./handlers/post";
 
 export async function POST(req: Request) {
   try {
