@@ -1,5 +1,9 @@
-// import { handleGet } from "./handlers/get";
-// import { handlePost } from "./handlers/post";
+import { NextResponse } from "next/server";
+import { db } from "@/libs/db/drizzle";
+import { listings } from "@/libs/db/schema";
+import { auth0 } from "@/libs/auth0";
+import { handleGet } from "./handlers/get";
+import { handlePost } from "./handlers/post";
 
 export async function POST(req: Request) {
   try {

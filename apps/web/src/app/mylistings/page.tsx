@@ -13,8 +13,17 @@ import {
 } from "@mui/material";
 import NextLink from "next/link";
 
+interface Listing {
+  id: number;
+  name: string;
+  category: string;
+  current_price?: number;
+  starting_price: number;
+  end_time: string;
+}
+
 const MyListingsPage = () => {
-  const [listings, setListings] = useState([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +49,7 @@ const MyListingsPage = () => {
       const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete listing");
 
-      setListings(listings.filter((item) => item.id !== id));
+      setListings((prev) => prev.filter((item) => item.id !== id));
     } catch (err: any) {
       alert(err.message);
     }
@@ -55,7 +64,7 @@ const MyListingsPage = () => {
         My Listings
       </Typography>
       <Grid container spacing={3}>
-        {listings.map((listing: any) => (
+        {listings.map((listing) => (
           <Grid item xs={12} md={6} key={listing.id}>
             <Card variant="outlined">
               <CardContent>
@@ -63,8 +72,12 @@ const MyListingsPage = () => {
                 <Typography variant="body2" color="text.secondary">
                   Category: {listing.category}
                 </Typography>
-                <Typography>Price: ${listing.current_price || listing.starting_price}</Typography>
-                <Typography>Ends at: {new Date(listing.end_time).toLocaleString()}</Typography>
+                <Typography>
+                  Price: ${listing.current_price || listing.starting_price}
+                </Typography>
+                <Typography>
+                  Ends at: {new Date(listing.end_time).toLocaleString()}
+                </Typography>
                 <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
                   <NextLink href={`/editlisting/${listing.id}`} passHref>
                     <Button variant="outlined">Edit</Button>
