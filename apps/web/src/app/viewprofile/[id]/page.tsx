@@ -1,143 +1,89 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import {
-  Box,
+  Container,
   Typography,
-  Grid,
+  CircularProgress,
+  Alert,
+  Box,
   Card,
   CardContent,
-  CardMedia,
-  IconButton,
 } from "@mui/material";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 
-const EndingSoon = () => {
-  const [listings, setListings] = useState([]); // Ensure listings is initialized as an array
-  const [currentPage, setCurrentPage] = useState(0);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [timeLeft, setTimeLeft] = useState({}); // ⬅️ COMMENTED OUT: No longer used
-  const [currentTime, setCurrentTime] = useState<Date | null>(null);
+// ✅ Define Profile type
+interface UserProfile {
+  username: string;
+  age: string;
+  phone: string;
+  address: string;
+  gender: "MALE" | "FEMALE";
+}
 
-  // Fetch Listings
+const ViewProfilePage = () => {
+  const { id } = useParams();
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchProfile = async () => {
       try {
-        const response = await fetch("/api/endingsoon");
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("Fetched data:", data);
-        if (Array.isArray(data)) {
-          setListings(data);
+        const res = await fetch(`/api/viewprofile/${id}`);
+        if (!res.ok) throw new Error("Failed to fetch profile");
+
+        const data: UserProfile = await res.json();
+        setProfile(data);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
         } else {
-          console.error("API response is not an array:", data);
+          setError("An unknown error occurred.");
         }
-      } catch (error) {
-        console.error("Failed to fetch 'ending soon' listings:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchListings();
-  }, []);
+    fetchProfile();
+  }, [id]);
 
-  // ⏳ Timer - Only updating current time
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // updateTimers(listings); // ⬅️ COMMENTED OUT
-      setCurrentTime(new Date());
-    }, 1000);
+  if (loading) {
+    return (
+      <Container maxWidth="sm">
+        <CircularProgress sx={{ mt: 4 }} />
+      </Container>
+    );
+  }
 
-    return () => clearInterval(interval);
-  }, [listings]);
-
-  // const updateTimers = (listings) => {
-  //   const now = new Date().getTime();
-  //   const newTimeLeft = {};
-
-  //   listings.forEach((listing) => {
-  //     const end = new Date(listing.end_time).getTime();
-  //     const difference = end - now;
-
-  //     if (difference <= 0) {
-  //       newTimeLeft[listing.id] = "Auction Ended";
-  //     } else {
-  //       const hours = Math.floor(difference / (1000 * 60 * 60));
-  //       const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-  //       const seconds = Math.floor((difference % (1000 * 60)) / 1000);
-  //       newTimeLeft[listing.id] = `${hours}h ${minutes}m ${seconds}s`;
-  //     }
-  //   });
-
-  //   setTimeLeft(newTimeLeft);
-  // };
-
-  // Pagination
-  const listingsPerPage = 5;
-  const totalPages = Math.min(8, Math.ceil(listings.length / listingsPerPage));
-
-  const handleNext = () => {
-    setCurrentPage((prev) => (prev + 1 < totalPages ? prev + 1 : 0));
-  };
-
-  const handlePrev = () => {
-    setCurrentPage((prev) => (prev - 1 >= 0 ? prev - 1 : totalPages - 1));
-  };
+  if (error) {
+    return (
+      <Container maxWidth="sm">
+        <Alert severity="error" sx={{ mt: 4 }}>{error}</Alert>
+      </Container>
+    );
+  }
 
   return (
-    <Box sx={{ py: 6 }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: "bold", color: "#007C5F" }}>
-        Current Time: {currentTime ? currentTime.toLocaleString() : "Loading..."}
-      </Typography>
-      <Typography
-        variant="h5"
-        sx={{ mb: 3, fontWeight: "bold", color: "#007C5F" }}
-      >
-        Auctions Ending Soon
+    <Container maxWidth="sm" sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        User Profile
       </Typography>
 
-      <Grid container spacing={3} sx={{ alignItems: "center" }}>
-        <Grid item>
-          <IconButton onClick={handlePrev} sx={{ color: "#007C5F" }}>
-            <ArrowBackIosNewIcon />
-          </IconButton>
-        </Grid>
-
-        {Array.isArray(listings) && listings.length > 0 ? (
-          listings.slice(currentPage * listingsPerPage, (currentPage + 1) * listingsPerPage).map((listing, index) => (
-            <Grid item xs={12} sm={6} md={2.4} key={index}>
-              <Card sx={{ boxShadow: 3 }}>
-                <CardMedia component="img" height="140" image={"/images/placeholder.png"} alt={listing.name} />
-                <CardContent>
-                  <Typography variant="body1">{listing.name}</Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary" }}>
-                    Current Bid: ${listing.current_price}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: "text.secondary", fontWeight: "bold" }}>
-                    Ends: {new Date(listing.end_time).toLocaleString()}
-                  </Typography>
-                  {/* <Typography variant="caption" color="error">
-                    {timeLeft[listing.id]}
-                  </Typography> */}
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
-        ) : (
-          <Typography variant="body1" sx={{ color: "text.secondary" }}>
-            No listings available.
-          </Typography>
-        )}
-
-        <Grid item>
-          <IconButton onClick={handleNext} sx={{ color: "#007C5F" }}>
-            <ArrowForwardIosIcon />
-          </IconButton>
-        </Grid>
-      </Grid>
-    </Box>
+      {profile && (
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Username: {profile.username}</Typography>
+            <Typography>Age: {profile.age}</Typography>
+            <Typography>Phone: {profile.phone}</Typography>
+            <Typography>Address: {profile.address}</Typography>
+            <Typography>Gender: {profile.gender}</Typography>
+          </CardContent>
+        </Card>
+      )}
+    </Container>
   );
 };
 
-export default EndingSoon;
+export default ViewProfilePage;
