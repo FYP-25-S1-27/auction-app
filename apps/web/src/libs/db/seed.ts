@@ -12,6 +12,7 @@ import { seedUserInterests } from "./helper/user_category_interests";
 
 const COUNT = 50;
 const USER_COUNT = 50;
+const PASSWORD = "1Qwer#@!";
 faker.seed(321);
 
 async function seedAuth0Users(email: string, password: string) {
@@ -24,24 +25,42 @@ async function seedAuth0Users(email: string, password: string) {
     return 0;
   } catch (error) {
     if (error instanceof ManagementApiError) {
-      if (error.error == "Conflict") {
-        console.log(`${email} already exists`);
+      if (error.error === "Conflict") {
+        console.log(`${email} already exists, resetting password...`);
+        // Fetch the existing user details
+        const existingUser = await auth0management.usersByEmail.getByEmail({
+          email,
+        });
+        if (existingUser?.data?.[0]?.user_id) {
+          await auth0management.users.update(
+            { id: existingUser?.data?.[0]?.user_id },
+            { password }
+          );
+        } else {
+          throw new Error("User ID is undefined, cannot update password.");
+        }
         return 1;
       }
     }
+    throw error; // Re-throw other errors
   }
 }
 
 async function main() {
+  const args = process.argv.slice(2);
+  const skipUsers = args.includes("--skip-users");
+  console.log("Skip users:", skipUsers);
   console.log("Reseting database...");
   await reset(db, schema);
 
-  const PASSWORD = "1Qwer#@!";
-  console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
-  for (let i = 0; i < USER_COUNT; i++) {
-    await seedAuth0Users(`test${i}.user@test.test`, PASSWORD);
+  if (!skipUsers) {
+    console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
+    for (let i = 0; i < USER_COUNT; i++) {
+      await seedAuth0Users(`test${i}.user@test.test`, PASSWORD); // not using Promise.all here as it will hit the rate limit
+    }
+    await seedAuth0Users(`test.admin@test.test`, PASSWORD);
   }
-  await seedAuth0Users(`test.admin@test.test`, PASSWORD);
+
   const auth0users = (await auth0management.users.getAll()).data || [];
 
   // Seed users
