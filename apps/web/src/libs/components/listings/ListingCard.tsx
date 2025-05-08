@@ -1,6 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardMedia, Typography, IconButton, Box } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  CardMedia,
+  Typography,
+  IconButton,
+  Box,
+} from "@mui/material";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { listings } from "@/libs/db/schema";
 import { InferSelectModel } from "drizzle-orm";
@@ -37,13 +44,13 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
         console.error("Failed to fetch like status", err);
       }
     };
-  
+
     fetchLikes();
   }, [listing.id]);
-  
+
   const likedListing = async () => {
     const method = liked ? "DELETE" : "POST";
-  
+
     try {
       const res = await fetch("/api/listing_likes", {
         method,
@@ -56,7 +63,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
         window.location.href = "/auth/login";
         return;
       }
-  
+
       if (res.ok) {
         setLiked((prev) => !prev);
       } else {
@@ -76,32 +83,37 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
         flexDirection: "column",
       }}
     >
-      <Box sx={{ position: "relative"}}>
-      <CardMedia
-        component="img"
-        image={imageUrl}
-        alt={listing.name}
-        sx={{
-          width: "100%", // Make the image take the full width of the card
-          minHeight: 140, // Set a fixed height for the image
-          objectFit: "cover",
-          borderRadius: "0.5rem",
-        }}
-      />
-      <IconButton
-        onClick={likedListing}
-        sx={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          backgroundColor: "white",
-          "&:hover": {
+      <Box sx={{ position: "relative", overflow: "hidden" }}>
+        <IconButton
+          onClick={likedListing}
+          sx={{
+            position: "absolute",
+            top: "0.5rem",
+            right: "0.5rem",
+            zIndex: 1,
             backgroundColor: "white",
-          },
-        }}
-      >
-        {liked ? <Favorite sx={{ color: "#007C5F" }} /> : <FavoriteBorder sx={{ color: "#007C5F" }}/>}
-      </IconButton>
+            "&:hover": {
+              backgroundColor: "white",
+            },
+          }}
+        >
+          {liked ? (
+            <Favorite sx={{ color: "#007C5F" }} />
+          ) : (
+            <FavoriteBorder sx={{ color: "#007C5F" }} />
+          )}
+        </IconButton>
+        <CardMedia
+          component="img"
+          image={imageUrl}
+          alt={listing.name}
+          sx={{
+            width: "100%", // Make the image take the full width of the card
+            minHeight: 140, // Set a fixed height for the image
+            objectFit: "cover",
+            borderRadius: "0.5rem",
+          }}
+        />
       </Box>
       <CardContent sx={{ marginTop: "auto" }}>
         <Typography gutterBottom variant="body1" component="div">
