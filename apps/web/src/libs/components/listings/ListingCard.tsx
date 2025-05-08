@@ -78,14 +78,13 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
   return (
     <Card
       sx={{
-        maxWidth: "16rem",
-        minWidth: "16rem",
+        width: "16rem",
         height: "24rem",
         display: "flex",
         flexDirection: "column",
       }}
     >
-      <Box sx={{ position: "relative", overflow: "hidden" }}>
+      <Box sx={{ position: "relative", height: "260px", overflow: "hidden" }}>
         <IconButton
           onClick={likedListing}
           sx={{
@@ -95,7 +94,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
             zIndex: 1,
             backgroundColor: "white",
             "&:hover": {
-              backgroundColor: "white",
+              backgroundColor: "grey.200",
             },
           }}
         >
@@ -112,16 +111,22 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
             alt={listing.name}
             sx={{
               width: "100%", // Make the image take the full width of the card
-              minHeight: 140, // Set a fixed height for the image
+              height: "100%",
               objectFit: "cover",
-              borderRadius: "0.5rem",
             }}
           />
         ) : (
-          <Skeleton variant="rounded" width={"100%"} height={140} />
+          <Skeleton variant="rounded" width={"100%"} height={"100%"} />
         )}
       </Box>
-      <CardContent sx={{ marginTop: "auto" }}>
+      <CardContent
+        sx={{
+          display: "flex",
+          flexGrow: 1,
+          flexDirection: "column",
+          justifyContent: "space-between",
+        }}
+      >
         <Typography gutterBottom variant="body1" component="div">
           {listing.name}
         </Typography>
