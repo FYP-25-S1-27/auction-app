@@ -1,5 +1,5 @@
 import { auth0management } from "@/libs/actions/auth0-management";
-import { CustomAdminUserDataGrid } from "@/libs/components/admin/CustomAdminDataGrid";
+import { CustomAdminUserDataGrid } from "@/libs/components/admin/datagrid/UserDataGrid";
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
 import { CustomUser } from "@/libs/types/users";
