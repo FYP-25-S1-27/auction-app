@@ -143,7 +143,7 @@ export async function GET(
     const subcategoryData = await db
       .select()
       .from(listingCategory)
-      .where(eq(listingCategory.name, subcategory))
+      .where(eq(listingCategory.name, subcategory.toUpperCase()))
       .limit(1);
 
     if (!subcategoryData.length) {

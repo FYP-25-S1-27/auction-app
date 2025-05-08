@@ -175,11 +175,6 @@ import { listingCategory, listingImages, listings } from "@/libs/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
-// Function to capitalize the first letter of a string
-function capitalizeFirstLetter(string: string) {
-  return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-}
-
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ category: string }> }
@@ -195,7 +190,7 @@ export async function GET(
 
   try {
     // Normalize the category name to match the database format
-    const normalizedCategory = capitalizeFirstLetter(category);
+    const normalizedCategory = category.toUpperCase();
 
     // Fetch the category from the database
     const categoryData = await db
