@@ -22,7 +22,7 @@ export async function GET() {
         const subcategories = await db
           .select()
           .from(listingCategory)
-          .where(eq(listingCategory.parent, category.name));
+          .where(eq(listingCategory.parent, category.name.toUpperCase()));
 
         return {
           name: category.name,
