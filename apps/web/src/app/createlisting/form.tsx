@@ -27,11 +27,6 @@ const ListingForm = () => {
 
   // Get all categories
   type CategoriesSchema = InferSelectModel<typeof listingCategory>;
-  function buildCategoryHierarchy(categories: CategoriesSchema[]) {
-    return categories.map((cat) => ({
-      ...cat,
-    }));
-  }
 
   useEffect(() => {
       const fetchCategories = async () => {
@@ -39,8 +34,7 @@ const ListingForm = () => {
           const response = await fetch("/api/categories");
           if (response.ok) {
             const data: CategoriesSchema[] = await response.json();
-            const hierarchical = buildCategoryHierarchy(data);
-            console.log("Hierarchical:", hierarchical);
+            const hierarchical = data.filter((cat) => cat.parent !== null);
             setCategoryHierarchy(hierarchical);
           } else {
             console.error("Failed to fetch categories");
@@ -138,6 +132,10 @@ const ListingForm = () => {
   return (
     <Container maxWidth="md">
       <Box sx={{ mt: 5 }}>
+      <Typography variant="h4" gutterBottom>
+        Create New Listing
+      </Typography>
+      
         {error && <Alert severity="error">{error}</Alert>}
 
           {/* success message */}
@@ -171,7 +169,7 @@ const ListingForm = () => {
         >
           <input {...getInputProps()} />
           <Typography color="text.secondary">
-            Drag and drop files here, or click to select files
+            Drag and drop images here, or click to select images
           </Typography>
         </Box>
 

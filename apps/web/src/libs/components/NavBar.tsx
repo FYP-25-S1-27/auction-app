@@ -151,6 +151,11 @@ export default function NavBar() {
                     </MenuItem>
                     <MenuItem onClick={popupState.close}>My account</MenuItem>
                     <MenuItem onClick={popupState.close}>
+                      <Link href="/mylikedlisting" underline="none">
+                        My Likes
+                      </Link>
+                    </MenuItem>
+                    <MenuItem onClick={popupState.close}>
                       <Link href="/auth/logout" underline="none">
                         Logout
                       </Link>
