@@ -16,21 +16,26 @@ export default async function Footer() {
             </Typography>
           </Stack>
           <Stack direction="column" maxWidth={250} id="footer-col-2">
-            <Typography variant="h6" color="#6F6F6F">
+            {/* <Typography variant="h6" color="#6F6F6F">
               Buy
-            </Typography>
-            <Link href="#" variant="body2" color="#6F6F6F" underline="hover">
-              How to buy
+            </Typography> */}
+            <Link
+              href="https://fyp25s127.wordpress.com/faq/"
+              variant="body2"
+              color="#6F6F6F"
+              underline="hover"
+            >
+              FAQ
             </Link>
           </Stack>
-          <Stack direction="column" maxWidth={250} id="footer-col-3">
+          {/* <Stack direction="column" maxWidth={250} id="footer-col-3">
             <Typography variant="h6" color="#6F6F6F">
               Sell
             </Typography>
             <Link href="#" variant="body2" color="#6F6F6F" underline="hover">
               How to sell
             </Link>
-          </Stack>
+          </Stack> */}
         </Stack>
       </Container>
       <Divider variant="middle" />
