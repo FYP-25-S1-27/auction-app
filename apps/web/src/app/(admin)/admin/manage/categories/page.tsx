@@ -1,4 +1,4 @@
-import { CustomAdminCategoryDataGrid } from "@/libs/components/admin/CustomAdminDataGrid";
+import { CustomAdminCategoryDataGrid } from "@/libs/components/admin/datagrid/CategoryDataGrid";
 import { db } from "@/libs/db/drizzle";
 import { listingCategory } from "@/libs/db/schema";
 import { Paper, Typography } from "@mui/material";
