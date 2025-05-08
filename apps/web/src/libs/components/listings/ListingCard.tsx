@@ -7,6 +7,7 @@ import {
   Typography,
   IconButton,
   Box,
+  Skeleton,
 } from "@mui/material";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
 import { listings } from "@/libs/db/schema";
@@ -17,7 +18,7 @@ type SelectListing = InferSelectModel<typeof listings>;
 
 export default function ListingCard({ listing }: { listing: SelectListing }) {
   const endDateLocale = new Date(listing.endTime).toLocaleString();
-  const [imageUrl, setImageUrl] = useState<string>("/images/placeholder.png");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
 
   useEffect(() => {
@@ -78,6 +79,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
     <Card
       sx={{
         maxWidth: "16rem",
+        minWidth: "16rem",
         height: "24rem",
         display: "flex",
         flexDirection: "column",
@@ -103,17 +105,21 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
             <FavoriteBorder sx={{ color: "#007C5F" }} />
           )}
         </IconButton>
-        <CardMedia
-          component="img"
-          image={imageUrl}
-          alt={listing.name}
-          sx={{
-            width: "100%", // Make the image take the full width of the card
-            minHeight: 140, // Set a fixed height for the image
-            objectFit: "cover",
-            borderRadius: "0.5rem",
-          }}
-        />
+        {imageUrl ? (
+          <CardMedia
+            component="img"
+            image={imageUrl}
+            alt={listing.name}
+            sx={{
+              width: "100%", // Make the image take the full width of the card
+              minHeight: 140, // Set a fixed height for the image
+              objectFit: "cover",
+              borderRadius: "0.5rem",
+            }}
+          />
+        ) : (
+          <Skeleton variant="rounded" width={"100%"} height={140} />
+        )}
       </Box>
       <CardContent sx={{ marginTop: "auto" }}>
         <Typography gutterBottom variant="body1" component="div">
