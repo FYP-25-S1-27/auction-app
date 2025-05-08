@@ -18,7 +18,9 @@ export async function middleware(request: NextRequest) {
     }
     // user is authenticated, check if they are an admin
     const adminCheckUrl = new URL("/api/check_admin", request.nextUrl.origin);
-    const res = await fetch(adminCheckUrl.toString());
+    const res = await fetch(adminCheckUrl.toString(), {
+      headers: { userId: session.user.sub },
+    });
     const data = await res.json();
     if (!data.isAdmin) {
       // user is not an admin, redirect to landing page
