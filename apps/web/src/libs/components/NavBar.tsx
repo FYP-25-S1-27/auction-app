@@ -145,20 +145,16 @@ export default function NavBar() {
                       </MenuItem>
                     )}
                     <MenuItem onClick={popupState.close}>
-                      <Link href="/demo_profile" underline="none">
-                        Profile
-                      </Link>
-                    </MenuItem>
-                    <MenuItem onClick={popupState.close}>My account</MenuItem>
-                    <MenuItem onClick={popupState.close}>
-                      <Link href="/mylikedlisting" underline="none">
-                        My Likes
-                      </Link>
+                      <NextLink href="/demo_profile">Profile</NextLink>
                     </MenuItem>
                     <MenuItem onClick={popupState.close}>
-                      <Link href="/auth/logout" underline="none">
-                        Logout
-                      </Link>
+                      <NextLink href="/mylikedlisting">My Likes</NextLink>
+                    </MenuItem>
+                    <MenuItem onClick={popupState.close}>
+                      <Link href="/auth/logout">Logout</Link>{" "}
+                      {/* Only this link is NOT to use NextLink */}
+                      {/* https://github.com/auth0/nextjs-auth0 */}
+                      {/* You must use <a> tags instead of the <Link> component to ensure that the routing is not done client-side as that may result in some unexpected behavior. */}
                     </MenuItem>
                   </Menu>
                 </Fragment>
