@@ -54,22 +54,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Container, Typography, CircularProgress, Alert } from "@mui/material";
+import { Container, Typography, CircularProgress, Alert, Box } from "@mui/material";
 import CategoryBar from "@/libs/components/CategoryBar";
-import CategoryListings from "@/libs/components/CategoryListings";
+import ListingCard from "@/libs/components/listings/ListingCard";
+import { listings } from "@/libs/db/schema";
+import { InferSelectModel } from "drizzle-orm";
 
-interface Listing {
-  id: number;
-  name: string;
-  startingPrice: number;
-  currentPrice?: number;
-  endTime: string;
-}
+type SelectListing = InferSelectModel<typeof listings>;
 
 interface SubcategoryData {
   name: string;
   subcategories: string[];
-  listings: Listing[];
+  listings: SelectListing[];
 }
 
 export default function SubcategoryPage() {
@@ -129,7 +125,11 @@ export default function SubcategoryPage() {
       <Typography variant="h4" sx={{ color: "#007C5F", mb: 2 }}>
         {subcategoryData?.name || "Loading..."}
       </Typography>
-      <CategoryListings listings={subcategoryData?.listings || []} />
+      <Box display="flex" flexWrap="wrap" gap={2} mt={4}>
+        {subcategoryData?.listings.map((listing) => (
+          <ListingCard key={listing.id} listing={listing} />
+        ))}
+      </Box>
     </Container>
   );
 }
