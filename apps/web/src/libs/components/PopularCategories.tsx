@@ -18,11 +18,11 @@ const categories = _categories.map((category, index) => ({
 export default async function PopularCategories() {
   await connection();
   return (
-    <Box sx={{ py: 5 }}>
+    <Box sx={{ pb: "2rem" }}>
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+        Popular Categories
+      </Typography>
       <Container>
-        <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-          Popular Categories
-        </Typography>
         <Grid container spacing={2}>
           {categories.map((category, index) => (
             <Grid item xs={6} sm={4} md={3} key={index}>
@@ -49,7 +49,7 @@ export default async function PopularCategories() {
                     </Typography>
 
                     <Typography variant="subtitle2">
-                      {`(${category.totalListings} items)`}
+                      {`(${category.totalListings} listings)`}
                     </Typography>
                   </Stack>
                 </Paper>

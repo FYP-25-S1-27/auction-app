@@ -34,7 +34,7 @@ export default function ListingCarousel({
   );
 
   return (
-    <Box>
+    <Box marginTop={"1rem"} marginBottom={"3rem"}>
       <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
         {title}
       </Typography>
