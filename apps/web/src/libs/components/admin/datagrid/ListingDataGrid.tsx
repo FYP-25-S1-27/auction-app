@@ -11,7 +11,7 @@ import {
 import { Button, Stack } from "@mui/material";
 import { useState } from "react";
 import { listings } from "@/libs/db/schema";
-import { deleteListing } from "@/libs/actions/db/listings";
+import { deleteListing } from "@/libs/actions/db/listings/listings";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
 import EditIcon from "@mui/icons-material/Edit";

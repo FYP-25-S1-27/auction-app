@@ -17,7 +17,14 @@ import { useEffect, useState } from "react";
 type SelectListing = InferSelectModel<typeof listings>;
 
 export default function ListingCard({ listing }: { listing: SelectListing }) {
-  const endDateLocale = new Date(listing.endTime).toLocaleString();
+  const endDateLocale = new Date(listing.endTime).toLocaleString("en-SG", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZoneName: "short",
+  });
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
 
