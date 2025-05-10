@@ -51,7 +51,6 @@ export default function ListingCarousel({
         {/* Listings */}
         <Stack
           direction="row"
-          justifyContent="space-between"
           alignItems="center"
           gap={2}
           sx={{

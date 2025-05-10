@@ -1,11 +1,9 @@
+"use server";
 import { db } from "@/libs/db/drizzle";
 import { listingCategory, listings, listingUserLikes } from "@/libs/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { NextRequest, NextResponse } from "next/server";
 
-export type TopListingsInCategory = Awaited<ReturnType<typeof getTopListings>>;
-
-async function getTopListings() {
+export default async function getTopListings() {
   return db
     .selectDistinctOn([listingCategory.parent], {
       id: listings.id,
@@ -29,10 +27,4 @@ async function getTopListings() {
     .innerJoin(listingCategory, eq(listings.category, listingCategory.name))
     .groupBy(listingCategory.parent, listings.id, listings.name)
     .orderBy(listingCategory.parent, sql`like_count DESC`);
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function GET(request: NextRequest) {
-  const topListingsInCategory = await getTopListings();
-  return NextResponse.json(topListingsInCategory, { status: 200 });
 }
