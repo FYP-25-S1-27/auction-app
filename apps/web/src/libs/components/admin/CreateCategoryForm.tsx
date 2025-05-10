@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Alert, Button, TextField, Stack, MenuItem } from "@mui/material";
-import { createCategory } from "@/libs/actions/db/listingCategory";
+import { createCategory } from "@/libs/actions/db/listingCategories/listingCategory";
 
 export function CreateCategoryForm({
   listingCategory,
@@ -18,8 +18,8 @@ export function CreateCategoryForm({
         const result = await createCategory(formData);
         setMessage(result.message);
         setIsError(!result.success);
-      }} >
-      
+      }}
+    >
       <Stack spacing={2} maxWidth={500}>
         {message && (
           <Alert severity={isError ? "error" : "success"}>{message}</Alert>
@@ -36,7 +36,7 @@ export function CreateCategoryForm({
         <TextField label="Sub Category" name="subCategory" required />
 
         <Button type="submit" variant="contained" color="primary">
-           Create category
+          Create category
         </Button>
       </Stack>
     </form>
