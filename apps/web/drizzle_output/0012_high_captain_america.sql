@@ -1,0 +1,1 @@
+ALTER TABLE "user_category_interests" ADD CONSTRAINT "user_category_interests_useruuid_categoryname_pk" PRIMARY KEY("useruuid","categoryname");
