@@ -8,7 +8,7 @@ import {
 } from "@mui/x-data-grid";
 import { Button, Stack } from "@mui/material";
 import { useState } from "react";
-import { deleteCategory } from "@/libs/actions/db/listingCategory";
+import { deleteCategory } from "@/libs/actions/db/listingCategories/listingCategory";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { useRouter } from "next/navigation";
 
