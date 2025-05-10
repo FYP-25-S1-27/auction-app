@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import BidFormModal from "./form";
 
-// ✅ Interface for listing
 interface Listing {
   id: number;
   name: string;
@@ -35,13 +34,12 @@ const ViewListingPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [listing, setListing] = useState<Listing | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<string>("");
 
-  // ✅ useCallback ensures stable function reference
   const fetchListing = useCallback(async () => {
     try {
       const res = await fetch(`/api/listings/${id}`);
       const data: Listing = await res.json();
-      console.log("📦 Updated listing data:", data);
       setListing(data);
     } catch (err) {
       console.error("Error fetching listing:", err);
@@ -51,6 +49,29 @@ const ViewListingPage = () => {
   useEffect(() => {
     if (id) fetchListing();
   }, [id, fetchListing]);
+
+  // ⏳ Live countdown timer
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (listing?.end_time) {
+        const end = new Date(listing.end_time).getTime();
+        const now = new Date().getTime();
+        const diff = end - now;
+
+        if (diff <= 0) {
+          setTimeLeft("Auction Ended");
+          clearInterval(interval);
+        } else {
+          const hours = Math.floor(diff / (1000 * 60 * 60));
+          const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+          setTimeLeft(`${hours}h ${minutes}m ${seconds}s`);
+        }
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [listing]);
 
   const handleBidPlaced = () => {
     fetchListing();
@@ -74,7 +95,6 @@ const ViewListingPage = () => {
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Grid container spacing={4}>
-        {/* Left: Images */}
         <Grid item xs={12} md={7}>
           <Grid container spacing={2}>
             <Grid item xs={3}>
@@ -109,17 +129,16 @@ const ViewListingPage = () => {
           </Grid>
         </Grid>
 
-        {/* Right: Info */}
         <Grid item xs={12} md={5}>
           <Typography variant="h5">{listing.name}</Typography>
-          <Typography variant="body2" color="textSecondary" gutterBottom>
+          <Typography variant="body2" color="textSecondary">
             Ends at: {formattedEndTime}
           </Typography>
-          <Typography variant="h4" color="error">
-            {formattedPrice}
+          <Typography variant="body2" color="error" sx={{ fontWeight: "bold" }}>
+            {timeLeft}
           </Typography>
-          <Typography variant="body1" sx={{ mt: 1 }}>
-            {listing.description}
+          <Typography variant="h4" color="error" sx={{ mt: 1 }}>
+            {formattedPrice}
           </Typography>
 
           <Button
@@ -150,12 +169,10 @@ const ViewListingPage = () => {
         </Grid>
       </Grid>
 
-      {/* Description */}
       <Box sx={{ mt: 5 }}>
         <Typography variant="h6">About this item</Typography>
         <Typography>{listing.description}</Typography>
 
-        {/* Seller Info */}
         <Box
           sx={{
             mt: 4,
@@ -175,20 +192,18 @@ const ViewListingPage = () => {
             </Box>
           </Box>
           <Box mt={2} display="flex" gap={2}>
-            <Button variant="outlined">Other Products</Button>
+            {/* <Button variant="outlined">Other Products</Button> */}
             <Button variant="contained">Contact</Button>
           </Box>
         </Box>
       </Box>
 
-      {/* Bid Modal */}
       <BidFormModal
         open={modalOpen}
         onClose={handleBidPlaced}
         listingId={Number(id)}
       />
 
-      {/* Snackbar for Success */}
       <Snackbar
         open={showSuccess}
         autoHideDuration={4000}
