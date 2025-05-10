@@ -69,7 +69,7 @@ async function main() {
     auth0users.map(async (user) => {
       await db.insert(schema.users).values({
         uuid: user.user_id,
-        username: user.nickname,
+        username: `${user.nickname}.${faker.number.int({ min: 1, max: 9 })}`,
         isAdmin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
         createdAt: new Date(user.created_at.toString()),
       });

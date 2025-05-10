@@ -8,6 +8,7 @@ import {
   timestamp,
   boolean,
   pgEnum,
+  primaryKey,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 
@@ -205,12 +206,13 @@ export const user_category_interests = pgTable(
   {
     userUuid: text("useruuid")
       .notNull()
-      .references(() => userProfile.userUuid, { onDelete: "cascade" }), 
+      .references(() => userProfile.userUuid, { onDelete: "cascade" }),
     categoryName: text("categoryname")
       .notNull()
-      .references(() => listingCategory.name, { onDelete: "cascade" }), 
+      .references(() => listingCategory.name, { onDelete: "cascade" }),
   },
   (table) => [
+    primaryKey({ columns: [table.userUuid, table.categoryName] }),
     foreignKey({
       columns: [table.userUuid],
       foreignColumns: [userProfile.userUuid],
@@ -221,8 +223,5 @@ export const user_category_interests = pgTable(
       foreignColumns: [listingCategory.name],
       name: "user_interests_category_id_fkey",
     }).onDelete("cascade"),
-    {
-      primaryKey: [table.userUuid, table.categoryName], // Composite primary key
-    },
   ]
 );
