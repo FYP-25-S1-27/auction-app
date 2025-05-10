@@ -47,7 +47,7 @@ const CategoryBar = () => {
   };
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", py: 2, mt: -1 }}>
+    <Box sx={{ display: "flex", justifyContent: "center", pt: 2 }}>
       {categories.map((category, index) => (
         <Box
           key={index}

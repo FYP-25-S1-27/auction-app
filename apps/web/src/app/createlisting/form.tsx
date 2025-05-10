@@ -1,9 +1,22 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { TextField, Button, Container, MenuItem, Select, FormControl,
-  InputLabel, Box, Switch, Alert, Typography, Snackbar } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Container,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Box,
+  Switch,
+  Alert,
+  Typography,
+  Snackbar,
+} from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -23,27 +36,29 @@ const ListingForm = () => {
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [categoryHierarchy, setCategoryHierarchy] = useState<CategoriesSchema[]>([]);
+  const [categoryHierarchy, setCategoryHierarchy] = useState<
+    CategoriesSchema[]
+  >([]);
 
   // Get all categories
   type CategoriesSchema = InferSelectModel<typeof listingCategory>;
 
   useEffect(() => {
-      const fetchCategories = async () => {
-        try {
-          const response = await fetch("/api/categories");
-          if (response.ok) {
-            const data: CategoriesSchema[] = await response.json();
-            const hierarchical = data.filter((cat) => cat.parent !== null);
-            setCategoryHierarchy(hierarchical);
-          } else {
-            console.error("Failed to fetch categories");
-          }
-        } catch (error) {
-          console.error("Error fetching categories:", error);
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data: CategoriesSchema[] = await response.json();
+          const hierarchical = data.filter((cat) => cat.parent !== null);
+          setCategoryHierarchy(hierarchical);
+        } else {
+          console.error("Failed to fetch categories");
         }
-      };
-      fetchCategories();
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
   }, []);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -73,7 +88,10 @@ const ListingForm = () => {
         setError("Scheduled listings must have a start time in the future.");
         return;
       }
-      if (end_time && (start_time.isAfter(end_time) || start_time.isSame(end_time))) {
+      if (
+        end_time &&
+        (start_time.isAfter(end_time) || start_time.isSame(end_time))
+      ) {
         setError("Scheduled time must be before end time.");
         return;
       }
@@ -81,7 +99,9 @@ const ListingForm = () => {
 
     // ✅ Convert scheduled time and end_time to a proper ISO string before sending
     const end_timeString = end_time ? end_time.toDate().toISOString() : null;
-    const start_timeString = start_time ? start_time.toDate().toISOString() : null; // ADD
+    const start_timeString = start_time
+      ? start_time.toDate().toISOString()
+      : null; // ADD
 
     const priceNumber = Number(starting_price);
     if (!Number.isInteger(priceNumber)) {
@@ -97,7 +117,7 @@ const ListingForm = () => {
     formData.append("description", description);
     formData.append("starting_price", String(priceNumber));
     formData.append("end_time", end_timeString || ""); // Send as string, handle null
-    formData.append("scheduled", String(scheduled)); 
+    formData.append("scheduled", String(scheduled));
     if (scheduled) {
       formData.append("start_time", start_timeString || "");
     }
@@ -132,27 +152,27 @@ const ListingForm = () => {
   return (
     <Container maxWidth="md">
       <Box sx={{ mt: 5 }}>
-      <Typography variant="h4" gutterBottom>
-        Create New Listing
-      </Typography>
-      
+        <Typography variant="h4" gutterBottom>
+          Create New Listing
+        </Typography>
+
         {error && <Alert severity="error">{error}</Alert>}
 
-          {/* success message */}
-          <Snackbar
-            open={showSuccess}
-            autoHideDuration={5000}
+        {/* success message */}
+        <Snackbar
+          open={showSuccess}
+          autoHideDuration={5000}
+          onClose={() => setShowSuccess(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          <Alert
             onClose={() => setShowSuccess(false)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+            severity="success"
+            sx={{ width: "100%" }}
           >
-            <Alert
-              onClose={() => setShowSuccess(false)}
-              severity="success"
-              sx={{ width: "100%" }}
-            >
-              Listing has created successfully!
-            </Alert>
-          </Snackbar>
+            Listing has created successfully!
+          </Alert>
+        </Snackbar>
 
         <h2>UPLOAD PHOTOS AND VIDEO</h2>
         <Box
@@ -178,7 +198,13 @@ const ListingForm = () => {
             <Box
               key={i}
               position="relative"
-              sx={{ width: 100, height: 100, borderRadius: 2, overflow: "hidden", boxShadow: 1, }}
+              sx={{
+                width: 100,
+                height: 100,
+                borderRadius: 2,
+                overflow: "hidden",
+                boxShadow: 1,
+              }}
             >
               <img
                 src={URL.createObjectURL(file)}
@@ -200,7 +226,6 @@ const ListingForm = () => {
           required
           margin="normal"
         />
-
         {/* Category */}
         <FormControl fullWidth margin="normal" required>
           <InputLabel>Item Category</InputLabel>
@@ -215,7 +240,6 @@ const ListingForm = () => {
             ))}
           </Select>
         </FormControl>
-
         {/* Condition */}
         <FormControl fullWidth margin="normal" required>
           <InputLabel>Item Condition</InputLabel>
@@ -228,7 +252,6 @@ const ListingForm = () => {
             <MenuItem value="heavily_used">Heavily Used</MenuItem>
           </Select>
         </FormControl>
-
         {/* Condition Description */}
         <TextField
           label="Condition Description"
@@ -240,7 +263,6 @@ const ListingForm = () => {
           multiline
           rows={3}
         />
-
         {/* Starting Price */}
         <TextField
           label="Starting Price"
@@ -251,7 +273,6 @@ const ListingForm = () => {
           required
           margin="normal"
         />
-
         {/* End Time */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
@@ -263,13 +284,14 @@ const ListingForm = () => {
             }}
           />
         </LocalizationProvider>
-
         {/* Schedule Toggle */}
         <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
           <p>Schedule Your Listing</p>
-          <Switch checked={scheduled} onChange={(e) => setScheduled(e.target.checked)}/>
+          <Switch
+            checked={scheduled}
+            onChange={(e) => setScheduled(e.target.checked)}
+          />
         </Box>
-        
         {/* Scheduled Start Time (ADDED THIS) */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
@@ -279,7 +301,6 @@ const ListingForm = () => {
             disabled={!scheduled} // disable the field if not scheduled
           />
         </LocalizationProvider>
-
         {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button variant="contained" color="primary" type="submit">
