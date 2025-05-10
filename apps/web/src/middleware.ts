@@ -12,7 +12,9 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin")) {
     if (!session) {
       // user is not authenticated, redirect to login page
-      return NextResponse.redirect("/auth/login?returnTo=/");
+      return NextResponse.redirect(
+        `http://${request.nextUrl.host}/auth/login?returnTo=/`
+      );
     }
     // user is authenticated, check if they are an admin
     // why specify http? - https://github.com/vercel/next.js/issues/67036
@@ -22,7 +24,7 @@ export async function middleware(request: NextRequest) {
     const data = await res.json();
     if (!data.isAdmin) {
       // user is not an admin, redirect to landing page
-      return NextResponse.redirect("/");
+      return NextResponse.redirect(`http://${request.nextUrl.host}/`);
     }
     // user is an admin, allow access to the page
     return NextResponse.next();
