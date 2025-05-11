@@ -96,70 +96,78 @@ export default function NavBar() {
               <Link href="/auth/login">Login</Link>
             </Box>
           ) : auth.user ? (
-            <PopupState variant="popover" popupId="avatar-menu">
-              {(popupState) => (
-                <Fragment>
-                  {/* Sell & My Listings Links */}
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "16px",
-                    }}
-                  >
-                    <NextLink href="/mylistings" passHref>
-                      <span
-                        style={{
-                          cursor: "pointer",
-                          fontSize: "16px",
-                          fontWeight: "bold",
-                          color: "#333",
-                        }}
-                      >
-                        My Listings
-                      </span>
-                    </NextLink>
+            <Fragment>
+              {/* Sell & My Listings Links */}
+              {!is_admin && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "16px",
+                  }}
+                >
+                  <NextLink href="/mylistings" passHref>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      My Listings
+                    </span>
+                  </NextLink>
 
-                    <NextLink href="/createlisting" passHref>
-                      <span
-                        style={{
-                          cursor: "pointer",
-                          fontSize: "16px",
-                          fontWeight: "bold",
-                          color: "#333",
-                        }}
-                      >
-                        Sell
-                      </span>
-                    </NextLink>
-                  </div>
-
-                  {/* User Avatar Menu */}
-                  <IconButton {...bindTrigger(popupState)}>
-                    <Avatar src={auth.user.picture} alt={auth.user.nickname} />
-                  </IconButton>
-                  <Menu {...bindMenu(popupState)}>
-                    {is_admin && (
-                      <MenuItem onClick={popupState.close}>
-                        <NextLink href="/admin">Admin Panel</NextLink>
-                      </MenuItem>
-                    )}
-                    <MenuItem onClick={popupState.close}>
-                      <NextLink href="/demo_profile">Profile</NextLink>
-                    </MenuItem>
-                    <MenuItem onClick={popupState.close}>
-                      <NextLink href="/mylikedlisting">My Likes</NextLink>
-                    </MenuItem>
-                    <MenuItem onClick={popupState.close}>
-                      <Link href="/auth/logout">Logout</Link>{" "}
-                      {/* Only this link is NOT to use NextLink */}
-                      {/* https://github.com/auth0/nextjs-auth0 */}
-                      {/* You must use <a> tags instead of the <Link> component to ensure that the routing is not done client-side as that may result in some unexpected behavior. */}
-                    </MenuItem>
-                  </Menu>
-                </Fragment>
+                  <NextLink href="/createlisting" passHref>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      Sell
+                    </span>
+                  </NextLink>
+                </div>
               )}
-            </PopupState>
+              <PopupState variant="popover" popupId="avatar-menu">
+                {(popupState) => (
+                  <Fragment>
+                    {/* User Avatar Menu */}
+                    <IconButton {...bindTrigger(popupState)}>
+                      <Avatar
+                        src={auth.user.picture}
+                        alt={auth.user.nickname}
+                      />
+                    </IconButton>
+                    <Menu {...bindMenu(popupState)}>
+                      {is_admin && (
+                        <MenuItem onClick={popupState.close}>
+                          <NextLink href="/admin">Admin Panel</NextLink>
+                        </MenuItem>
+                      )}
+                      <MenuItem onClick={popupState.close}>
+                        <NextLink href="/demo_profile">Profile</NextLink>
+                      </MenuItem>
+                      {!is_admin && (
+                        <MenuItem onClick={popupState.close}>
+                          <NextLink href="/mylikedlisting">My Likes</NextLink>
+                        </MenuItem>
+                      )}
+                      <MenuItem onClick={popupState.close}>
+                        <Link href="/auth/logout">Logout</Link>{" "}
+                        {/* Only this link is NOT to use NextLink */}
+                        {/* https://github.com/auth0/nextjs-auth0 */}
+                        {/* You must use <a> tags instead of the <Link> component to ensure that the routing is not done client-side as that may result in some unexpected behavior. */}
+                      </MenuItem>
+                    </Menu>
+                  </Fragment>
+                )}
+              </PopupState>
+            </Fragment>
           ) : (
             <Box component={"div"} sx={{ display: "flex", gap: 2 }}>
               <Link href="/auth/login?screen_hint=signup">Register</Link>
