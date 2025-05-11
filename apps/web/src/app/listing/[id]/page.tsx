@@ -88,7 +88,7 @@ const ViewListingPage = () => {
         <Grid item xs={12} md={7}>
           <Grid container spacing={2}>
             <Grid item xs={3}>
-              <ImageList cols={1} rowHeight={130} gap={8}>
+              <ImageList cols={2} rowHeight={130} gap={8}>
                 {listing.image_urls.map((img: string, i: number) => (
                   <ImageListItem key={i}>
                     <img
