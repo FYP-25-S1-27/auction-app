@@ -12,7 +12,8 @@ import { seedUserInterests } from "./helper/user_category_interests";
 
 const COUNT = 50;
 const USER_COUNT = 50;
-const PASSWORD = "1Qwer#@!";
+const ADMIN_COUNT = 5;
+const PASSWORD = "1Qwer$#@!";
 faker.seed(321);
 
 async function seedAuth0Users(email: string, password: string) {
@@ -49,20 +50,26 @@ async function seedAuth0Users(email: string, password: string) {
 async function main() {
   const args = process.argv.slice(2);
   const skipUsers = args.includes("--skip-users");
+  const usersOnly = args.includes("--users-only");
   console.log("Skip users:", skipUsers);
   console.log("Reseting database...");
   await reset(db, schema);
 
   if (!skipUsers) {
     console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
-    for (let i = 0; i < USER_COUNT; i++) {
-      await seedAuth0Users(`test${i}.user@test.test`, PASSWORD); // not using Promise.all here as it will hit the rate limit
+    for (let i = 1; i <= USER_COUNT; i++) {
+      await seedAuth0Users(`test.user${i}@test.test`, PASSWORD); // not using Promise.all here as it will hit the rate limit
     }
-    await seedAuth0Users(`test.admin@test.test`, PASSWORD);
+    for (let i = 1; i <= ADMIN_COUNT; i++) {
+      await seedAuth0Users(`test.admin${i}@test.test`, PASSWORD);
+    }
   }
 
   const auth0users = (await auth0management.users.getAll()).data || [];
 
+  if (usersOnly) {
+    return 0; // Skip seeding other tables
+  }
   // Seed users
   console.log("Seeding auth0 users to database...");
   await Promise.all(
