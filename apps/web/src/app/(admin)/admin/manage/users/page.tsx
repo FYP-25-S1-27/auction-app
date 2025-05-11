@@ -1,4 +1,4 @@
-import { auth0management } from "@/libs/actions/auth0-management";
+import { getAuth0ManagementClient } from "@/libs/actions/auth0-management";
 import { CustomAdminUserDataGrid } from "@/libs/components/admin/datagrid/UserDataGrid";
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
@@ -8,6 +8,7 @@ import { connection } from "next/server";
 
 export default async function UsersPage() {
   await connection();
+  const auth0management = getAuth0ManagementClient();
 
   const getUsersRepsonse = auth0management.users.getAll();
   const auth0users = (await getUsersRepsonse).data || [];

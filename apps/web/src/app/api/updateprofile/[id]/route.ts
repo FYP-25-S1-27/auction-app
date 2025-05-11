@@ -43,7 +43,7 @@ export async function PUT(
     if (gender !== undefined) updateData.gender = gender;
 
     if (Object.keys(updateData).length > 0) {
-      updateData.updatedAt = new Date(); 
+      updateData.updatedAt = new Date();
       await db
         .update(userProfile)
         .set(updateData)

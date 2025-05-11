@@ -1,7 +1,6 @@
 import { reset, seed } from "drizzle-seed";
 import { db } from "./drizzle";
 import * as schema from "./schema";
-import { auth0management } from "../actions/auth0-management";
 import { ManagementApiError } from "auth0";
 import { faker } from "@faker-js/faker";
 import { seedCategoriesListingsAndImages } from "./helper/categories_listing_and_images";
@@ -10,12 +9,15 @@ import { seedTransactions } from "./helper/transactions";
 import { seedUserLikes } from "./helper/listing_user_likes";
 import { seedUserInterests } from "./helper/user_category_interests";
 import { seedWallets } from "./helper/wallet";
+import { getAuth0ManagementClient } from "../actions/auth0-management";
 
 const COUNT = 50;
 const USER_COUNT = 50;
 const ADMIN_COUNT = 5;
 const PASSWORD = "1Qwer$#@!";
 faker.seed(321);
+
+const auth0management = getAuth0ManagementClient();
 
 async function seedAuth0Users(email: string, password: string) {
   try {
