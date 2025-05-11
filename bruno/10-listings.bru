@@ -1,0 +1,20 @@
+meta {
+  name: 10-listings
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{host}}/api/listings
+  body: none
+  auth: none
+}
+
+params:query {
+  ~name: steel
+  ~maxPrice: 1700
+  ~page: 1
+  ~pageSize: 2
+  ~category: alcohol
+  ~minPrice: 1700
+}

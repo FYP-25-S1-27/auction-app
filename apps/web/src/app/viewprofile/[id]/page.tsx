@@ -127,7 +127,11 @@ const EditProfile = () => {
             onChange={handleChange}
           >
             <FormControlLabel value="MALE" control={<Radio />} label="Male" />
-            <FormControlLabel value="FEMALE" control={<Radio />} label="Female"/>
+            <FormControlLabel
+              value="FEMALE"
+              control={<Radio />}
+              label="Female"
+            />
           </RadioGroup>
         </FormControl>
 

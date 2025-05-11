@@ -46,12 +46,8 @@
           "name": "bids_listing_id_fkey",
           "tableFrom": "bids",
           "tableTo": "listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -59,12 +55,8 @@
           "name": "bids_user_id_fkey",
           "tableFrom": "bids",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["user_uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -123,12 +115,8 @@
           "name": "listing_images_listing_id_fkey",
           "tableFrom": "listing_images",
           "tableTo": "listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -162,12 +150,8 @@
           "name": "user_listing_likes_user_id_fkey",
           "tableFrom": "user_listing_likes",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["user_uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -175,12 +159,8 @@
           "name": "user_listing_likes_listing_id_fkey",
           "tableFrom": "user_listing_likes",
           "tableTo": "listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -264,12 +244,8 @@
           "name": "listings_user_id_fkey",
           "tableFrom": "listings",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["user_uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -277,12 +253,8 @@
           "name": "listings_category_id_fkey",
           "tableFrom": "listings",
           "tableTo": "listing_category",
-          "columnsFrom": [
-            "category"
-          ],
-          "columnsTo": [
-            "name"
-          ],
+          "columnsFrom": ["category"],
+          "columnsTo": ["name"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -341,12 +313,8 @@
           "name": "transactions_listing_id_fkey",
           "tableFrom": "transactions",
           "tableTo": "listings",
-          "columnsFrom": [
-            "listing_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["listing_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -354,12 +322,8 @@
           "name": "transactions_buyer_id_fkey",
           "tableFrom": "transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "buyer_uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["buyer_uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -367,12 +331,8 @@
           "name": "transactions_seller_id_fkey",
           "tableFrom": "transactions",
           "tableTo": "users",
-          "columnsFrom": [
-            "seller_uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["seller_uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -427,9 +387,7 @@
         "users_username_unique": {
           "name": "users_username_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
+          "columns": ["username"]
         }
       },
       "policies": {},
@@ -467,12 +425,8 @@
           "name": "wallets_user_id_fkey",
           "tableFrom": "wallets",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_uuid"
-          ],
-          "columnsTo": [
-            "uuid"
-          ],
+          "columnsFrom": ["user_uuid"],
+          "columnsTo": ["uuid"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }

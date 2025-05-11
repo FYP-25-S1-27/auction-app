@@ -23,8 +23,8 @@ const MyListings = () => {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
-  const updated = searchParams.get("updated") === "true"; 
-  const [showSuccess, setShowSuccess] = useState(updated); 
+  const updated = searchParams.get("updated") === "true";
+  const [showSuccess, setShowSuccess] = useState(updated);
 
   useEffect(() => {
     if (updated) {
@@ -94,9 +94,7 @@ const MyListings = () => {
       {loading && <CircularProgress sx={{ mt: 3 }} />}
       {error && <Alert severity="error">{error}</Alert>}
       {showSuccess && (
-        <Alert severity="success">
-          Your listing had updated successfully!
-        </Alert>
+        <Alert severity="success">Your listing had updated successfully!</Alert>
       )}
 
       <List sx={{ mt: 3 }}>

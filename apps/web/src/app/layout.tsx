@@ -6,10 +6,9 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "@/libs/theme";
 import { Auth0Provider } from "@auth0/nextjs-auth0";
 import NavBar from "@/libs/components/NavBar";
-import { auth0 } from "@/libs/auth0";
-import { db } from "@/libs/db/drizzle";
-import { users } from "@/libs/db/schema";
 import { Toolbar } from "@mui/material";
+import { auth0 } from "@/libs/auth0";
+import { upsertUser } from "@/libs/actions/db/users";
 
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
@@ -34,14 +33,7 @@ export default async function RootLayout({
     // This is called on every and any page load, but the database will only insert the user if they don't already exist
     const user = session.user;
     if (user) {
-      await db
-        .insert(users)
-        .values({
-          uuid: user.sub ?? "",
-          username: user.nickname ?? "",
-          isAdmin: false,
-        })
-        .onConflictDoNothing();
+      await upsertUser(user.sub, user.nickname ? user.nickname : "");
     }
   }
 
