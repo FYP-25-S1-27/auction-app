@@ -9,6 +9,7 @@ import { seedBids } from "./helper/bids";
 import { seedTransactions } from "./helper/transactions";
 import { seedUserLikes } from "./helper/listing_user_likes";
 import { seedUserInterests } from "./helper/user_category_interests";
+import { seedWallets } from "./helper/wallet";
 
 const COUNT = 50;
 const USER_COUNT = 50;
@@ -86,14 +87,23 @@ async function main() {
   );
 
   const _userIds = auth0users.map((user) => user.user_id);
+  // remove admins from userIds - admins should not have any listings, bids, transactions or likes
+  const _userIdsWithoutAdmins = _userIds.filter(
+    (userId) =>
+      !auth0users
+        .find((user) => user.user_id === userId)
+        ?.email?.includes("admin")
+  );
   console.log("Seeding categories, accompanying listings and images...");
-  const { listingIds } = await seedCategoriesListingsAndImages(_userIds);
+  const { listingIds } = await seedCategoriesListingsAndImages(
+    _userIdsWithoutAdmins
+  );
   console.log("Seeding bids...");
-  await seedBids(listingIds, _userIds);
+  await seedBids(listingIds, _userIdsWithoutAdmins);
   console.log("Seeding transactions...");
-  await seedTransactions(listingIds, _userIds);
+  await seedTransactions(listingIds, _userIdsWithoutAdmins);
   console.log("Seeding listing user likes...");
-  await seedUserLikes(listingIds, _userIds);
+  await seedUserLikes(listingIds, _userIdsWithoutAdmins);
 
   const {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -116,6 +126,8 @@ async function main() {
     offers, // wip
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     requests, // wip
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    wallets,
     ...schemaFiltered
   } = schema; // Remove tables from schemas
   // Seed remaining tables
@@ -159,25 +171,12 @@ async function main() {
         }),
       },
     },
-    wallets: {
-      count: auth0users.length,
-      columns: {
-        userUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-          isUnique: true,
-        }),
-        balance: f.int({ minValue: 0, maxValue: 1000 }),
-        lastUpdated: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.recent({ days: 10 }).toISOString()
-          ),
-        }),
-      },
-    },
   }));
 
   console.log("Seeding user category interests..."); // placed here as it relies on profiles being created first
-  await seedUserInterests(_userIds);
+  await seedUserInterests(_userIdsWithoutAdmins);
+  console.log("Seeding wallets...");
+  await seedWallets(_userIdsWithoutAdmins);
   return 0;
 }
 

@@ -189,7 +189,7 @@ export const wallets = pgTable(
   "wallets",
   {
     userUuid: text().primaryKey(),
-    balance: numeric({ precision: 10, scale: 2 }).default("0").notNull(),
+    balance: integer().default(0).notNull(),
     lastUpdated: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
   },
   (table) => [

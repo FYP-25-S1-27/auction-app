@@ -10,17 +10,18 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-
-const tabs = [
-  { label: "Profile Information", path: "/demo_profile" },
-  { label: "Interests", path: "/interests" },
-  { label: "Change password", path: "/password" },
-  { label: "Wallet", path: "/wallet" },
-];
+import { getRole } from "../actions/db/users";
+import { useUser } from "@auth0/nextjs-auth0";
 
 const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [username, setUsername] = useState<string>("user");
+  const user = useUser().user;
+  const [tabs, setTabs] = useState([
+    { label: "Profile Information", path: "/demo_profile" },
+    { label: "Interests", path: "/interests" },
+    { label: "Change password", path: "/password" },
+    { label: "Wallet", path: "/wallet" },
+  ]);
+
   const router = useRouter();
   const pathname = usePathname();
   type JoinedUserProfile = {
@@ -49,9 +50,19 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
       }
     };
+    if (!user) return;
+    getRole(user.sub).then((x) => {
+      if (x[0].is_admin) {
+        setTabs((prev) =>
+          prev.filter(
+            (tab) => tab.label !== "Interests" && tab.label !== "Wallet"
+          )
+        );
+      }
+    });
 
     fetchUsername();
-  }, []);
+  }, [user]);
 
   return (
     <Box
