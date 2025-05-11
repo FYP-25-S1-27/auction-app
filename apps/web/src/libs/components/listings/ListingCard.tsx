@@ -84,7 +84,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
     }
   };
 
-  if (listing.status == "ACTIVE") {
+  if (listing.status !== "SCHEDULED") {
   return (
     <NextLink href={`/listing/${listing.id}`}>
       <Card
