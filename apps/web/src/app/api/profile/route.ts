@@ -1,44 +1,44 @@
 import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
-import { users, userProfile, user_category_interests} from "@/libs/db/schema";
-import { eq } from "drizzle-orm"; 
+import { users, userProfile, user_category_interests } from "@/libs/db/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
-    try {
-
+  try {
     const { user_uuid } = await req.json();
     if (!user_uuid) {
-      return NextResponse.json({ error: "No user ID provided" }, { status: 400 });
+      return NextResponse.json(
+        { error: "No user ID provided" },
+        { status: 400 }
+      );
     }
 
     // ✅ Query user profile for the user
     const userUsers = await db
-        .select()
-        .from(users)
-        .leftJoin(userProfile, eq(users.uuid, userProfile.userUuid))
-        .where(eq(users.uuid, user_uuid)); // ✅ Corrected filter
+      .select()
+      .from(users)
+      .leftJoin(userProfile, eq(users.uuid, userProfile.userUuid))
+      .where(eq(users.uuid, user_uuid)); // ✅ Corrected filter
 
     // Query user interests for the user
     const interests = await db
-        .select({ name: user_category_interests.categoryName })
-        .from(user_category_interests)
-        .where(eq(user_category_interests.userUuid, user_uuid));
-    
+      .select({ name: user_category_interests.categoryName })
+      .from(user_category_interests)
+      .where(eq(user_category_interests.userUuid, user_uuid));
+
     const interestNames = interests.map((i) => i.name);
 
-    return NextResponse.json(
-        {
-            profile: userUsers,
-            interests: interestNames,
-        }
-    );
-    } catch (error) {
+    return NextResponse.json({
+      profile: userUsers,
+      interests: interestNames,
+    });
+  } catch (error) {
     console.error("❌ Error fetching profile:", error);
     return NextResponse.json(
-        { error: "Internal Server Error" },
-        { status: 500 }
+      { error: "Internal Server Error" },
+      { status: 500 }
     );
-    }
+  }
 }
 
 // import { NextResponse } from "next/server";
@@ -46,7 +46,7 @@ export async function POST(req: Request) {
 // import { users } from "@/libs/db/schema";
 // import { auth0 } from "@/libs/auth0";
 // import { NextRequest } from "next/server";
-// import { eq } from "drizzle-orm"; 
+// import { eq } from "drizzle-orm";
 
 // export async function GET(req: NextRequest) {
 //     try {

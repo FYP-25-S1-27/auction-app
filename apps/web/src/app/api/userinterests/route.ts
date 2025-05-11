@@ -9,10 +9,7 @@ export async function GET(request: Request) {
   const userUuid = searchParams.get("userUuid");
 
   if (!userUuid) {
-    return NextResponse.json(
-      { error: "Missing user ID" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Missing user ID" }, { status: 400 });
   }
 
   try {
@@ -51,13 +48,19 @@ export async function POST(request: Request) {
       categoryName,
     }));
 
-    await db.insert(user_category_interests).values(insertData).onConflictDoNothing();
+    await db
+      .insert(user_category_interests)
+      .values(insertData)
+      .onConflictDoNothing();
 
-    return NextResponse.json({ message: "Interests added successfully" }, { status: 200 });
+    return NextResponse.json(
+      { message: "Interests added successfully" },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Error adding interests:", error);
     return NextResponse.json(
-      { error: "Failed to add interests"},
+      { error: "Failed to add interests" },
       { status: 500 }
     );
   }
