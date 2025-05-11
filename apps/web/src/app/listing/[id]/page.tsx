@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -12,6 +13,8 @@ import {
   Divider,
   Snackbar,
   Alert,
+  ImageList,
+  ImageListItem,
 } from "@mui/material";
 import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
@@ -22,6 +25,7 @@ const ViewListingPage = () => {
   const [listing, setListing] = useState<GetListingByIdWithImages | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
+  const [bigImage, setBigImage] = useState<string | null>(null);
 
   const fetchListing = useCallback(async () => {
     try {
@@ -84,35 +88,21 @@ const ViewListingPage = () => {
         <Grid item xs={12} md={7}>
           <Grid container spacing={2}>
             <Grid item xs={3}>
-              {(listing.image_urls || [1, 2, 3, 4]).map(
-                (img: string, i: number) => (
-                  <Box key={i} mb={2}>
-                    <Paper
-                      sx={{
-                        height: 60,
-                        backgroundColor: "#eee",
-                        backgroundImage:
-                          typeof img === "string" ? `url(${img})` : "none",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                      }}
+              <ImageList cols={1} rowHeight={130} gap={8}>
+                {listing.image_urls.map((img: string, i: number) => (
+                  <ImageListItem key={i}>
+                    <img
+                      src={img}
+                      alt={listing.name + { i }}
+                      onClick={() => setBigImage(img)}
+                      style={{ cursor: "pointer" }}
                     />
-                  </Box>
-                )
-              )}
+                  </ImageListItem>
+                ))}
+              </ImageList>
             </Grid>
             <Grid item xs={9}>
-              <Paper
-                sx={{
-                  height: 400,
-                  backgroundColor: "#ddd",
-                  backgroundImage: listing.image_urls?.[0]
-                    ? `url(${listing.image_urls[0]})`
-                    : "none",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              />
+              <img src={bigImage ?? listing.image_urls[0]} alt={listing.name} />
             </Grid>
           </Grid>
         </Grid>

@@ -23,8 +23,10 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
 import { InferSelectModel } from "drizzle-orm";
 import { listingCategory } from "@/libs/db/schema";
+import { createClient } from "@/libs/supabase/client";
 
 const ListingForm = () => {
+  const supabase = createClient();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
@@ -33,7 +35,7 @@ const ListingForm = () => {
   const [end_time, setend_time] = useState<dayjs.Dayjs | null>(null);
   const [start_time, setstart_time] = useState<dayjs.Dayjs | null>(null); // ADDED THIS LINE
   const [scheduled, setScheduled] = useState(false);
-  const [files, setFiles] = useState<File[]>([]);
+  const [files, setFiles] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [categoryHierarchy, setCategoryHierarchy] = useState<
@@ -61,9 +63,34 @@ const ListingForm = () => {
     fetchCategories();
   }, []);
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFiles((prev) => [...prev, ...acceptedFiles]);
-  }, []);
+  const onDrop = useCallback(
+    async (acceptedFiles: File[]) => {
+      acceptedFiles.forEach(async (file) => {
+        const randomNumber = Math.floor(Math.random() * 1000); // Generate a random number between 0 and 999
+
+        const { data, error } = await supabase.storage
+          .from("listing-images")
+          .upload(`${randomNumber + file.name}`, file, {
+            upsert: false, // prevent overwriting
+          });
+        if (error) {
+          if (error.message.includes("already exists")) {
+            const { data: publicUrlData } = supabase.storage
+              .from("listing-images")
+              .getPublicUrl(file.name);
+            setFiles((prev) => [...prev, publicUrlData.publicUrl]);
+            return;
+          }
+        } else {
+          const { data: publicUrlData } = supabase.storage
+            .from("listing-images")
+            .getPublicUrl(data.path);
+          setFiles((prev) => [...prev, publicUrlData.publicUrl]);
+        }
+      });
+    },
+    [supabase.storage]
+  );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -124,7 +151,7 @@ const ListingForm = () => {
 
     // Append files to form data
     files.forEach((file) => {
-      formData.append("files", file);
+      formData.append("image_urls", file);
     });
 
     console.log("📩 Submitting Form Data with Files");
@@ -207,8 +234,8 @@ const ListingForm = () => {
               }}
             >
               <img
-                src={URL.createObjectURL(file)}
-                alt={file.name}
+                src={file}
+                alt={file}
                 style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             </Box>
