@@ -6,7 +6,7 @@ export async function seedWallets(userIds: string[]) {
   for (let i = 0; i < userIds.length; i++) {
     await db.insert(wallets).values({
       userUuid: userIds[i],
-      balance: faker.number.int({ min: 0, max: 1000 }),
+      balance: faker.number.int({ min: 50, max: 5000 }),
     });
   }
 }
