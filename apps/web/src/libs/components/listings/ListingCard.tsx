@@ -18,6 +18,7 @@ import NextLink from "next/link";
 type SelectListing = InferSelectModel<typeof listings>;
 
 export default function ListingCard({ listing }: { listing: SelectListing }) {
+
   const endDateLocale = new Date(listing.endTime).toLocaleString("en-SG", {
     year: "numeric",
     month: "short",
@@ -83,6 +84,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
     }
   };
 
+  if (listing.status !== "SCHEDULED") {
   return (
     <NextLink href={`/listing/${listing.id}`}>
       <Card
@@ -154,4 +156,5 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
       </Card>
     </NextLink>
   );
+}
 }

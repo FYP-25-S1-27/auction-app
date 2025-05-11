@@ -124,11 +124,9 @@ const ListingForm = () => {
       }
     }
 
-    // ✅ Convert scheduled time and end_time to a proper ISO string before sending
-    const end_timeString = end_time ? end_time.toDate().toISOString() : null;
-    const start_timeString = start_time
-      ? start_time.toDate().toISOString()
-      : null; // ADD
+    // ✅ Convert scheduled time and end_time
+    const end_timeString = end_time ? dayjs(end_time).format("YYYY-MM-DD HH:mm") : null;
+    const start_timeString = start_time ? dayjs(start_time).format("YYYY-MM-DD HH:mm") : null;
 
     const priceNumber = Number(starting_price);
     if (!Number.isInteger(priceNumber)) {
