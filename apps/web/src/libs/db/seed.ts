@@ -103,6 +103,10 @@ async function main() {
     transactions, // handled by helper/transactions
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     user_category_interests, // handled by helper/user_category_interests
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    offers, // wip
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    requests, // wip
     ...schemaFiltered
   } = schema; // Remove tables from schemas
   // Seed remaining tables
@@ -117,6 +121,11 @@ async function main() {
         }),
         gender: f.valuesFromArray({ values: ["MALE", "FEMALE"] }),
         age: f.int({ minValue: 18, maxValue: 90 }),
+        bio: f.valuesFromArray({
+          values: Array.from({ length: auth0users.length }, () =>
+            faker.person.bio()
+          ),
+        }),
         phone: f.valuesFromArray({
           values: Array.from({ length: auth0users.length }, () =>
             faker.phone.number()

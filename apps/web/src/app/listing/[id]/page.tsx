@@ -14,32 +14,19 @@ import {
   Alert,
 } from "@mui/material";
 import BidFormModal from "./form";
-
-interface Listing {
-  id: number;
-  name: string;
-  description: string;
-  starting_price: number;
-  current_price?: number;
-  end_time?: string;
-  image_urls?: string[];
-  shipping_fee?: number;
-  delivery_estimate?: string;
-  seller_name?: string;
-  seller_description?: string;
-}
+import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
 
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
-  const [listing, setListing] = useState<Listing | null>(null);
+  const [listing, setListing] = useState<GetListingByIdWithImages | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
 
   const fetchListing = useCallback(async () => {
     try {
       const res = await fetch(`/api/listings/${id}`);
-      const data: Listing = await res.json();
+      const data: GetListingByIdWithImages = await res.json();
       setListing(data);
     } catch (err) {
       console.error("Error fetching listing:", err);
@@ -81,12 +68,11 @@ const ViewListingPage = () => {
 
   if (!listing) return <Typography>Loading...</Typography>;
 
-  const formattedPrice =
-    listing.current_price !== undefined
-      ? `$${listing.current_price.toLocaleString()}`
-      : listing.starting_price !== undefined
-      ? `$${listing.starting_price.toLocaleString()}`
-      : "Price unavailable";
+  const formattedPrice = listing.current_price
+    ? `$${listing.current_price}`
+    : listing.starting_price
+    ? `$${listing.starting_price}`
+    : "Price unavailable";
 
   const formattedEndTime = listing.end_time
     ? new Date(listing.end_time).toLocaleString()
@@ -98,20 +84,22 @@ const ViewListingPage = () => {
         <Grid item xs={12} md={7}>
           <Grid container spacing={2}>
             <Grid item xs={3}>
-              {(listing.image_urls || [1, 2, 3, 4]).map((img, i) => (
-                <Box key={i} mb={2}>
-                  <Paper
-                    sx={{
-                      height: 60,
-                      backgroundColor: "#eee",
-                      backgroundImage:
-                        typeof img === "string" ? `url(${img})` : "none",
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  />
-                </Box>
-              ))}
+              {(listing.image_urls || [1, 2, 3, 4]).map(
+                (img: string, i: number) => (
+                  <Box key={i} mb={2}>
+                    <Paper
+                      sx={{
+                        height: 60,
+                        backgroundColor: "#eee",
+                        backgroundImage:
+                          typeof img === "string" ? `url(${img})` : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    />
+                  </Box>
+                )
+              )}
             </Grid>
             <Grid item xs={9}>
               <Paper
@@ -153,7 +141,7 @@ const ViewListingPage = () => {
           <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
             <Typography fontWeight="bold">Shipping</Typography>
             <Typography>
-              {listing.shipping_fee !== undefined
+              {listing.shipping_fee
                 ? `$${listing.shipping_fee}`
                 : "$10 per order"}
             </Typography>
@@ -187,7 +175,7 @@ const ViewListingPage = () => {
             <Box>
               <Typography>{listing.seller_name ?? "Unknown Seller"}</Typography>
               <Typography variant="body2" color="textSecondary">
-                {listing.seller_description ?? "Seller description"}
+                {listing.seller_bio ?? "Seller description"}
               </Typography>
             </Box>
           </Box>
