@@ -1,22 +1,38 @@
 "use client";
 
+import { createClient } from "@/libs/supabase/client";
 import { getAccessToken, useUser } from "@auth0/nextjs-auth0";
 import { Button, Container, Link } from "@mui/material";
 // import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const supabase = createClient();
   const [count, setCount] = useState<number>(0);
   const [token, setToken] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [buckets, setBuckets] = useState<any>(null);
   const auth = useUser();
   if (auth.user) {
     getAccessToken().then((t) => {
       setToken(t);
     });
   }
+  useEffect(() => {
+    const { data } = supabase.storage
+      .from("123")
+      .getPublicUrl("SCR-20240527-ohyn.png");
+    setBuckets(data.publicUrl);
+  }, []);
 
   return (
     <Container>
+      <img src={buckets} alt="" />
+      <button
+        onClick={() => supabase.storage.createBucket("123", { public: true })}
+      >
+        create bucket
+      </button>
       <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
         <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
           <div className="flex flex-row gap-4">
