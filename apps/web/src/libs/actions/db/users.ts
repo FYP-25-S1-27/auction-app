@@ -6,12 +6,12 @@ import { eq } from "drizzle-orm";
 
 // set user is_admin status
 export async function setis_admin(uuid: string, is_admin: boolean) {
-  await db.update(users).set({ is_admin: is_admin }).where(eq(users.uuid, uuid));
+  await db.update(users).set({ isAdmin: is_admin }).where(eq(users.uuid, uuid));
 }
 
 export async function getRole(uuid: string) {
   const role = await db
-    .select({ is_admin: users.is_admin })
+    .select({ is_admin: users.isAdmin })
     .from(users)
     .where(eq(users.uuid, uuid));
   return role;
@@ -22,8 +22,9 @@ export async function getUser(uuid: string) {
   return user;
 }
 
-export async function insertUser(uuid: string, nickname: string) {
-  await db.insert(users)
-    .values({ uuid, username: nickname, is_admin: false })
+export async function upsertUser(uuid: string, nickname: string) {
+  await db
+    .insert(users)
+    .values({ uuid, username: nickname, isAdmin: false })
     .onConflictDoNothing(); // ensures it won’t fail if user exists
 }

@@ -69,10 +69,9 @@ async function main() {
     auth0users.map(async (user) => {
       await db.insert(schema.users).values({
         uuid: user.user_id,
-        username: user.nickname,
-        bio: faker.person.bio(),
-        is_admin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
-        created_at: new Date(user.created_at.toString()),
+        username: `${user.nickname}.${faker.number.int({ min: 1, max: 9 })}`,
+        isAdmin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
+        createdAt: new Date(user.created_at.toString()),
       });
     })
   );
@@ -145,7 +144,7 @@ async function main() {
     wallets: {
       count: auth0users.length,
       columns: {
-        user_uuid: f.valuesFromArray({
+        userUuid: f.valuesFromArray({
           values: auth0users.map((user) => user.user_id),
           isUnique: true,
         }),
@@ -154,82 +153,6 @@ async function main() {
           values: Array.from({ length: COUNT }, () =>
             faker.date.recent({ days: 10 }).toISOString()
           ),
-        }),
-      },
-      count: auth0users.length,
-    },
-    listing_category: {
-      columns: {
-        name: f.valuesFromArray({
-          values: categories,
-          isUnique: true,
-        }),
-      },
-      count: categories.length,
-    },
-    listings: {
-      columns: {
-        user_uuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-        name: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.commerce.productName()
-          ), // Generate random product names
-        }),
-        description: f.loremIpsum({ sentencesCount: 1 }),
-        starting_price: f.int({ minValue: 1, maxValue: 1000 }),
-        current_price: f.int({ minValue: 1000, maxValue: 10000 }),
-        status: f.valuesFromArray({ values: ["ACTIVE", "SOLD"] }),
-        end_time: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.future().toISOString()
-          ),
-        }),
-        created_at: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.past().toISOString()
-          ),
-        }),
-      },
-      with: {
-        listing_images: 1,
-      },
-    },
-    listing_images: {
-      columns: {
-        imageUrl: f.default({
-          defaultValue: "/list_img/image_placeholder.jpg",
-        }),
-      },
-    },
-    listing_user_likes: {
-      columns: {
-        user_uuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-      },
-    },
-    bids: {
-      columns: {
-        user_uuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-        bidAmount: f.int({ minValue: 1, maxValue: 1000 }),
-        created_at: f.valuesFromArray({
-          values: Array.from({ length: COUNT }, () =>
-            faker.date.recent({ days: 2 }).toISOString()
-          ),
-        }),
-      },
-    },
-    transactions: {
-      columns: {
-        buyerUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-        }),
-        sellerUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
         }),
       },
     },

@@ -1,41 +1,41 @@
 import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { bids } from "@/libs/db/schema";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: number }> }
 ) {
   try {
-    const requestId = parseInt(params.id);
-    if (isNaN(requestId)) {
-      return NextResponse.json({ error: "Invalid request ID" }, { status: 400 });
-    }
+    const { id } = await params; // Await the promise to get the actual params
 
-    console.log("🔍 Fetching offers for request ID:", requestId);
+    console.log("🔍 Fetching offers for request ID:", id);
 
     const offerHistory = await db
       .select({
         id: bids.id,
-        user_uuid: bids.user_uuid,
-        bid_amount: bids.bid_amount,
-        bid_time: bids.bid_time,
+        user_uuid: bids.userUuid,
+        bid_amount: bids.bidAmount,
+        bid_time: bids.bidTime,
       })
       .from(bids)
       .where(
-        eq(bids.listing_id, requestId) // Must match the request ID
+        and(
+          eq(bids.listingId, id), // Must match the request ID
+          eq(bids.type, "OFFER") // Only fetch "OFFER" entries)
+        )
       )
-      .where(
-        eq(bids.bid_types, "OFFER") // Only fetch "OFFER" entries
-      )
-      .orderBy(desc(bids.bid_time));
+      .orderBy(desc(bids.bidTime));
 
     console.log("📄 Retrieved Offers:", offerHistory);
 
     return NextResponse.json(offerHistory, { status: 200 });
   } catch (error) {
     console.error("❌ Error fetching offers:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

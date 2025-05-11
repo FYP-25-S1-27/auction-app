@@ -1,58 +1,86 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useCallback, useEffect } from "react";
+import { useDropzone } from "react-dropzone";
 import {
-  Box,
+  TextField,
   Button,
   Container,
-  TextField,
   MenuItem,
   Select,
   FormControl,
   InputLabel,
+  Box,
   Switch,
   Alert,
-  CircularProgress,
-  Snackbar,
   Typography,
+  Snackbar,
 } from "@mui/material";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import dayjs from "dayjs";
-// import Image from "next/image";
-
-// const [files, setFiles] = useState<File[]>([]); // REMOVE IF NOT NEEDED
+import { InferSelectModel } from "drizzle-orm";
+import { listingCategory } from "@/libs/db/schema";
 
 const ListingForm = () => {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
   const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
-  const [startingPrice, setStartingPrice] = useState("");
-  const [endTime, setEndTime] = useState<dayjs.Dayjs | null>(null);
+  const [starting_price, setstarting_price] = useState("");
+  const [end_time, setend_time] = useState<dayjs.Dayjs | null>(null);
+  const [start_time, setstart_time] = useState<dayjs.Dayjs | null>(null); // ADDED THIS LINE
   const [scheduled, setScheduled] = useState(false);
+  const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [start_time, setstart_time] = useState<dayjs.Dayjs | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [categoryHierarchy, setCategoryHierarchy] = useState<
+    CategoriesSchema[]
+  >([]);
+
+  // Get all categories
+  type CategoriesSchema = InferSelectModel<typeof listingCategory>;
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch("/api/categories");
+        if (response.ok) {
+          const data: CategoriesSchema[] = await response.json();
+          const hierarchical = data.filter((cat) => cat.parent !== null);
+          setCategoryHierarchy(hierarchical);
+        } else {
+          console.error("Failed to fetch categories");
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    setFiles((prev) => [...prev, ...acceptedFiles]);
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "image/*": [], "video/*": [] },
+  });
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    setError(null);
-    setLoading(true);
+    setError(null); // Reset errors on new submit
 
-    if (Number(startingPrice) < 0) {
+    // **Validation Checks**
+    if (Number(starting_price) < 0) {
       setError("Starting price cannot be negative.");
-      setLoading(false);
       return;
     }
-    if (endTime && endTime.isBefore(dayjs())) {
+    if (end_time && end_time.isBefore(dayjs())) {
       setError("End time cannot be before the current time.");
-      setLoading(false);
       return;
     }
     if (scheduled) {
@@ -60,46 +88,64 @@ const ListingForm = () => {
         setError("Scheduled listings must have a start time in the future.");
         return;
       }
-      if (endTime && (start_time.isAfter(endTime) || start_time.isSame(endTime))) {
+      if (
+        end_time &&
+        (start_time.isAfter(end_time) || start_time.isSame(end_time))
+      ) {
         setError("Scheduled time must be before end time.");
         return;
       }
     }
 
-    const endTimeString = endTime ? endTime.toDate().toISOString() : null;
+    // ✅ Convert scheduled time and end_time to a proper ISO string before sending
+    const end_timeString = end_time ? end_time.toDate().toISOString() : null;
+    const start_timeString = start_time
+      ? start_time.toDate().toISOString()
+      : null; // ADD
 
-    const listingData = {
-      name,
-      category,
-      condition,
-      description,
-      starting_price: Number(startingPrice),
-      end_time: endTimeString,
-      scheduled,
-      listing_types: "LISTING",
-    };
+    const priceNumber = Number(starting_price);
+    if (!Number.isInteger(priceNumber)) {
+      alert("Starting price must be a whole number!");
+      return;
+    }
+
+    // Prepare form data for file upload
+    const formData = new FormData();
+    formData.append("name", name);
+    formData.append("category", category);
+    formData.append("condition", condition);
+    formData.append("description", description);
+    formData.append("starting_price", String(priceNumber));
+    formData.append("end_time", end_timeString || ""); // Send as string, handle null
+    formData.append("scheduled", String(scheduled));
+    if (scheduled) {
+      formData.append("start_time", start_timeString || "");
+    }
+
+    // Append files to form data
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+
+    console.log("📩 Submitting Form Data with Files");
 
     try {
       const response = await fetch("/api/listings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listingData),
+        body: formData,
       });
 
-      const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.error || "Something went wrong");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create listing");
       }
 
-      router.push("/");
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred.");
-      }
-    } finally {
-      setLoading(false);
+      const data = await response.json();
+      console.log("✅ Server Response:", data);
+      setShowSuccess(true);
+    } catch (error) {
+      console.error("❌ Error submitting form:", error);
+      setError("Failed to create listing");
     }
   };
 
@@ -112,6 +158,7 @@ const ListingForm = () => {
 
         {error && <Alert severity="error">{error}</Alert>}
 
+        {/* success message */}
         <Snackbar
           open={showSuccess}
           autoHideDuration={5000}
@@ -128,7 +175,6 @@ const ListingForm = () => {
         </Snackbar>
 
         <h2>UPLOAD PHOTOS AND VIDEO</h2>
-        {/* 
         <Box
           {...getRootProps()}
           sx={{
@@ -152,21 +198,26 @@ const ListingForm = () => {
             <Box
               key={i}
               position="relative"
-              sx={{ width: 100, height: 100, borderRadius: 2, overflow: "hidden", boxShadow: 1 }}
+              sx={{
+                width: 100,
+                height: 100,
+                borderRadius: 2,
+                overflow: "hidden",
+                boxShadow: 1,
+              }}
             >
-              <Image
+              <img
                 src={URL.createObjectURL(file)}
                 alt={file.name}
-                fill
-                style={{ objectFit: "cover" }}
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
               />
             </Box>
           ))}
         </Box>
-        */}
       </Box>
 
       <form onSubmit={handleSubmit}>
+        {/* Name */}
         <TextField
           label="Listing Name"
           value={name}
@@ -175,8 +226,8 @@ const ListingForm = () => {
           required
           margin="normal"
         />
-
-        <FormControl fullWidth margin="normal">
+        {/* Category */}
+        <FormControl fullWidth margin="normal" required>
           <InputLabel>Item Category</InputLabel>
           <Select
             value={category}
@@ -189,8 +240,8 @@ const ListingForm = () => {
             ))}
           </Select>
         </FormControl>
-
-        <FormControl fullWidth margin="normal">
+        {/* Condition */}
+        <FormControl fullWidth margin="normal" required>
           <InputLabel>Item Condition</InputLabel>
           <Select
             value={condition}
@@ -201,7 +252,7 @@ const ListingForm = () => {
             <MenuItem value="heavily_used">Heavily Used</MenuItem>
           </Select>
         </FormControl>
-
+        {/* Condition Description */}
         <TextField
           label="Condition Description"
           value={description}
@@ -212,42 +263,51 @@ const ListingForm = () => {
           multiline
           rows={3}
         />
-
+        {/* Starting Price */}
         <TextField
           label="Starting Price"
           type="number"
-          value={startingPrice}
-          onChange={(e) => setStartingPrice(e.target.value)}
+          value={starting_price}
+          onChange={(e) => setstarting_price(e.target.value)}
           fullWidth
           required
           margin="normal"
         />
-
+        {/* End Time */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
             label="Auction End Time"
-            value={endTime}
-            onChange={(newValue) => setEndTime(newValue)}
+            value={end_time}
+            onChange={(newValue) => setend_time(newValue)}
+            slotProps={{
+              textField: { required: true },
+            }}
           />
         </LocalizationProvider>
+        {/* Schedule Toggle */}
         <Box sx={{ display: "flex", alignItems: "center", mt: 2 }}>
           <p>Schedule Your Listing</p>
-          <Switch checked={scheduled} onChange={(e) => setScheduled(e.target.checked)} />
+          <Switch
+            checked={scheduled}
+            onChange={(e) => setScheduled(e.target.checked)}
+          />
         </Box>
-
+        {/* Scheduled Start Time (ADDED THIS) */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
             label="Listing Start Time"
             value={start_time}
             onChange={(newValue) => setstart_time(newValue)}
-            disabled={!scheduled}
+            disabled={!scheduled} // disable the field if not scheduled
           />
         </LocalizationProvider>
+        {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-          <Button type="submit" variant="contained" color="primary" disabled={loading}>
-            {loading ? <CircularProgress size={24} /> : "List Now"}
+          <Button variant="contained" color="primary" type="submit">
+            List Now
           </Button>
         </Box>
+        &nbsp;
       </form>
     </Container>
   );

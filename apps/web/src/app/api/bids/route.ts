@@ -22,31 +22,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid bid data" }, { status: 400 });
     }
 
-    const listing = await db.select().from(listings).where(eq(listings.id, listing_id));
+    const listing = await db
+      .select()
+      .from(listings)
+      .where(eq(listings.id, listing_id));
 
     if (!listing.length) {
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    const current_price = listing[0].current_price || listing[0].starting_price;
+    const current_price = listing[0].currentPrice || listing[0].startingPrice;
 
     if (bid_amount <= current_price) {
-      return NextResponse.json({ error: "Bid must be higher than current price" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Bid must be higher than current price" },
+        { status: 400 }
+      );
     }
 
     const newBid = await db
       .insert(bids)
-      .values({ listing_id, user_uuid, bid_amount })
+      .values({
+        listingId: listing_id,
+        userUuid: user_uuid,
+        bidAmount: bid_amount,
+      })
       .returning();
 
     await db
       .update(listings)
-      .set({ current_price: bid_amount })
+      .set({ currentPrice: bid_amount })
       .where(eq(listings.id, listing_id));
 
     return NextResponse.json(newBid[0], { status: 201 });
   } catch (error) {
     console.error("❌ Error placing bid:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

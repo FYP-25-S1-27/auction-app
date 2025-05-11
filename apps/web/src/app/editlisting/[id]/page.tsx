@@ -1,5 +1,7 @@
 "use client";
 
+// MIGHT NOT BE USED
+
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -78,9 +80,15 @@ const EditListingPage = () => {
 
   return (
     <Container maxWidth="sm">
-      <Typography variant="h4" sx={{ mt: 3 }}>Edit Listing</Typography>
+      <Typography variant="h4" sx={{ mt: 3 }}>
+        Edit Listing
+      </Typography>
       {loading && <CircularProgress sx={{ mt: 3 }} />}
-      {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+      {error && (
+        <Alert severity="error" sx={{ mt: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {!loading && (
         <form onSubmit={handleSubmit}>

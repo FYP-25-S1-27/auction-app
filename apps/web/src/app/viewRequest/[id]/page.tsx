@@ -74,7 +74,11 @@ const ViewRequestPage = () => {
           </Typography>
 
           <Box>
-            <Button variant="contained" color="primary" onClick={handleOpenOfferForm}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenOfferForm}
+            >
               Make an Offer
             </Button>
           </Box>
@@ -82,7 +86,9 @@ const ViewRequestPage = () => {
           {showOfferForm && (
             <OfferForm
               requestId={request.id}
-              matchAmount={request.starting_price}
+              // matchAmount={request.starting_price} @azwssoh001 fix this component
+              open={showOfferForm}
+              refreshOffers={() => {}}
               onClose={handleCloseOfferForm}
             />
           )}

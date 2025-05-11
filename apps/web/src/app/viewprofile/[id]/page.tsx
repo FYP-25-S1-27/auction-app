@@ -1,90 +1,173 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import {
   Container,
-  Typography,
+  TextField,
+  Button,
   CircularProgress,
   Alert,
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Box,
-  Card,
-  CardContent,
+  Typography,
+  Radio,
+  RadioGroup,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
 } from "@mui/material";
 
-// ✅ Define Profile type
-interface UserProfile {
-  username: string;
-  age: string;
-  phone: string;
-  address: string;
-  gender: "MALE" | "FEMALE";
-}
-
-const ViewProfilePage = () => {
+const EditProfile = () => {
   const { id } = useParams();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [formData, setFormData] = useState<any>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchListing = async () => {
       try {
-        const res = await fetch(`/api/viewprofile/${id}`);
-        if (!res.ok) throw new Error("Failed to fetch profile");
+        const response = await fetch(`/api/viewprofile/${id}`);
 
-        const data: UserProfile = await res.json();
-        setProfile(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred.");
+        if (!response.ok) {
+          throw new Error("Failed to fetch profile");
         }
+
+        const data = await response.json();
+        setFormData(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProfile();
+    fetchListing();
   }, [id]);
 
-  if (loading) {
-    return (
-      <Container maxWidth="sm">
-        <CircularProgress sx={{ mt: 4 }} />
-      </Container>
-    );
-  }
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-  if (error) {
-    return (
-      <Container maxWidth="sm">
-        <Alert severity="error" sx={{ mt: 4 }}>{error}</Alert>
-      </Container>
-    );
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    try {
+      const response = await fetch(`/api/updateprofile/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: formData.username,
+          user_profile: {
+            age: formData.age,
+            phone: formData.phone,
+            address: formData.address,
+            gender: formData.gender,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update profile");
+      }
+
+      router.push("/demo_profile?success=1");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
 
   return (
-    <Container maxWidth="sm" sx={{ mt: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        User Profile
+    <Container maxWidth="sm">
+      <Typography variant="h4" sx={{ mt: 3 }}>
+        Edit Profile
       </Typography>
 
-      {profile && (
-        <Card>
-          <CardContent>
-            <Typography variant="h6">Username: {profile.username}</Typography>
-            <Typography>Age: {profile.age}</Typography>
-            <Typography>Phone: {profile.phone}</Typography>
-            <Typography>Address: {profile.address}</Typography>
-            <Typography>Gender: {profile.gender}</Typography>
-          </CardContent>
-        </Card>
-      )}
+      {loading && <CircularProgress sx={{ mt: 3 }} />}
+      {error && <Alert severity="error">{error}</Alert>}
+
+      <form onSubmit={handleSubmit}>
+        <TextField
+          name="username"
+          label="Username"
+          fullWidth
+          value={formData.username || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
+
+        <TextField
+          name="age"
+          label="Age"
+          fullWidth
+          value={formData.age || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
+
+        <TextField
+          name="phone"
+          label="Phone"
+          type="number"
+          fullWidth
+          value={formData.phone || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
+
+        <FormControl component="fieldset" sx={{ mt: 3 }}>
+          <FormLabel component="legend">Gender</FormLabel>
+          <RadioGroup
+            row
+            aria-label="gender"
+            name="gender"
+            value={formData.gender || ""}
+            onChange={handleChange}
+          >
+            <FormControlLabel value="MALE" control={<Radio />} label="Male" />
+            <FormControlLabel
+              value="FEMALE"
+              control={<Radio />}
+              label="Female"
+            />
+          </RadioGroup>
+        </FormControl>
+
+        <TextField
+          name="address"
+          label="Address"
+          fullWidth
+          multiline
+          rows={3}
+          value={formData.address || ""}
+          onChange={handleChange}
+          sx={{ mt: 3 }}
+        />
+
+        <Button
+          variant="outlined"
+          color="primary"
+          sx={{ mt: 3 }}
+          onClick={() => router.push("/demo_profile")}
+        >
+          {" "}
+          Cancel
+        </Button>
+
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ mt: 3, ml: 2 }}
+        >
+          {" "}
+          Save Changes
+        </Button>
+      </form>
     </Container>
   );
 };
 
-export default ViewProfilePage;
+export default EditProfile;

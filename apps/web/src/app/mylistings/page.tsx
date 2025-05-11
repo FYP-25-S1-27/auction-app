@@ -1,45 +1,57 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Box,
-  Button,
-  Card,
-  CardContent,
+  Container,
   Typography,
-  Grid,
+  List,
+  ListItem,
+  ListItemText,
+  Button,
+  Box,
   CircularProgress,
   Alert,
 } from "@mui/material";
-import NextLink from "next/link";
+import { listings } from "@/libs/db/schema";
 
-interface Listing {
-  id: number;
-  name: string;
-  category: string;
-  current_price?: number;
-  starting_price: number;
-  end_time: string;
-}
-
-const MyListingsPage = () => {
-  const [listings, setListings] = useState<Listing[]>([]);
+const MyListings = () => {
+  const [_listings, setListings] = useState<(typeof listings.$inferSelect)[]>(
+    []
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const updated = searchParams.get("updated") === "true";
+  const [showSuccess, setShowSuccess] = useState(updated);
+
+  useEffect(() => {
+    if (updated) {
+      // Clear success message after 5 seconds
+      const timeout = setTimeout(() => {
+        setShowSuccess(false);
+      }, 3000);
+
+      router.replace("/mylistings", { scroll: false });
+      return () => clearTimeout(timeout);
+    }
+  }, [updated, router]);
 
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const res = await fetch("/api/mylistings");
-        if (!res.ok) throw new Error("Failed to load listings");
-        const data = await res.json();
-        setListings(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("An unknown error occurred.");
+        const response = await fetch("/api/mylistings");
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch listings");
         }
+
+        const data = await response.json();
+        setListings(data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        setError(error.message);
       } finally {
         setLoading(false);
       }
@@ -48,63 +60,75 @@ const MyListingsPage = () => {
     fetchListings();
   }, []);
 
-  const handleDelete = async (id: number) => {
-    try {
-      const res = await fetch(`/api/listings/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete listing");
-
-      setListings((prev) => prev.filter((item) => item.id !== id));
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred.");
-      }
-    }    
+  const handleEdit = (listingId: number) => {
+    router.push(`/viewlistings/${listingId}`);
   };
 
-  if (loading) return <CircularProgress sx={{ mt: 5 }} />;
-  if (error) return <Alert severity="error">{error}</Alert>;
+  const handleDelete = async (listingId: number) => {
+    if (!confirm("Are you sure you want to delete this listing?")) return;
+
+    try {
+      const response = await fetch(`/api/deletelisting/${listingId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete listing");
+      }
+
+      setListings((prevListings) =>
+        prevListings.filter((item) => item.id !== Number(listingId))
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      setError(error.message);
+    }
+  };
 
   return (
-    <Box sx={{ mt: 4 }}>
-      <Typography variant="h4" sx={{ mb: 3 }}>
+    <Container maxWidth="md">
+      <Typography variant="h4" sx={{ mt: 3 }}>
         My Listings
       </Typography>
-      <Grid container spacing={3}>
-        {listings.map((listing) => (
-          <Grid item xs={12} md={6} key={listing.id}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h6">{listing.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Category: {listing.category}
-                </Typography>
-                <Typography>
-                  Price: ${listing.current_price || listing.starting_price}
-                </Typography>
-                <Typography>
-                  Ends at: {new Date(listing.end_time).toLocaleString()}
-                </Typography>
-                <Box sx={{ mt: 2, display: "flex", gap: 2 }}>
-                  <NextLink href={`/editlisting/${listing.id}`} passHref>
-                    <Button variant="outlined">Edit</Button>
-                  </NextLink>
-                  <Button
-                    variant="contained"
-                    color="error"
-                    onClick={() => handleDelete(listing.id)}
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+
+      {loading && <CircularProgress sx={{ mt: 3 }} />}
+      {error && <Alert severity="error">{error}</Alert>}
+      {showSuccess && (
+        <Alert severity="success">Your listing had updated successfully!</Alert>
+      )}
+
+      <List sx={{ mt: 3 }}>
+        {_listings.map((listing) => (
+          <ListItem
+            key={listing.id}
+            sx={{ display: "flex", justifyContent: "space-between" }}
+          >
+            <ListItemText
+              primary={listing.name}
+              secondary={`Category: ${listing.category} | Price: $${listing.startingPrice}`}
+            />
+            <Box>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleEdit(listing.id)}
+              >
+                Edit
+              </Button>
+              <Button
+                variant="outlined"
+                color="error"
+                sx={{ ml: 2 }}
+                onClick={() => handleDelete(listing.id)}
+              >
+                Delete
+              </Button>
+            </Box>
+          </ListItem>
         ))}
-      </Grid>
-    </Box>
+      </List>
+    </Container>
   );
 };
 
-export default MyListingsPage;
+export default MyListings;

@@ -2,11 +2,10 @@ import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { requests } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
-import { headers } from "next/headers";
 
 export async function POST(req: Request) {
   try {
-    const session = await auth0.getSession(headers());
+    const session = await auth0.getSession();
 
     let userUuid: string | null = null;
 
@@ -20,7 +19,10 @@ export async function POST(req: Request) {
     const { title, description, category } = await req.json();
 
     if (!title || !category) {
-      return NextResponse.json({ error: "Title and category are required." }, { status: 400 });
+      return NextResponse.json(
+        { error: "Title and category are required." },
+        { status: 400 }
+      );
     }
 
     const newRequest = await db
@@ -30,7 +32,6 @@ export async function POST(req: Request) {
         description,
         category,
         userUuid,
-        type: "request",
       })
       .returning();
 
@@ -38,7 +39,10 @@ export async function POST(req: Request) {
     return NextResponse.json(newRequest[0], { status: 201 });
   } catch (error) {
     console.error("❌ Error creating request:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -47,6 +51,9 @@ export async function GET() {
     const allRequests = await db.select().from(requests);
     return NextResponse.json(allRequests, { status: 200 });
   } catch {
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

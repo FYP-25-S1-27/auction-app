@@ -20,7 +20,7 @@ export async function GET() {
     const userListings = await db
       .select()
       .from(listings)
-      .where(eq(listings.user_uuid, user_uuid)); // ✅ Corrected filter
+      .where(eq(listings.userUuid, user_uuid)); // ✅ Corrected filter
 
     console.log("📄 Retrieved Listings:", userListings);
 
