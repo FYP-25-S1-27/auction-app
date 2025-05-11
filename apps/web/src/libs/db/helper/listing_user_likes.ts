@@ -2,7 +2,6 @@ import { faker } from "@faker-js/faker";
 import { db } from "../drizzle";
 import { listingUserLikes } from "../schema";
 
-faker.seed(321);
 const COUNT = 200;
 
 export async function seedUserLikes(listingIds: number[], userIds: string[]) {

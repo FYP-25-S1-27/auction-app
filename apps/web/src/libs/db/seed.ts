@@ -52,8 +52,6 @@ async function main() {
   const skipUsers = args.includes("--skip-users");
   const usersOnly = args.includes("--users-only");
   console.log("Skip users:", skipUsers);
-  console.log("Reseting database...");
-  await reset(db, schema);
 
   if (!skipUsers) {
     console.log(`Creating test users on Auth0 with password="${PASSWORD}" ...`);
@@ -70,6 +68,10 @@ async function main() {
   if (usersOnly) {
     return 0; // Skip seeding other tables
   }
+
+  console.log("Reseting database...");
+  await reset(db, schema);
+
   // Seed users
   console.log("Seeding auth0 users to database...");
   await Promise.all(
