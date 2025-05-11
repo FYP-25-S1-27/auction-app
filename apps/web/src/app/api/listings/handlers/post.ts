@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings, listingImages } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
-import { promises as fs } from "fs";
-import path from "path";
 
 export async function handlePost(req: Request) {
   try {
@@ -31,8 +29,8 @@ export async function handlePost(req: Request) {
     const end_time = formData.get("end_time") as string;
     const start_time = formData.get("start_time") as string;
     const scheduled = formData.get("scheduled") as string;
-    const files: File[] = Array.from(formData.getAll("files") as File[]);
-    const type = formData.get("type") as string; 
+    const image_urls = formData.getAll("image_urls") as string[]; // Use getAll to get all files
+    const type = formData.get("type") as string;
 
     console.log("📩 Received Data:", {
       name,
@@ -41,9 +39,9 @@ export async function handlePost(req: Request) {
       starting_price,
       end_time,
       scheduled,
-      start_time, // ADD 
+      start_time, // ADD
       type,
-      files: files.map((f) => f.name), // Log file names
+      image_urls: image_urls.map((f) => f), // Log file names
     });
 
     // ✅ Validate required fields
@@ -72,47 +70,25 @@ export async function handlePost(req: Request) {
         startingPrice: Number(starting_price), // Ensure it's a number
         endTime: end_time,
         startTime: start_time ? start_time : null, // ADD THIS LINE
-        status: scheduled === 'true' ? "SCHEDULED" : "ACTIVE", // ADD THIS LINE
-        type: 'LISTING', 
+        status: scheduled === "true" ? "SCHEDULED" : "ACTIVE", // ADD THIS LINE
+        type: "LISTING",
       })
       .returning({ id: listings.id });
 
     console.log("✅ Listing created successfully!");
 
     // File uploads and save image URLs
-    const imageUrls: string[] = [];
-    for (const file of files) {
-      if (file instanceof File) {
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        const publicUrl = `/user_uploaded/${file.name}`;
-        const fileDir = path.join(
-          "/Applications/XAMPP/auction-app-main/apps/web/public/user_uploaded/"
-        );
-        const filePath = path.join(fileDir, file.name);
-
-        await fs.mkdir(fileDir, { recursive: true });
-
-        // Save the file 
-        await fs.writeFile(filePath, buffer);
-
-        // Image URL 
-        imageUrls.push(publicUrl);
+    // ✅ Insert image URLs into listingImages table
+    if (image_urls.length > 0) {
+      for (const image_url of image_urls) {
+        await db.insert(listingImages).values({
+          listingId: newListing[0].id,
+          imageUrl: image_url,
+        });
       }
     }
 
-    // ✅ Insert image URLs into listingImages table
-    if (imageUrls.length > 0) {
-      await db.insert(listingImages).values(
-        imageUrls.map((url) => ({
-          listingId: newListing[0].id,
-          imageUrl: url,
-        }))
-      );
-      console.log("Image URLs saved to listingImages");
-    }
-
+    console.log("Image URLs saved to listingImages");
     return NextResponse.json(
       { message: "Listing created successfully!" },
       { status: 201 }
