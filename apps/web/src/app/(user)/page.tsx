@@ -5,6 +5,7 @@ import ListingCarousel from "@/libs/components/listings/ListingCarousel";
 import { getEndingSoonListings } from "@/libs/actions/db/listings/endingSoon";
 import getTopListings from "@/libs/actions/db/listings/topPicks";
 import getRecommendedListings from "@/libs/actions/db/listings/recommended";
+import getRecentSoldTransaction from "@/libs/actions/db/listings/recentSold";
 import { connection } from "next/server";
 
 export default async function LandingPage() {
@@ -29,6 +30,11 @@ export default async function LandingPage() {
       <ListingCarousel
         listings={await getRecommendedListings()}
         title="You might also like"
+      />
+      {/* Recently sold transactions */}
+      <ListingCarousel
+        listings={await getRecentSoldTransaction()}
+        title="Recent Auction Sold Transactions"
       />
     </Container>
   );
