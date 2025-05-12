@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/libs/db/drizzle";
 import { listingCategory, listings, listingUserLikes } from "@/libs/db/schema";
-import { eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 
 export default async function getTopListings() {
   return db
@@ -23,7 +23,12 @@ export default async function getTopListings() {
       likeCount: sql`COUNT(${listingUserLikes.userUuid})`.as("like_count"),
     })
     .from(listings)
-    .where(gt(listings.endTime, new Date().toISOString()))
+    .where(
+      and(
+        gt(listings.endTime, new Date().toISOString()),
+        eq(listings.status, "ACTIVE")
+      )
+    )
     .innerJoin(listingUserLikes, eq(listings.id, listingUserLikes.listingId))
     .innerJoin(listingCategory, eq(listings.category, listingCategory.name))
     .groupBy(listingCategory.parent, listings.id, listings.name)
