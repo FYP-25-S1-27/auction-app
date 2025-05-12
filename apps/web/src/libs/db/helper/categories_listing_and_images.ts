@@ -389,7 +389,7 @@ export async function seedCategoriesListingsAndImages(
         const withinTheWeek = faker.date.soon({ days: 6 });
         const others = faker.date.between({
           from: subDays(new Date(), 60),
-          to: addDays(new Date(), 60),
+          to: addDays(new Date(), 90),
         });
         // Insert listing
         const listingId = await db
