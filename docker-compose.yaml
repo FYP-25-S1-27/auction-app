@@ -3,6 +3,14 @@ services:
     build:
       context: .
       dockerfile: ./Dockerfile-web
+      args:
+        # changed in live build
+        DB_CONNECTION_STRING: "postgres://postgres:postgres@localhost:5433/auction_db"
+        NEXT_PUBLIC_BACKEND_BASE_URL: "http://localhost:3001"
+        # same in live build
+        NEXT_PUBLIC_SUPABASE_URL: https://plcfkilaqxlczftcfcnf.supabase.co
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsY2ZraWxhcXhsY3pmdGNmY25mIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDU5NDE5MjgsImV4cCI6MjA2MTUxNzkyOH0.DRk8gRSkb73NxSqqOOjN9K9oDN6gu1xgRwAM_CFE_Qc
+
     network_mode: host
     ports:
       - "3000:3000"
