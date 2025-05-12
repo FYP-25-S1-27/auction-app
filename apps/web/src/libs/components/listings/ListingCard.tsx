@@ -145,13 +145,26 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
             {listing.name}
           </Typography>
           <Typography variant="subtitle2">{listing.category}</Typography>
-          <Typography variant="subtitle1">${listing.currentPrice}</Typography>
-          <Typography variant="subtitle2" color="text.secondary">
-            ${listing.startingPrice}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {endDateLocale}
-          </Typography>
+          {listing.status === "SOLD" ? (
+          <>
+            <Typography variant="subtitle1">
+              Sold price: ${listing.currentPrice}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Ended at: {endDateLocale}
+            </Typography>
+          </>
+        ) : (
+          <>
+            <Typography variant="subtitle1">${listing.currentPrice}</Typography>
+            <Typography variant="subtitle2" color="text.secondary">
+              ${listing.startingPrice}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {endDateLocale}
+            </Typography>
+          </>
+        )}
         </CardContent>
       </Card>
     </NextLink>
