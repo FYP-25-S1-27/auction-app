@@ -14,19 +14,15 @@ import { listings } from "@/libs/db/schema";
 import { InferSelectModel } from "drizzle-orm";
 import { useEffect, useState } from "react";
 import NextLink from "next/link";
+import { formatDistance } from "date-fns";
 
 type SelectListing = InferSelectModel<typeof listings>;
 
 export default function ListingCard({ listing }: { listing: SelectListing }) {
-
-  const endDateLocale = new Date(listing.endTime).toLocaleString("en-SG", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    timeZoneName: "short",
-  });
+  const endDateFromNow =
+    new Date(listing.endTime) > new Date()
+      ? formatDistance(listing.endTime, new Date())
+      : null;
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [liked, setLiked] = useState(false);
 
@@ -85,89 +81,97 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
   };
 
   if (listing.status !== "SCHEDULED") {
-  return (
-    <NextLink href={`/listing/${listing.id}`}>
-      <Card
-        sx={{
-          width: "16rem",
-          height: "24rem",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <Box sx={{ position: "relative", height: "260px", overflow: "hidden" }}>
-          <IconButton
-            onClick={(e) => {
-              e.preventDefault(); // Prevent navigating to the listing page if the icon is clicked
-              likedListing();
-            }}
-            sx={{
-              position: "absolute",
-              top: "0.5rem",
-              right: "0.5rem",
-              zIndex: 1,
-              backgroundColor: "white",
-              "&:hover": {
-                backgroundColor: "grey.200",
-              },
-            }}
-          >
-            {liked ? (
-              <Favorite sx={{ color: "#007C5F" }} />
-            ) : (
-              <FavoriteBorder sx={{ color: "#007C5F" }} />
-            )}
-          </IconButton>
-          {imageUrl ? (
-            <CardMedia
-              component="img"
-              image={imageUrl}
-              alt={listing.name}
-              sx={{
-                width: "100%", // Make the image take the full width of the card
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <Skeleton variant="rounded" width={"100%"} height={"100%"} />
-          )}
-        </Box>
-        <CardContent
+    return (
+      <NextLink href={`/listing/${listing.id}`}>
+        <Card
           sx={{
+            width: "16rem",
+            height: "24rem",
             display: "flex",
-            flexGrow: 1,
             flexDirection: "column",
-            justifyContent: "space-between",
           }}
         >
-          <Typography gutterBottom variant="body1" component="div">
-            {listing.name}
-          </Typography>
-          <Typography variant="subtitle2">{listing.category}</Typography>
-          {listing.status === "SOLD" ? (
-          <>
-            <Typography variant="subtitle1">
-              Sold price: ${listing.currentPrice}
+          <Box
+            sx={{ position: "relative", height: "260px", overflow: "hidden" }}
+          >
+            <IconButton
+              onClick={(e) => {
+                e.preventDefault(); // Prevent navigating to the listing page if the icon is clicked
+                likedListing();
+              }}
+              sx={{
+                position: "absolute",
+                top: "0.5rem",
+                right: "0.5rem",
+                zIndex: 1,
+                backgroundColor: "white",
+                "&:hover": {
+                  backgroundColor: "grey.200",
+                },
+              }}
+            >
+              {liked ? (
+                <Favorite sx={{ color: "#007C5F" }} />
+              ) : (
+                <FavoriteBorder sx={{ color: "#007C5F" }} />
+              )}
+            </IconButton>
+            {imageUrl ? (
+              <CardMedia
+                component="img"
+                image={imageUrl}
+                alt={listing.name}
+                sx={{
+                  width: "100%", // Make the image take the full width of the card
+                  height: "100%",
+                  objectFit: "cover",
+                }}
+              />
+            ) : (
+              <Skeleton variant="rounded" width={"100%"} height={"100%"} />
+            )}
+          </Box>
+          <CardContent
+            sx={{
+              display: "flex",
+              flexGrow: 1,
+              flexDirection: "column",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography gutterBottom variant="body1" component="div">
+              {listing.name}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Ended at: {endDateLocale}
-            </Typography>
-          </>
-        ) : (
-          <>
-            <Typography variant="subtitle1">${listing.currentPrice}</Typography>
-            <Typography variant="subtitle2" color="text.secondary">
-              ${listing.startingPrice}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {endDateLocale}
-            </Typography>
-          </>
-        )}
-        </CardContent>
-      </Card>
-    </NextLink>
-  );
-}
+            <Typography variant="subtitle2">{listing.category}</Typography>
+            {listing.status === "SOLD" ? (
+              <>
+                <Typography variant="subtitle1">
+                  Winning Bid:{"\t"}${listing.currentPrice}
+                </Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  Closed
+                </Typography>
+                {/* Won't be needed as item is already sold */}
+                {/* <Typography variant="body2" color="text.secondary">
+                  Closing in: {endDateFromNow}
+                </Typography> */}
+              </>
+            ) : (
+              <>
+                <Typography variant={"body1"}>
+                  Current Bid: ${listing.currentPrice}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Starting Bid: ${listing.startingPrice}
+                </Typography>
+                <Typography variant="subtitle2" color="text.secondary">
+                  {endDateFromNow ? `${endDateFromNow} left` : "Ended"}
+                </Typography>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </NextLink>
+    );
+  }
 }

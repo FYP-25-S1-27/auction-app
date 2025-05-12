@@ -74,7 +74,9 @@ export const listings = pgTable(
     endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
     startTime: timestamp({ mode: "string" }), // ADDED THIS
     status: text().default("ACTIVE"), // ACTIVE, SOLD
-    createdAt: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
+    createdAt: timestamp({ mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
   },
   (table) => [
     foreignKey({
@@ -158,7 +160,7 @@ export const transactions = pgTable(
   "transactions",
   {
     id: serial().primaryKey().notNull(),
-    listingId: integer().notNull(),
+    listingId: integer().notNull().unique(),
     buyerUuid: text().notNull(),
     sellerUuid: text().notNull(),
     salePrice: numeric({ precision: 10, scale: 2 }).notNull(),
