@@ -1,6 +1,7 @@
 import { en, Faker } from "@faker-js/faker";
 import { db } from "../drizzle";
 import { listings, listingImages, listingCategory } from "../schema";
+import { addDays, subDays } from "date-fns";
 
 const faker = new Faker({ locale: [en] }); // new instance of faker to override seed
 faker.seed(907845632);
@@ -385,7 +386,11 @@ export async function seedCategoriesListingsAndImages(
           default:
             break;
         }
-
+        const withinTheWeek = faker.date.soon({ days: 6 });
+        const others = faker.date.between({
+          from: subDays(new Date(), 60),
+          to: addDays(new Date(), 60),
+        });
         // Insert listing
         const listingId = await db
           .insert(listings)
@@ -399,7 +404,10 @@ export async function seedCategoriesListingsAndImages(
               min: _startPrice,
               max: _startPrice + 80,
             }),
-            endTime: faker.date.anytime(),
+            endTime: faker.helpers.weightedArrayElement([
+              { weight: 2, value: withinTheWeek },
+              { weight: 8, value: others },
+            ]),
             description: faker.lorem.paragraph(),
             createdAt: faker.date.past({ years: 1 }),
             status: faker.helpers.arrayElement(["ACTIVE", "SOLD"]),
