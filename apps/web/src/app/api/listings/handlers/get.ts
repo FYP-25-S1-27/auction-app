@@ -1,7 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings } from "@/libs/db/schema";
-import { and, eq, gte, lte, ilike, SQL, desc, asc, sql } from "drizzle-orm";
+import {
+  and,
+  gte,
+  lte,
+  ilike,
+  SQL,
+  desc,
+  asc,
+  sql,
+  inArray,
+} from "drizzle-orm";
 
 export async function handleGet(request: NextRequest) {
   try {
@@ -26,7 +36,10 @@ export async function handleGet(request: NextRequest) {
           pageSize = parseInt(value);
           break;
         case "category":
-          filters.push(eq(listings.category, value.toUpperCase()));
+          const categories = value.split(",").map((cat) => cat.toUpperCase());
+          if (categories.length > 0) {
+            filters.push(inArray(listings.category, categories));
+          }
           break;
         case "name":
           filters.push(ilike(listings.name, `%${value}%`));
@@ -51,7 +64,12 @@ export async function handleGet(request: NextRequest) {
           );
           break;
         case "status":
-          filters.push(eq(listings.status, value));
+          filters.push(
+            inArray(
+              listings.status,
+              value.split(",").map((s) => s.toUpperCase())
+            )
+          );
           break;
         case "orderBy":
           // Handle ordering
@@ -59,10 +77,14 @@ export async function handleGet(request: NextRequest) {
             orderBy = asc(listings.currentPrice);
           } else if (value === "priceDesc") {
             orderBy = desc(listings.currentPrice);
-          } else if (value === "createdAtAsc") {
-            orderBy = asc(listings.createdAt);
-          } else if (value === "createdAtDesc") {
-            orderBy = desc(listings.createdAt);
+            // } else if (value === "createdAtAsc") {
+            //   orderBy = asc(listings.createdAt);
+            // } else if (value === "createdAtDesc") {
+            //   orderBy = desc(listings.createdAt);
+          } else if (value === "endTimeAsc") {
+            orderBy = asc(listings.endTime);
+          } else if (value === "endTimeDesc") {
+            orderBy = desc(listings.endTime);
           }
           break;
       }

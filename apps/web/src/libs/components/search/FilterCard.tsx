@@ -14,6 +14,9 @@ import {
   Box,
   TextField,
   Grid,
+  InputLabel,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InferSelectModel } from "drizzle-orm";
@@ -32,19 +35,43 @@ interface FilterProps {
 }
 
 type GetCategories = InferSelectModel<typeof listingCategory>[];
+type ListingStatus = "ACTIVE" | "SOLD";
+type SortOption = "priceAsc" | "priceDesc" | "endTimeAsc" | "endTimeDesc";
+
+function buildCategoryHierarchy(categories: GetCategories) {
+  // Find all root categories (with null parent)
+  const rootCategories = categories.filter((cat) => cat.parent === null);
+
+  // Create the hierarchy
+  return rootCategories.map((parent) => ({
+    ...parent,
+    children: categories.filter((cat) => cat.parent === parent.name),
+  }));
+}
 
 export default function FilterCard({ initialFilters }: FilterProps) {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [categories, setCategories] = useState<GetCategories | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(
-    searchParams.get("category") ? searchParams.get("category")!.split(",") : []
+  const [categoryHierarchy, setCategoryHierarchy] = useState<
+    ReturnType<typeof buildCategoryHierarchy>
+  >([]);
+  const [sortBy, setSortBy] = useState<SortOption>(
+    (searchParams.get("orderBy") as SortOption) || "endTimeAsc"
+  );
+  const [selectedStatuses, setSelectedStatuses] = useState<ListingStatus[]>(
+    searchParams.get("status")
+      ? (searchParams.get("status")!.split(",") as ListingStatus[])
+      : ["ACTIVE"]
   );
 
   const [selectedPriceRange, setSelectedPriceRange] = useState<number[]>([
     Number(searchParams.get("minPrice")) || initialFilters?.minPrice || 0,
     Number(searchParams.get("maxPrice")) || initialFilters?.maxPrice || 1000,
   ]);
+
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(
+    searchParams.get("category") ? searchParams.get("category")!.split(",") : []
+  );
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -53,7 +80,8 @@ export default function FilterCard({ initialFilters }: FilterProps) {
           `${window.location.origin}/api/categories`
         );
         const data: GetCategories = await response.json();
-        setCategories(data);
+        const hierarchical = buildCategoryHierarchy(data);
+        setCategoryHierarchy(hierarchical);
       } catch (error) {
         console.error("Error fetching categories:", error);
       } finally {
@@ -63,6 +91,14 @@ export default function FilterCard({ initialFilters }: FilterProps) {
 
     fetchCategories();
   }, []);
+
+  const handleStatusChange = (status: ListingStatus) => {
+    setSelectedStatuses((prev) =>
+      prev.includes(status)
+        ? prev.filter((s) => s !== status)
+        : [...prev, status]
+    );
+  };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories(
@@ -74,11 +110,13 @@ export default function FilterCard({ initialFilters }: FilterProps) {
   };
 
   const handleReset = () => {
+    setSelectedStatuses(["ACTIVE"]);
     setSelectedPriceRange([
       initialFilters?.minPrice ?? 0,
       initialFilters?.maxPrice ?? 0,
     ]);
     setSelectedCategories([]);
+    setSortBy("endTimeAsc");
   };
 
   const handleSubmit = () => {
@@ -89,6 +127,10 @@ export default function FilterCard({ initialFilters }: FilterProps) {
       minPrice: selectedPriceRange[0].toString(), // Update minPrice
       maxPrice: selectedPriceRange[1].toString(), // Update maxPrice
       category: selectedCategories.join(","), // Include selected categories
+      ...(selectedStatuses.length > 0 && {
+        status: selectedStatuses.join(","),
+      }),
+      orderBy: sortBy,
     };
 
     const queryString = qs.stringify(newParams);
@@ -99,9 +141,55 @@ export default function FilterCard({ initialFilters }: FilterProps) {
     <Box sx={{ maxWidth: "30rem", minWidth: "25rem" }}>
       <FormGroup>
         <form>
-          <Typography variant="h4" color="primary">
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <InputLabel id="sort-label">Sort By</InputLabel>
+            <Select
+              value={sortBy}
+              label="Sort By"
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+            >
+              <MenuItem value="priceAsc">Price: Asc</MenuItem>
+              <MenuItem value="priceDesc">Price: Desc</MenuItem>
+              <MenuItem value="endTimeAsc">End Date: Asc</MenuItem>
+              <MenuItem value="endTimeDesc">End Date: Desc</MenuItem>
+            </Select>
+          </Box>
+          <Typography variant="h5" color="primary">
             Filter by
           </Typography>
+          <Accordion>
+            <AccordionSummary
+              expandIcon={<ExpandMoreIcon />}
+              aria-controls="status-content"
+              id="status-header"
+            >
+              <Typography variant="h5" color="primary">
+                Status
+              </Typography>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Stack spacing={1} direction={"row"}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedStatuses.includes("ACTIVE")}
+                      onChange={() => handleStatusChange("ACTIVE")}
+                    />
+                  }
+                  label="Active"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedStatuses.includes("SOLD")}
+                      onChange={() => handleStatusChange("SOLD")}
+                    />
+                  }
+                  label="Sold"
+                />
+              </Stack>
+            </AccordionDetails>
+          </Accordion>
           <Accordion defaultExpanded>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
@@ -165,28 +253,51 @@ export default function FilterCard({ initialFilters }: FilterProps) {
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
-              <Grid container spacing={5}>
+              <Stack spacing={0}>
                 {isLoading ? (
                   <Typography>Loading categories...</Typography>
-                ) : categories ? (
-                  categories.map((category) => (
-                    <Grid key={category.name}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={selectedCategories.includes(category.name)}
-                            onChange={() => handleCategoryChange(category.name)}
-                          />
-                        }
-                        label={category.name}
-                        sx={{ width: "100%", marginRight: 0, minWidth: "10em" }}
-                      />
-                    </Grid>
+                ) : categoryHierarchy ? (
+                  categoryHierarchy.map((category) => (
+                    <Accordion key={category.name}>
+                      <AccordionSummary
+                        expandIcon={<ExpandMoreIcon />}
+                        aria-controls="category-parent-content"
+                        id="category-parent-header"
+                      >
+                        <Typography variant={"body1"} color="primary">
+                          {category.name}
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        {category.children.map((childCategory) => (
+                          <Grid key={childCategory.name}>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={selectedCategories.includes(
+                                    childCategory.name
+                                  )}
+                                  onChange={() =>
+                                    handleCategoryChange(childCategory.name)
+                                  }
+                                />
+                              }
+                              label={childCategory.name}
+                              sx={{
+                                width: "100%",
+                                marginRight: 0,
+                                minWidth: "10em",
+                              }}
+                            />
+                          </Grid>
+                        ))}
+                      </AccordionDetails>
+                    </Accordion>
                   ))
                 ) : (
                   <Typography>No categories available</Typography>
                 )}
-              </Grid>
+              </Stack>
             </AccordionDetails>
           </Accordion>
           <Stack direction={"row"} spacing={2} marginTop={"1rem"}>
