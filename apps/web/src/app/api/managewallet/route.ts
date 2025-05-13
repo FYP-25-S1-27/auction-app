@@ -65,11 +65,23 @@ export async function POST(req: NextRequest) {
     }
 
     // Fetch the current wallet balance
-    const existingwallet = await db
+    let existingwallet = await db
       .select()
       .from(wallets)
       .where(eq(wallets.userUuid, user_uuid))
       .limit(1);
+
+    if (existingwallet.length === 0) {
+      // If no wallet exists, create a new one
+      existingwallet = await db
+        .insert(wallets)
+        .values({
+          userUuid: user_uuid,
+          balance: 0,
+          lastUpdated: new Date().toISOString(),
+        })
+        .returning();
+    }
 
     const lastUpdated = new Date().toISOString();
 

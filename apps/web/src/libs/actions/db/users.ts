@@ -2,6 +2,7 @@
 
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
+import { randomInt } from "crypto";
 import { eq } from "drizzle-orm";
 
 // set user is_admin status
@@ -25,6 +26,10 @@ export async function getUser(uuid: string) {
 export async function upsertUser(uuid: string, nickname: string) {
   await db
     .insert(users)
-    .values({ uuid, username: nickname, isAdmin: false })
+    .values({
+      uuid,
+      username: `${nickname}.${randomInt(9)}${randomInt(9)}`,
+      isAdmin: false,
+    })
     .onConflictDoNothing(); // ensures it won’t fail if user exists
 }
