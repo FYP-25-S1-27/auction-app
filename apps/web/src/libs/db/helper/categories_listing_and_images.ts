@@ -1,7 +1,7 @@
 import { en, Faker } from "@faker-js/faker";
 import { db } from "../drizzle";
 import { listings, listingImages, listingCategory } from "../schema";
-import { addDays, subDays } from "date-fns";
+import { addDays } from "date-fns";
 
 const faker = new Faker({ locale: [en] }); // new instance of faker to override seed
 faker.seed(907845632);
@@ -383,12 +383,17 @@ export async function seedCategoriesListingsAndImages(userId: string[]) {
           default:
             break;
         }
+        const _createAt = faker.date.past({ years: 1 });
         const withinTheWeek = faker.date.soon({ days: 6 });
         const others = faker.date.between({
-          from: subDays(new Date(), 60),
-          to: addDays(new Date(), 90),
+          from: _createAt,
+          to: addDays(_createAt, 90),
         });
         // Insert listing
+        const _endDateTime = faker.helpers.weightedArrayElement([
+          { weight: 2, value: withinTheWeek },
+          { weight: 8, value: others },
+        ]);
         const listingId = await db
           .insert(listings)
           .values({
@@ -397,16 +402,10 @@ export async function seedCategoriesListingsAndImages(userId: string[]) {
             category: subcat.toUpperCase(),
             name: listingName,
             startingPrice: _startPrice,
-            currentPrice: faker.number.int({
-              min: _startPrice,
-              max: _startPrice + 80,
-            }),
-            endTime: faker.helpers.weightedArrayElement([
-              { weight: 2, value: withinTheWeek },
-              { weight: 8, value: others },
-            ]),
+            currentPrice: _startPrice,
+            endTime: _endDateTime,
             description: faker.lorem.paragraph(),
-            createdAt: faker.date.past({ years: 1 }),
+            createdAt: _createAt,
             status: faker.helpers.arrayElement(["ACTIVE", "SOLD"]),
           })
           .returning({ id: listings.id });

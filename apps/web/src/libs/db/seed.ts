@@ -115,12 +115,12 @@ async function main() {
 
   const listingIds = allListings.map((listing) => listing.id);
 
-  await Promise.all([
-    console.log("Seeding bids..."),
-    seedBids(allListings, _userIdsWithoutAdmins),
+  console.log("Seeding bids...");
+  await seedBids(allListings, _userIdsWithoutAdmins);
 
+  await Promise.all([
     console.log("Seeding transactions..."),
-    seedTransactions(listingIds, _userIdsWithoutAdmins),
+    seedTransactions(allListings, _userIdsWithoutAdmins),
 
     console.log("Seeding listing user likes..."),
     seedUserLikes(listingIds, _userIdsWithoutAdmins),
