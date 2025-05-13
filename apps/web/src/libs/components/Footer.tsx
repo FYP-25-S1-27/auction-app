@@ -4,7 +4,7 @@ import Image from "next/image";
 
 export default async function Footer() {
   return (
-    <Stack direction="column">
+    <Stack direction="column" mt={"2rem"}>
       <Divider />
       <Container>
         <Stack direction="row" gap={2} marginTop={2} marginBottom={2}>
