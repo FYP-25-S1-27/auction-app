@@ -19,6 +19,7 @@ import {
 import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
 import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
+import { useUser } from "@auth0/nextjs-auth0";
 
 const ViewListingPage = () => {
   const { id } = useParams();
@@ -30,6 +31,8 @@ const ViewListingPage = () => {
   const [latestBids, setLatestBids] = useState<
     Awaited<ReturnType<typeof getLatestBids>>
   >([]); // Adjust type as needed
+
+  const user = useUser();
 
   const fetchListing = useCallback(async () => {
     try {
@@ -62,7 +65,11 @@ const ViewListingPage = () => {
         const now = new Date().getTime();
         const diff = end - now;
 
-        if (diff <= 0) {
+        if (
+          diff <= 0 ||
+          listing.status?.toUpperCase() !== "ACTIVE" ||
+          new Date(listing.end_time) < new Date()
+        ) {
           setTimeLeft("Auction Ended");
           clearInterval(interval);
         } else {
@@ -121,18 +128,40 @@ const ViewListingPage = () => {
         </Grid>
 
         <Grid item xs={12} md={5}>
-          <Typography variant="h5">{listing.name}</Typography>
+          <Typography variant="h5" color={"textPrimary"}>
+            {listing.name}
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Category: {listing.category}
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Status: {listing.status?.toUpperCase() ?? "Unknown"}
+          </Typography>
           <Typography variant="body2" color="textSecondary">
             Ends at: {formattedEndTime}
           </Typography>
           <Typography variant="body2" color="error" sx={{ fontWeight: "bold" }}>
             {timeLeft}
           </Typography>
-          <Typography variant="h4" color="error" sx={{ mt: 1 }}>
+          <Typography
+            variant="h4"
+            color={listing.status === "ACTIVE" ? "primary" : "error"}
+            sx={{ mt: 1 }}
+          >
             {formattedPrice}
+          </Typography>
+          <Typography variant="subtitle1" color={"textSecondary"}>
+            Starting Bid: ${listing.starting_price}
           </Typography>
 
           <Button
+            disabled={
+              !listing ||
+              !user ||
+              listing.status?.toUpperCase() !== "ACTIVE" ||
+              new Date(listing.end_time) < new Date() ||
+              listing.user_uuid === user.user?.sub
+            }
             variant="contained"
             color="primary"
             sx={{ mt: 2 }}
