@@ -163,7 +163,7 @@ export const transactions = pgTable(
     listingId: integer().notNull().unique(),
     buyerUuid: text().notNull(),
     sellerUuid: text().notNull(),
-    salePrice: numeric({ precision: 10, scale: 2 }).notNull(),
+    salePrice: integer().notNull(),
     transactionDate: timestamp({ mode: "string" }).default(
       sql`CURRENT_TIMESTAMP`
     ),

@@ -20,10 +20,10 @@ export async function seedUserInterests(userIds: string[]) {
       // Check if the error is a duplicate key error
       if (error.code === "23505") {
         // Duplicate key error, skip this iteration
-        console.warn(
-          "Duplicate key detected, skipping iteration:",
-          error.detail
-        );
+        // console.warn(
+        //   "Duplicate key detected, skipping iteration:",
+        //   error.detail
+        // );
         i--; // Decrement the counter to retry this iteration
         continue;
       }

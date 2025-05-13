@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
+import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
+import { useUser } from "@auth0/nextjs-auth0";
 
 const ViewListingPage = () => {
   const { id } = useParams();
@@ -26,6 +28,11 @@ const ViewListingPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
+  const [latestBids, setLatestBids] = useState<
+    Awaited<ReturnType<typeof getLatestBids>>
+  >([]); // Adjust type as needed
+
+  const user = useUser();
 
   const fetchListing = useCallback(async () => {
     try {
@@ -38,8 +45,17 @@ const ViewListingPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id) fetchListing();
+    if (id) {
+      fetchListing();
+    }
   }, [id, fetchListing]);
+  useEffect(() => {
+    if (id) {
+      getLatestBids(parseInt(id as string)).then((bids) => {
+        setLatestBids(bids);
+      });
+    }
+  }, [id, showSuccess]);
 
   // ⏳ Live countdown timer
   useEffect(() => {
@@ -49,7 +65,11 @@ const ViewListingPage = () => {
         const now = new Date().getTime();
         const diff = end - now;
 
-        if (diff <= 0) {
+        if (
+          diff <= 0 ||
+          listing.status?.toUpperCase() !== "ACTIVE" ||
+          new Date(listing.end_time) < new Date()
+        ) {
           setTimeLeft("Auction Ended");
           clearInterval(interval);
         } else {
@@ -67,7 +87,7 @@ const ViewListingPage = () => {
   const handleBidPlaced = () => {
     fetchListing();
     setModalOpen(false);
-    setShowSuccess(true);
+    // setShowSuccess(true); this shall be handled by the modal/form
   };
 
   if (!listing) return <Typography>Loading...</Typography>;
@@ -108,18 +128,40 @@ const ViewListingPage = () => {
         </Grid>
 
         <Grid item xs={12} md={5}>
-          <Typography variant="h5">{listing.name}</Typography>
+          <Typography variant="h5" color={"textPrimary"}>
+            {listing.name}
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Category: {listing.category}
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Status: {listing.status?.toUpperCase() ?? "Unknown"}
+          </Typography>
           <Typography variant="body2" color="textSecondary">
             Ends at: {formattedEndTime}
           </Typography>
           <Typography variant="body2" color="error" sx={{ fontWeight: "bold" }}>
             {timeLeft}
           </Typography>
-          <Typography variant="h4" color="error" sx={{ mt: 1 }}>
+          <Typography
+            variant="h4"
+            color={listing.status === "ACTIVE" ? "primary" : "error"}
+            sx={{ mt: 1 }}
+          >
             {formattedPrice}
+          </Typography>
+          <Typography variant="subtitle1" color={"textSecondary"}>
+            Starting Bid: ${listing.starting_price}
           </Typography>
 
           <Button
+            disabled={
+              !listing ||
+              !user ||
+              listing.status?.toUpperCase() !== "ACTIVE" ||
+              new Date(listing.end_time) < new Date() ||
+              listing.user_uuid === user.user?.sub
+            }
             variant="contained"
             color="primary"
             sx={{ mt: 2 }}
@@ -141,8 +183,23 @@ const ViewListingPage = () => {
             <Typography fontWeight="bold">Delivery</Typography>
             <Typography>
               {listing.delivery_estimate ??
-                "Estimated between Tue, 1 Mar and Wed, 7 Mar"}
+                "Estimated between 3-10 business days"}
             </Typography>
+          </Box>
+          <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
+            <Typography fontWeight="bold">Latest Bids</Typography>
+            {latestBids.length > 0 ? (
+              latestBids.map((bid) => (
+                <Box key={bid.id} sx={{ mt: 1 }}>
+                  <Typography>${bid.bidAmount}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {new Date(bid.bidTime).toLocaleString()}
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography>No bids placed yet.</Typography>
+            )}
           </Box>
         </Grid>
       </Grid>
@@ -180,6 +237,7 @@ const ViewListingPage = () => {
         open={modalOpen}
         onClose={handleBidPlaced}
         listingId={Number(id)}
+        setShowSuccessMessage={setShowSuccess}
       />
 
       <Snackbar

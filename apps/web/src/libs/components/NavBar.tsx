@@ -21,6 +21,7 @@ import PopupState, { bindTrigger, bindMenu } from "material-ui-popup-state";
 import { Fragment, useEffect, useState } from "react";
 import { getRole } from "@/libs/actions/db/users";
 import { useSearchParams } from "next/navigation";
+import getWalletBalance from "../actions/db/wallet/getWalletBalance";
 // import { getListingCategories } from "../actions/db/listing_category";
 // import { listing_category } from "../db/schema";
 
@@ -35,6 +36,7 @@ export default function NavBar() {
       window.location.href = `/search?name=${searchNameQuery}`;
     }
   };
+  const [walletBalance, setWalletBalance] = useState<number>(0);
 
   useEffect(() => {
     if (auth.user) {
@@ -45,6 +47,9 @@ export default function NavBar() {
           setis_admin(false);
         }
       });
+      getWalletBalance(auth.user.sub).then((balance) =>
+        setWalletBalance(balance)
+      );
     }
     const x = searchParams.get("name");
     if (x) {
@@ -118,7 +123,6 @@ export default function NavBar() {
                       My Listings
                     </span>
                   </NextLink>
-
                   <NextLink href="/createlisting" passHref>
                     <span
                       style={{
@@ -129,6 +133,18 @@ export default function NavBar() {
                       }}
                     >
                       Sell
+                    </span>
+                  </NextLink>
+                  <NextLink href={"/wallet"}>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      ${walletBalance}
                     </span>
                   </NextLink>
                 </div>

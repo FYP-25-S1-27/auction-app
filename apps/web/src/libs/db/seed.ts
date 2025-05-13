@@ -1,4 +1,4 @@
-import { reset, seed } from "drizzle-seed";
+import { reset } from "drizzle-seed";
 import { db } from "./drizzle";
 import * as schema from "./schema";
 import { ManagementApiError } from "auth0";
@@ -11,7 +11,6 @@ import { seedUserInterests } from "./helper/user_category_interests";
 import { seedWallets } from "./helper/wallet";
 import { getAuth0ManagementClient } from "../actions/auth0-management";
 
-const COUNT = 50;
 const USER_COUNT = 50;
 const ADMIN_COUNT = 5;
 const PASSWORD = "1Qwer$#@!";
@@ -76,13 +75,25 @@ async function main() {
   await reset(db, schema);
 
   // Seed users
-  console.log("Seeding auth0 users to database...");
+  console.log("Seeding auth0 users to database along with profile...");
   await Promise.all(
     auth0users.map(async (user) => {
       await db.insert(schema.users).values({
         uuid: user.user_id,
-        username: `${user.nickname}.${faker.number.int({ min: 1, max: 9 })}`,
+        username: `${user.nickname}.${faker.number.int({
+          min: 0,
+          max: 9,
+        })}${faker.number.int({ min: 0, max: 9 })}`,
         isAdmin: /admin/.test(user.email) ? true : false, // Set admin status based on email using regex
+        createdAt: new Date(user.created_at.toString()),
+      });
+      await db.insert(schema.userProfile).values({
+        userUuid: user.user_id,
+        bio: faker.person.bio(),
+        phone: faker.phone.number({ style: "international" }),
+        address: faker.location.streetAddress(),
+        gender: faker.helpers.arrayElement(["MALE", "FEMALE"]),
+        age: faker.number.int({ min: 18, max: 70 }),
         createdAt: new Date(user.created_at.toString()),
       });
     })
@@ -96,89 +107,30 @@ async function main() {
         .find((user) => user.user_id === userId)
         ?.email?.includes("admin")
   );
+
   console.log("Seeding categories, accompanying listings and images...");
-  const { listingIds } = await seedCategoriesListingsAndImages(
+  const { allListings } = await seedCategoriesListingsAndImages(
     _userIdsWithoutAdmins
   );
+
+  const listingIds = allListings.map((listing) => listing.id);
+
   console.log("Seeding bids...");
-  await seedBids(listingIds, _userIdsWithoutAdmins);
-  console.log("Seeding transactions...");
-  await seedTransactions(listingIds, _userIdsWithoutAdmins);
-  console.log("Seeding listing user likes...");
-  await seedUserLikes(listingIds, _userIdsWithoutAdmins);
+  await seedBids(allListings, _userIdsWithoutAdmins);
 
-  const {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    users, // handled above
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    listingCategory, // handled by helper/categories_listing_and_images
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    listings, // handled by helper/categories_listing_and_images
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    listingImages, // handled by helper/categories_listing_and_images
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    listingUserLikes, // handled by helper/listing_user_likes
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    bids, // handled by helper/bids
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    transactions, // handled by helper/transactions
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    user_category_interests, // handled by helper/user_category_interests
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    offers, // wip
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    requests, // wip
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    wallets,
-    ...schemaFiltered
-  } = schema; // Remove tables from schemas
-  // Seed remaining tables
-  console.log("Seeding remaining tables (except user interests)...");
-  await seed(db, schemaFiltered, { count: COUNT, seed: 321 }).refine((f) => ({
-    userProfile: {
-      count: auth0users.length,
-      columns: {
-        userUuid: f.valuesFromArray({
-          values: auth0users.map((user) => user.user_id),
-          isUnique: true,
-        }),
-        gender: f.valuesFromArray({ values: ["MALE", "FEMALE"] }),
-        age: f.int({ minValue: 18, maxValue: 90 }),
-        bio: f.valuesFromArray({
-          values: Array.from({ length: auth0users.length }, () =>
-            faker.person.bio()
-          ),
-        }),
-        phone: f.valuesFromArray({
-          values: Array.from({ length: auth0users.length }, () =>
-            faker.phone.number()
-          ),
-        }),
-        address: f.valuesFromArray({
-          values: Array.from({ length: auth0users.length }, () =>
-            faker.location.streetAddress()
-          ),
-        }),
-        createdAt: f.valuesFromArray({
-          values: Array.from(
-            { length: auth0users.length },
-            () => faker.date.past() as unknown as string // surpasses type safety, only use for seeding as we know it is a date
-          ),
-        }),
-        updatedAt: f.valuesFromArray({
-          values: Array.from(
-            { length: auth0users.length },
-            () => faker.date.recent({ days: 90 }) as unknown as string // surpasses type safety, only use for seeding as we know it is a date
-          ),
-        }),
-      },
-    },
-  }));
+  await Promise.all([
+    console.log("Seeding transactions..."),
+    seedTransactions(allListings, _userIdsWithoutAdmins),
 
-  console.log("Seeding user category interests..."); // placed here as it relies on profiles being created first
-  await seedUserInterests(_userIdsWithoutAdmins);
-  console.log("Seeding wallets...");
-  await seedWallets(_userIdsWithoutAdmins);
+    console.log("Seeding listing user likes..."),
+    seedUserLikes(listingIds, _userIdsWithoutAdmins),
+
+    console.log("Seeding user category interests..."),
+    seedUserInterests(_userIdsWithoutAdmins),
+
+    console.log("Seeding wallets..."),
+    seedWallets(_userIdsWithoutAdmins),
+  ]);
   return 0;
 }
 
