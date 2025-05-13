@@ -73,7 +73,7 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <Box
-      sx={{ minHeight: "100vh", backgroundColor: "#f5f5f5", padding: "24px" }}
+      sx={{ minHeight: "80vh", backgroundColor: "#f5f5f5", padding: "24px" }}
     >
       <Box sx={{ display: "flex", gap: 4, marginTop: 4 }}>
         {/* Sidebar */}
