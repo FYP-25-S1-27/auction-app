@@ -109,13 +109,15 @@ async function main() {
   );
 
   console.log("Seeding categories, accompanying listings and images...");
-  const { listingIds } = await seedCategoriesListingsAndImages(
+  const { allListings } = await seedCategoriesListingsAndImages(
     _userIdsWithoutAdmins
   );
 
+  const listingIds = allListings.map((listing) => listing.id);
+
   await Promise.all([
     console.log("Seeding bids..."),
-    seedBids(listingIds, _userIdsWithoutAdmins),
+    seedBids(allListings, _userIdsWithoutAdmins),
 
     console.log("Seeding transactions..."),
     seedTransactions(listingIds, _userIdsWithoutAdmins),

@@ -20,10 +20,7 @@ export const CATEGORIES = {
   WATCHES: ["LUXURY", "SMARTWATCHES", "CASUAL"],
 };
 
-export async function seedCategoriesListingsAndImages(
-  userId: string[]
-): Promise<{ listingIds: number[] }> {
-  let listingIds: number[] = [];
+export async function seedCategoriesListingsAndImages(userId: string[]) {
   // insert categories
   for (const [parent, subcats] of Object.entries(CATEGORIES)) {
     await db.insert(listingCategory).values({
@@ -425,6 +422,5 @@ export async function seedCategoriesListingsAndImages(
 
   // Get all listing IDs
   const allListings = await db.select().from(listings);
-  listingIds = allListings.map((listing) => listing.id);
-  return { listingIds };
+  return { allListings };
 }
