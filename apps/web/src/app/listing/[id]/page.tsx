@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
+import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
 
 const ViewListingPage = () => {
   const { id } = useParams();
@@ -26,6 +27,9 @@ const ViewListingPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
+  const [latestBids, setLatestBids] = useState<
+    Awaited<ReturnType<typeof getLatestBids>>
+  >([]); // Adjust type as needed
 
   const fetchListing = useCallback(async () => {
     try {
@@ -38,8 +42,17 @@ const ViewListingPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id) fetchListing();
+    if (id) {
+      fetchListing();
+    }
   }, [id, fetchListing]);
+  useEffect(() => {
+    if (id) {
+      getLatestBids(parseInt(id as string)).then((bids) => {
+        setLatestBids(bids);
+      });
+    }
+  }, [id, showSuccess]);
 
   // ⏳ Live countdown timer
   useEffect(() => {
@@ -141,8 +154,23 @@ const ViewListingPage = () => {
             <Typography fontWeight="bold">Delivery</Typography>
             <Typography>
               {listing.delivery_estimate ??
-                "Estimated between Tue, 1 Mar and Wed, 7 Mar"}
+                "Estimated between 3-10 business days"}
             </Typography>
+          </Box>
+          <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
+            <Typography fontWeight="bold">Latest Bids</Typography>
+            {latestBids.length > 0 ? (
+              latestBids.map((bid) => (
+                <Box key={bid.id} sx={{ mt: 1 }}>
+                  <Typography>${bid.bidAmount}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {new Date(bid.bidTime).toLocaleString()}
+                  </Typography>
+                </Box>
+              ))
+            ) : (
+              <Typography>No bids placed yet.</Typography>
+            )}
           </Box>
         </Grid>
       </Grid>
