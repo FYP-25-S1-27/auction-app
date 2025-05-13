@@ -29,6 +29,7 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user_profile: { [key: string]: any };
   };
+
   const [userProfiles, setUserProfiles] = useState<JoinedUserProfile[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [error, setError] = useState<string | null>(null);
@@ -36,13 +37,20 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user) return;
     const fetchUsername = async () => {
       try {
-        const res = await fetch("/api/profile");
-        if (!res.ok) throw new Error("Failed to fetch profile");
+        const res = await fetch("/api/profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ user_uuid: user.sub }),
+        });
 
-        const data: JoinedUserProfile[] = await res.json();
-        setUserProfiles(data);
+        const { profile } = await res.json();
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        setUserProfiles(profile);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message);
@@ -50,7 +58,6 @@ const ProfileLayout = ({ children }: { children: React.ReactNode }) => {
         setLoading(false);
       }
     };
-    if (!user) return;
     getRole(user.sub).then((x) => {
       if (x[0].is_admin) {
         setTabs((prev) =>
