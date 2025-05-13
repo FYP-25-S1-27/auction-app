@@ -20,10 +20,13 @@ import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
 import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
 import { useUser } from "@auth0/nextjs-auth0";
+import ChatModal from "@/libs/components/chats/ChatModal";
+import { useRouter } from "next/navigation";
 
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
   const [listing, setListing] = useState<GetListingByIdWithImages | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
@@ -33,6 +36,7 @@ const ViewListingPage = () => {
   >([]); // Adjust type as needed
 
   const user = useUser();
+  const router = useRouter();
 
   const fetchListing = useCallback(async () => {
     try {
@@ -89,6 +93,14 @@ const ViewListingPage = () => {
     setModalOpen(false);
     // setShowSuccess(true); this shall be handled by the modal/form
   };
+
+  function handleChatClick() {
+    if (user.user?.sub) {
+      setChatModalOpen(true);
+    } else {
+      router.push("/api/auth/login");
+    }
+  }
 
   if (!listing) return <Typography>Loading...</Typography>;
 
@@ -228,11 +240,22 @@ const ViewListingPage = () => {
           </Box>
           <Box mt={2} display="flex" gap={2}>
             {/* <Button variant="outlined">Other Products</Button> */}
-            <Button variant="contained">Contact</Button>
+            <Button variant="contained" onClick={handleChatClick}>
+              Send a message
+            </Button>
           </Box>
         </Box>
       </Box>
-
+      {user.user?.sub && (
+        <ChatModal
+          open={chatModalOpen}
+          onClose={() => setChatModalOpen(false)}
+          userUuid={user.user.sub}
+          otherPartyUuid={listing.user_uuid}
+          otherPartyUuidUsername={listing.seller_name}
+          preFilledMessage={`Hi, I am interested in your ${listing.name}.`}
+        />
+      )}
       <BidFormModal
         open={modalOpen}
         onClose={handleBidPlaced}

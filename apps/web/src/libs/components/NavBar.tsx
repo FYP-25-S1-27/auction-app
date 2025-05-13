@@ -108,6 +108,8 @@ export default function NavBar() {
                   style={{
                     display: "flex",
                     alignItems: "center",
+                    alignContent: "center",
+                    textAlign: "center",
                     gap: "16px",
                   }}
                 >
@@ -133,6 +135,18 @@ export default function NavBar() {
                       }}
                     >
                       Sell
+                    </span>
+                  </NextLink>
+                  <NextLink href="/chats" passHref>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      Chats
                     </span>
                   </NextLink>
                   <NextLink href={"/wallet"}>

@@ -263,3 +263,29 @@ export const offers = pgTable(
     }).onDelete("cascade"),
   ]
 );
+
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: serial().primaryKey().notNull(),
+    conversationId: text().notNull(),
+    senderUuid: text().notNull(),
+    receiverUuid: text().notNull(),
+    message: text().notNull(),
+    createdAt: timestamp({ mode: "string" })
+      .default(sql`CURRENT_TIMESTAMP`)
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.senderUuid],
+      foreignColumns: [users.uuid],
+      name: "chat_messages_sender_uuid_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.receiverUuid],
+      foreignColumns: [users.uuid],
+      name: "chat_messages_receiver_uuid_fkey",
+    }).onDelete("cascade"),
+  ]
+);
