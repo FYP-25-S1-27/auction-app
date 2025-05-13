@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth0 } from "@/libs/auth0";
 import { db } from "@/libs/db/drizzle";
-import { bids, listings } from "@/libs/db/schema";
+import { bids, listings, wallets } from "@/libs/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function POST(req: NextRequest) {
@@ -22,6 +22,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid bid data" }, { status: 400 });
     }
 
+    const userWallet = await db
+      .select()
+      .from(wallets)
+      .where(eq(wallets.userUuid, user_uuid));
+
     const listing = await db
       .select()
       .from(listings)
@@ -36,6 +41,12 @@ export async function POST(req: NextRequest) {
     if (bid_amount <= current_price) {
       return NextResponse.json(
         { error: "Bid must be higher than current price" },
+        { status: 400 }
+      );
+    }
+    if (bid_amount > userWallet[0].balance) {
+      return NextResponse.json(
+        { error: "Insufficient funds in wallet" },
         { status: 400 }
       );
     }
