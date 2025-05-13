@@ -80,6 +80,11 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
     }
   };
 
+  // for padding, return empty card (invisible)
+  if (listing.id === -1) {
+    return <Box sx={{ width: "16rem", height: "24rem" }}></Box>;
+  }
+
   if (listing.status !== "SCHEDULED") {
     return (
       <NextLink href={`/listing/${listing.id}`}>

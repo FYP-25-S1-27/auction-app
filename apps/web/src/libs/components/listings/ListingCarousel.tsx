@@ -17,27 +17,71 @@ export default function ListingCarousel({
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const itemsPerPage = 4;
-
+  const noOfPages = Math.ceil(listings.length / itemsPerPage);
+  // Create padded array of listings
+  const paddedListings = [...listings];
+  const remainingSlots = itemsPerPage - (listings.length % itemsPerPage);
+  // Only pad if we need to (when listings length is not divisible by itemsPerPage)
+  if (remainingSlots !== itemsPerPage) {
+    for (let i = 0; i < remainingSlots; i++) {
+      paddedListings.push({
+        id: -1,
+        userUuid: "",
+        category: "",
+        name: "NIL",
+        description: null,
+        startingPrice: 0,
+        currentPrice: null,
+        type: "LISTING",
+        endTime: "",
+        startTime: null,
+        status: null,
+        createdAt: "",
+      });
+    }
+  }
   const handlePrev = () => {
     setCurrentIndex((prev) => Math.max(prev - itemsPerPage, 0));
   };
 
   const handleNext = () => {
     setCurrentIndex((prev) =>
-      Math.min(prev + itemsPerPage, listings.length - itemsPerPage)
+      Math.min(prev + itemsPerPage, paddedListings.length - itemsPerPage)
     );
   };
 
-  const visibleItems = listings.slice(
+  const visibleItems = paddedListings.slice(
     currentIndex,
     currentIndex + itemsPerPage
   );
 
   return (
     <Box marginTop={"1rem"} marginBottom={"3rem"}>
-      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
-        {title}
-      </Typography>
+      <Stack direction={"column"} pl={"3.5rem"} gap={"0.5rem"} mb={"0.5rem"}>
+        <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          {title}
+        </Typography>
+        <Stack direction={"row"} gap={"0.5rem"}>
+          {[...Array(noOfPages)].map((_, index) => (
+            <Box
+              component={"button"}
+              key={index}
+              pl={"3.5rem"}
+              bgcolor={
+                index <= Math.floor(currentIndex / itemsPerPage)
+                  ? "#007C5F"
+                  : "#6F6F6F"
+              }
+              // width={"2px"}
+              height={"8px"}
+              onClick={() => {
+                setCurrentIndex(index * itemsPerPage);
+              }}
+              type={"button"}
+            />
+          ))}
+        </Stack>
+      </Stack>
       <Stack direction={"row"} alignItems={"center"}>
         {/* Left Arrow */}
         <IconButton
