@@ -40,7 +40,7 @@ export async function seedTransactions(
       // Check if the error is a duplicate key error
       if (error.code === "23505") {
         // Duplicate key error, skip this iteration
-        console.warn("Duplicate key detected, skipping:", error.detail);
+        // console.warn("Duplicate key detected, skipping:", error.detail);
         continue;
       }
       // Log other errors
