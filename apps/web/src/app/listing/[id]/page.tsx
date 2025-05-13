@@ -67,7 +67,7 @@ const ViewListingPage = () => {
   const handleBidPlaced = () => {
     fetchListing();
     setModalOpen(false);
-    setShowSuccess(true);
+    // setShowSuccess(true); this shall be handled by the modal/form
   };
 
   if (!listing) return <Typography>Loading...</Typography>;
@@ -180,6 +180,7 @@ const ViewListingPage = () => {
         open={modalOpen}
         onClose={handleBidPlaced}
         listingId={Number(id)}
+        setShowSuccessMessage={setShowSuccess}
       />
 
       <Snackbar
