@@ -10,6 +10,7 @@ import { seedUserLikes } from "./helper/listing_user_likes";
 import { seedUserInterests } from "./helper/user_category_interests";
 import { seedWallets } from "./helper/wallet";
 import { getAuth0ManagementClient } from "../actions/auth0-management";
+import { seedChatMessages } from "./helper/chat_messages";
 
 const USER_COUNT = 50;
 const ADMIN_COUNT = 5;
@@ -130,6 +131,9 @@ async function main() {
 
     console.log("Seeding wallets..."),
     seedWallets(_userIdsWithoutAdmins),
+
+    console.log("Seeding chat messages..."),
+    seedChatMessages(_userIdsWithoutAdmins),
   ]);
   return 0;
 }

@@ -13,7 +13,6 @@ export async function ConversationList() {
     return "Unauthorized";
   }
   const userUuid = session.user.sub;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // socket.on("message", (data) => {
   //   getConversationList().then((newConversations) => {
   //     conversations = newConversations;
@@ -60,13 +59,10 @@ export async function ConversationList() {
                 width="100%"
               >
                 <Typography variant="body1">
-                  {conversation.senderUuid === userUuid
-                    ? getUser(conversation.receiverUuid).then(
-                        (user) => user[0]?.username || "Unknown User"
-                      )
-                    : getUser(conversation.senderUuid).then(
-                        (user) => user[0]?.username || "Unknown User"
-                      )}
+                  {conversation.senderUuid &&
+                    getUser(conversation.senderUuid).then(
+                      (user) => user[0]?.username || "Unknown User"
+                    )}
                 </Typography>
                 <Typography
                   variant={"body2"}
