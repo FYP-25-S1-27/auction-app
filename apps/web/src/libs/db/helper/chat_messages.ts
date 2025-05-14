@@ -19,6 +19,7 @@ export async function seedChatMessages(userIds: string[]) {
         conversationId,
         senderUuid: userId,
         message,
+        createdAt: faker.date.recent({ days: 14 }).toISOString(),
       });
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
