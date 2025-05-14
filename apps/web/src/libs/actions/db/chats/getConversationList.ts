@@ -3,7 +3,7 @@
 import { auth0 } from "@/libs/auth0";
 import { db } from "@/libs/db/drizzle";
 import { chatMessages } from "@/libs/db/schema";
-import { and, desc, eq, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, sql } from "drizzle-orm";
 
 export default async function getConversationList() {
   const session = await auth0.getSession();
@@ -21,7 +21,7 @@ export default async function getConversationList() {
       ),
     })
     .from(chatMessages)
-    .where(or(eq(chatMessages.senderUuid, userUuid)))
+    .where(ilike(chatMessages.conversationId, `%${userUuid}%`))
     .groupBy(chatMessages.conversationId)
     .as("latestMessages");
 

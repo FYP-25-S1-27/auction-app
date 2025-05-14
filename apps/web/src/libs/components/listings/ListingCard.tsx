@@ -164,7 +164,7 @@ export default function ListingCard({ listing }: { listing: SelectListing }) {
             ) : (
               <>
                 <Typography variant={"body1"}>
-                  Current Bid: ${listing.currentPrice}
+                  Current Bid: ${listing.currentPrice || listing.startingPrice}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
                   Starting Bid: ${listing.startingPrice}
