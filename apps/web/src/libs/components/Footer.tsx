@@ -2,6 +2,7 @@ import { Container, Divider, Link, Stack, Typography } from "@mui/material";
 import Logo from "@public/logo.svg";
 import Image from "next/image";
 import InstagramIcon from "@mui/icons-material/Instagram";
+import YouTubeIcon from "@mui/icons-material/YouTube";
 
 export default async function Footer() {
   return (
@@ -20,9 +21,22 @@ export default async function Footer() {
               Participate in online auctions to discover one-of-a-kind treasures
               and experience the thrill of buying and selling.
             </Typography>
-            <a href="#" target="_blank" rel="noopener noreferrer">
-              <InstagramIcon />
-            </a>
+            <Stack direction={"row"} gap={"1rem"}>
+              <a
+                href="https://www.instagram.com/go_gavel?igsh=MWwzd3NncWw5Y2tydQ=="
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <InstagramIcon />
+              </a>
+              <a
+                href="https://www.youtube.com/@GoGavel-y7c8u"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <YouTubeIcon />
+              </a>
+            </Stack>
           </Stack>
           <Stack direction="column" maxWidth={250} id="footer-col-2">
             <Typography variant="h6" color="#6F6F6F">
