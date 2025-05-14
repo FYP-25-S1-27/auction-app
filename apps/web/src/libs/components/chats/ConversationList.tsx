@@ -13,12 +13,18 @@ export async function ConversationList() {
     return "Unauthorized";
   }
   const userUuid = session.user.sub;
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   // socket.on("message", (data) => {
   //   getConversationList().then((newConversations) => {
   //     conversations = newConversations;
   //   });
-  // });
+  let otherPartyUuid: string[] | null = null;
+  if (typeof conversations === "string") {
+    otherPartyUuid = null;
+  } else {
+    otherPartyUuid = conversations.map((conversation) =>
+      conversation.conversationId.replace(userUuid, "")
+    );
+  }
 
   return (
     <Stack direction={"column"} spacing={2} sx={{ padding: 2 }}>
@@ -38,7 +44,7 @@ export async function ConversationList() {
         </>
       ) : (
         Array.isArray(conversations) &&
-        conversations.map((conversation) => (
+        conversations.map((conversation, i) => (
           <NextLink
             key={conversation.id}
             href={`/chats/${conversation.conversationId}`}
@@ -60,13 +66,10 @@ export async function ConversationList() {
                 width="100%"
               >
                 <Typography variant="body1">
-                  {conversation.senderUuid === userUuid
-                    ? getUser(conversation.receiverUuid).then(
-                        (user) => user[0]?.username || "Unknown User"
-                      )
-                    : getUser(conversation.senderUuid).then(
-                        (user) => user[0]?.username || "Unknown User"
-                      )}
+                  {otherPartyUuid &&
+                    getUser(otherPartyUuid[i]).then(
+                      (user) => user[0]?.username || "Unknown User"
+                    )}
                 </Typography>
                 <Typography
                   variant={"body2"}

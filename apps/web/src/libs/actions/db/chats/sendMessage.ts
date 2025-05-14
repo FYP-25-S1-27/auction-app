@@ -22,7 +22,6 @@ export default async function sendMessage(
     await db.insert(chatMessages).values({
       conversationId,
       senderUuid: userUuid,
-      receiverUuid: otherPartyUuid,
       message,
     });
   } catch (error) {

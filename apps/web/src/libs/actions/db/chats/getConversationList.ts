@@ -21,12 +21,7 @@ export default async function getConversationList() {
       ),
     })
     .from(chatMessages)
-    .where(
-      or(
-        eq(chatMessages.senderUuid, userUuid),
-        eq(chatMessages.receiverUuid, userUuid)
-      )
-    )
+    .where(or(eq(chatMessages.senderUuid, userUuid)))
     .groupBy(chatMessages.conversationId)
     .as("latestMessages");
 
@@ -36,7 +31,6 @@ export default async function getConversationList() {
       id: chatMessages.id,
       conversationId: chatMessages.conversationId,
       senderUuid: chatMessages.senderUuid,
-      receiverUuid: chatMessages.receiverUuid,
       message: chatMessages.message,
       createdAt: chatMessages.createdAt,
     })
