@@ -238,12 +238,14 @@ const ViewListingPage = () => {
               </Typography>
             </Box>
           </Box>
-          <Box mt={2} display="flex" gap={2}>
-            {/* <Button variant="outlined">Other Products</Button> */}
-            <Button variant="contained" onClick={handleChatClick}>
-              Send a message
-            </Button>
-          </Box>
+          {listing.user_uuid !== user.user?.sub && (
+            <Box mt={2} display="flex" gap={2}>
+              {/* <Button variant="outlined">Other Products</Button> */}
+              <Button variant="contained" onClick={handleChatClick}>
+                Send a message
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
       {user.user?.sub && (

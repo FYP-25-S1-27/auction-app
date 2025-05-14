@@ -1,6 +1,7 @@
 import getConversationList from "@/libs/actions/db/chats/getConversationList";
 import { getUser } from "@/libs/actions/db/users";
 import { auth0 } from "@/libs/auth0";
+// import { socket } from "@/libs/sio";
 import { Stack, Typography } from "@mui/material";
 import { formatRelative } from "date-fns";
 import NextLink from "next/link";
@@ -12,6 +13,12 @@ export async function ConversationList() {
     return "Unauthorized";
   }
   const userUuid = session.user.sub;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // socket.on("message", (data) => {
+  //   getConversationList().then((newConversations) => {
+  //     conversations = newConversations;
+  //   });
+  // });
 
   return (
     <Stack direction={"column"} spacing={2} sx={{ padding: 2 }}>
