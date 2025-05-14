@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings, listingImages } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
+import { sql } from "drizzle-orm";
 
 export async function handlePost(req: Request) {
   try {
@@ -69,8 +70,8 @@ export async function handlePost(req: Request) {
         description,
         startingPrice: Number(starting_price), // Ensure it's a number
         endTime: end_time,
-        startTime: start_time ? start_time : null, // ADD THIS LINE
-        status: scheduled === "true" ? "SCHEDULED" : "ACTIVE", // ADD THIS LINE
+        startTime: start_time ? start_time : sql`CURRENT_TIMESTAMP`, // ADD THIS LINE
+        status: "ACTIVE", // ADD THIS LINE
         type: "LISTING",
       })
       .returning({ id: listings.id });
