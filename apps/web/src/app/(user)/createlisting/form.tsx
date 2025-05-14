@@ -125,8 +125,8 @@ const ListingForm = () => {
     }
 
     // ✅ Convert scheduled time and end_time
-    const end_timeString = end_time ? dayjs(end_time).format("YYYY-MM-DD HH:mm") : null;
-    const start_timeString = start_time ? dayjs(start_time).format("YYYY-MM-DD HH:mm") : null;
+    const end_timeString = end_time ? dayjs(end_time).format() : null;
+    const start_timeString = start_time ? dayjs(start_time).format() : null;
 
     const priceNumber = Number(starting_price);
     if (!Number.isInteger(priceNumber)) {

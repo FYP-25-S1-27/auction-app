@@ -107,7 +107,8 @@ export async function handleGet(request: NextRequest) {
     const maxPrice = priceMetadata[0]?.maxPrice || 0;
 
     // Execute the query with all applied filters
-    // filters.push(gte(listings.))
+    // Add default filters
+    filters.push(lte(listings.startTime, sql`CURRENT_TIMESTAMP`)); // Only include listings that have started
     const items = await db
       .select()
       .from(listings)
