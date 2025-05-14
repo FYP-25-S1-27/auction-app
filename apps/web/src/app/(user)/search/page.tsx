@@ -8,6 +8,7 @@ import {
   Link,
   Pagination,
   Stack,
+  Typography,
 } from "@mui/material";
 import qs from "qs";
 import { listings } from "@/libs/db/schema";
@@ -100,11 +101,15 @@ export default function SearchPage() {
           </div>
           <div>
             <Grid2 container spacing={4}>
-              {listings
-                ? listings.items.map((listing, i) => {
-                    return <ListingCard listing={listing} key={i} />;
-                  })
-                : null}
+              {listings && listings.items.length > 0 ? (
+                listings.items.map((listing, i) => {
+                  return <ListingCard listing={listing} key={i} />;
+                })
+              ) : (
+                <Typography variant="h5" color={"textPrimary"}>
+                  No listings found
+                </Typography>
+              )}
             </Grid2>
           </div>
         </Stack>
