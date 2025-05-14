@@ -31,18 +31,24 @@ const ViewListingPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
-  const [latestBids, setLatestBids] = useState<
-    Awaited<ReturnType<typeof getLatestBids>>
-  >([]); // Adjust type as needed
-
-  const user = useUser();
-  const router = useRouter();
+  const [winner, setWinner] = useState<string | null>(null);
 
   const fetchListing = useCallback(async () => {
     try {
       const res = await fetch(`/api/listings/${id}`);
       const data: GetListingByIdWithImages = await res.json();
       setListing(data);
+
+      // 👑 If auction ended, fetch winning bidder
+      if (data.end_time && new Date(data.end_time) < new Date()) {
+        const bidsRes = await fetch(`/api/listings/${id}/bids`);
+        if (bidsRes.ok) {
+          const bids = await bidsRes.json();
+          if (bids.length > 0) {
+            setWinner(bids[0].user_uid);
+          }
+        }
+      }
     } catch (err) {
       console.error("Error fetching listing:", err);
     }
@@ -61,7 +67,6 @@ const ViewListingPage = () => {
     }
   }, [id, showSuccess]);
 
-  // ⏳ Live countdown timer
   useEffect(() => {
     const interval = setInterval(() => {
       if (listing?.end_time) {
@@ -114,6 +119,8 @@ const ViewListingPage = () => {
     ? new Date(listing.end_time).toLocaleString()
     : "Unknown";
 
+  const auctionEnded = listing.end_time && new Date(listing.end_time) < new Date();
+
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Grid container spacing={4}>
@@ -125,7 +132,7 @@ const ViewListingPage = () => {
                   <ImageListItem key={i}>
                     <img
                       src={img}
-                      alt={listing.name + { i }}
+                      alt={listing.name + i}
                       onClick={() => setBigImage(img)}
                       style={{ cursor: "pointer" }}
                     />
@@ -134,7 +141,11 @@ const ViewListingPage = () => {
               </ImageList>
             </Grid>
             <Grid item xs={9}>
-              <img src={bigImage ?? listing.image_urls[0]} alt={listing.name} />
+              <img
+                src={bigImage ?? listing.image_urls[0]}
+                alt={listing.name}
+                style={{ width: "100%", objectFit: "contain" }}
+              />
             </Grid>
           </Grid>
         </Grid>
@@ -166,21 +177,22 @@ const ViewListingPage = () => {
             Starting Bid: ${listing.starting_price}
           </Typography>
 
-          <Button
-            disabled={
-              !listing ||
-              !user ||
-              listing.status?.toUpperCase() !== "ACTIVE" ||
-              new Date(listing.end_time) < new Date() ||
-              listing.user_uuid === user.user?.sub
-            }
-            variant="contained"
-            color="primary"
-            sx={{ mt: 2 }}
-            onClick={() => setModalOpen(true)}
-          >
-            Place Bid
-          </Button>
+          {auctionEnded && winner && (
+            <Typography sx={{ mt: 2 }} color="primary">
+              👑 Winner: {winner}
+            </Typography>
+          )}
+
+          {!auctionEnded && (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{ mt: 2 }}
+              onClick={() => setModalOpen(true)}
+            >
+              Place Bid
+            </Button>
+          )}
 
           <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
             <Typography fontWeight="bold">Shipping</Typography>
@@ -238,32 +250,21 @@ const ViewListingPage = () => {
               </Typography>
             </Box>
           </Box>
-          {listing.user_uuid !== user.user?.sub && (
-            <Box mt={2} display="flex" gap={2}>
-              {/* <Button variant="outlined">Other Products</Button> */}
-              <Button variant="contained" onClick={handleChatClick}>
-                Send a message
-              </Button>
-            </Box>
-          )}
+          <Box mt={2} display="flex" gap={2}>
+            <Button variant="contained">Contact</Button>
+          </Box>
         </Box>
       </Box>
-      {user.user?.sub && (
-        <ChatModal
-          open={chatModalOpen}
-          onClose={() => setChatModalOpen(false)}
-          userUuid={user.user.sub}
-          otherPartyUuid={listing.user_uuid}
-          otherPartyUuidUsername={listing.seller_name}
-          preFilledMessage={`Hi, I am interested in your ${listing.name}.`}
+
+      {modalOpen && (
+        <BidFormModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          listingId={Number(id)}
+          listing={listing}
+          onSuccess={handleBidPlaced}
         />
       )}
-      <BidFormModal
-        open={modalOpen}
-        onClose={handleBidPlaced}
-        listingId={Number(id)}
-        setShowSuccessMessage={setShowSuccess}
-      />
 
       <Snackbar
         open={showSuccess}
