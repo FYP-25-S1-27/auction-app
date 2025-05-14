@@ -107,6 +107,7 @@ export async function handleGet(request: NextRequest) {
     const maxPrice = priceMetadata[0]?.maxPrice || 0;
 
     // Execute the query with all applied filters
+    // filters.push(gte(listings.))
     const items = await db
       .select()
       .from(listings)
