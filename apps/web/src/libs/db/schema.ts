@@ -16,7 +16,7 @@ export const users = pgTable("users", {
   uuid: text().primaryKey().notNull(),
   username: text().notNull().unique(),
   isAdmin: boolean().default(false).notNull(),
-  createdAt: timestamp()
+  createdAt: timestamp({ withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -30,10 +30,10 @@ export const userProfile = pgTable("user_profile", {
   address: text(),
   gender: text(),
   age: integer(),
-  createdAt: timestamp()
+  createdAt: timestamp({ withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
-  updatedAt: timestamp()
+  updatedAt: timestamp({ withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull()
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
@@ -71,10 +71,10 @@ export const listings = pgTable(
     startingPrice: integer().notNull(),
     currentPrice: integer(),
     type: listingTypes("listing_types").notNull().default("LISTING"), // LISTING, REQUEST
-    endTime: timestamp({ mode: "string" }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
-    startTime: timestamp({ mode: "string" }), // ADDED THIS
+    endTime: timestamp({ mode: "string", withTimezone: true }).notNull(), //https://orm.drizzle.team/docs/column-types/pg#timestamp - should be a string to be predictable, do not let the ORM convert it to a Date object
+    startTime: timestamp({ mode: "string", withTimezone: true }), // ADDED THIS
     status: text().default("ACTIVE"), // ACTIVE, SOLD
-    createdAt: timestamp({ mode: "string" })
+    createdAt: timestamp({ mode: "string", withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
@@ -137,7 +137,7 @@ export const bids = pgTable(
     listingId: integer().notNull(),
     userUuid: text().notNull(),
     bidAmount: integer().notNull(),
-    bidTime: timestamp({ mode: "string" })
+    bidTime: timestamp({ mode: "string", withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
     type: bidTypes("bid_types").notNull().default("BID"), // OFFER, BID
@@ -164,7 +164,7 @@ export const transactions = pgTable(
     buyerUuid: text().notNull(),
     sellerUuid: text().notNull(),
     salePrice: integer().notNull(),
-    transactionDate: timestamp({ mode: "string" }).default(
+    transactionDate: timestamp({ mode: "string", withTimezone: true }).default(
       sql`CURRENT_TIMESTAMP`
     ),
   },
@@ -192,7 +192,9 @@ export const wallets = pgTable(
   {
     userUuid: text().primaryKey(),
     balance: integer().default(0).notNull(),
-    lastUpdated: timestamp({ mode: "string" }).default(sql`CURRENT_TIMESTAMP`),
+    lastUpdated: timestamp({ mode: "string", withTimezone: true }).default(
+      sql`CURRENT_TIMESTAMP`
+    ),
   },
   (table) => [
     foreignKey({
@@ -234,7 +236,7 @@ export const requests = pgTable("requests", {
   description: text(),
   category: text().notNull(),
   userUuid: text().notNull(),
-  createdAt: timestamp({ mode: "string" })
+  createdAt: timestamp({ mode: "string", withTimezone: true })
     .default(sql`CURRENT_TIMESTAMP`)
     .notNull(),
 });
@@ -246,7 +248,7 @@ export const offers = pgTable(
     requestId: integer().notNull(),
     userUuid: text().notNull(),
     offerAmount: numeric().notNull(),
-    offerTime: timestamp({ mode: "string" })
+    offerTime: timestamp({ mode: "string", withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
@@ -271,7 +273,7 @@ export const chatMessages = pgTable(
     conversationId: text().notNull(),
     senderUuid: text().notNull(),
     message: text().notNull(),
-    createdAt: timestamp({ mode: "string" })
+    createdAt: timestamp({ mode: "string", withTimezone: true })
       .default(sql`CURRENT_TIMESTAMP`)
       .notNull(),
   },
