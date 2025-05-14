@@ -37,6 +37,9 @@ export default async function Footer() {
                 <YouTubeIcon />
               </a>
             </Stack>
+            <Typography variant="body2" color="#6F6F6F" mt={2}>
+              gogavel.sa.user@gmail.com
+            </Typography>
           </Stack>
           <Stack direction="column" maxWidth={250} id="footer-col-2">
             <Typography variant="h6" color="#6F6F6F">
