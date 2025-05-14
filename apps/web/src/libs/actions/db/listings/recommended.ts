@@ -2,7 +2,7 @@
 
 import { db } from "@/libs/db/drizzle";
 import { listings } from "@/libs/db/schema";
-import { and, eq, gt, inArray, sql } from "drizzle-orm";
+import { and, eq, gt, inArray, lte, sql } from "drizzle-orm";
 import { getUserInterests } from "../userCategoryInterests";
 
 export default async function getRecommendedListings(
@@ -10,7 +10,8 @@ export default async function getRecommendedListings(
 ) {
   const baseConditions = and(
     gt(listings.endTime, new Date().toISOString()),
-    eq(listings.status, "ACTIVE")
+    eq(listings.status, "ACTIVE"),
+    lte(listings.startTime, sql`CURRENT_TIMESTAMP`) // Only include listings that have started
   );
   // Only apply category filter if user has interests
   const whereCondition =

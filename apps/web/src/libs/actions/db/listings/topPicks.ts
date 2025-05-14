@@ -1,7 +1,7 @@
 "use server";
 import { db } from "@/libs/db/drizzle";
 import { listingCategory, listings, listingUserLikes } from "@/libs/db/schema";
-import { and, eq, gt, sql } from "drizzle-orm";
+import { and, eq, gt, lte, sql } from "drizzle-orm";
 
 export default async function getTopListings() {
   return db
@@ -26,7 +26,8 @@ export default async function getTopListings() {
     .where(
       and(
         gt(listings.endTime, new Date().toISOString()),
-        eq(listings.status, "ACTIVE")
+        eq(listings.status, "ACTIVE"),
+        lte(listings.startTime, sql`CURRENT_TIMESTAMP`) // Only include listings that have started
       )
     )
     .innerJoin(listingUserLikes, eq(listings.id, listingUserLikes.listingId))
