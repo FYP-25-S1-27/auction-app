@@ -34,7 +34,7 @@ export default function ListingCarousel({
         currentPrice: null,
         type: "LISTING",
         endTime: "",
-        startTime: null,
+        startTime: "",
         status: null,
         createdAt: "",
       });
