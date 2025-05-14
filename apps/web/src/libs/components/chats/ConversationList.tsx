@@ -38,9 +38,11 @@ export async function ConversationList() {
         sx={{
           flex: 1, // Take remaining space
           overflowY: "auto", // Enable vertical scrolling
-          minHeight: "60vh", // Minimum height to ensure it takes up some space
-          maxHeight: "60vh", // Limit height to 60% of viewport height
-          padding: 1,
+          minHeight: "75vh", // Minimum height to ensure it takes up some space
+          maxHeight: "75vh", // Limit height to 60% of viewport height
+          padding: 2,
+          border: "1px solid #ccc",
+          borderRadius: 2,
           "&::-webkit-scrollbar": {
             width: "8px",
           },

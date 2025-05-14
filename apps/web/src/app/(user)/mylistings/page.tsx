@@ -86,7 +86,7 @@ const MyListings = () => {
   };
 
   return (
-    <Container maxWidth="md">
+    <Container maxWidth="md" sx={{ minHeight: "80vh" }}>
       <Typography variant="h4" sx={{ mt: 3 }}>
         My Listings
       </Typography>
