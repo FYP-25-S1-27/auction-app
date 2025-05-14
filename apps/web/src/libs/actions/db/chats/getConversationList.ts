@@ -49,7 +49,6 @@ export default async function getConversationList() {
       )
     )
     .orderBy(desc(chatMessages.createdAt));
-  console.log(conversations);
 
   return conversations;
 }

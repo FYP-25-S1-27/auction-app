@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { Modal, Box, Typography, TextField, Button } from "@mui/material";
 import sendMessage from "@/libs/actions/db/chats/sendMessage";
 import compareAndConcatIds from "@/libs/actions/db/chats/compareAndConcatIds";
+import { socket } from "@/libs/sio";
+import { MessageData } from "@/libs/types/socketData";
 
 interface ChatModalProps {
   open: boolean;
@@ -25,13 +27,17 @@ const ChatModal: React.FC<ChatModalProps> = ({
     null
   );
 
-  const conversationId = compareAndConcatIds(userUuid, otherPartyUuid);
-
   const handleSendMessage = () => {
     if (message.trim()) {
+      const conversationId = compareAndConcatIds(userUuid, otherPartyUuid);
       sendMessage(conversationId, message, otherPartyUuid).then((result) => {
         setSendMessageResult(result);
       });
+      const messageData: MessageData = {
+        message: message,
+        conversationId: otherPartyUuid, // use other party uuid as this may be the start of conversation
+      };
+      socket.emit("message", messageData);
     }
   };
 
