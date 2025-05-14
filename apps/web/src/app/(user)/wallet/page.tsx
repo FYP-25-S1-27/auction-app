@@ -32,18 +32,22 @@ import {
     const [walletBalance, setWalletBalance] = useState<string>("0.00");
     const [transactions, setTransactions] = useState<Transaction[]>([]);
     const [loading, setLoading] = useState(true);
-    const [openModal, setOpenModal] = useState(false);
-    const [amount, setAmount] = useState("");
+    // const [openModal, setOpenModal] = useState(false);
+    // const [amount, setAmount] = useState("");
+    const [topUpAmount, setTopUpAmount] = useState("");
+    const [openTopUpModal, setOpenTopUpModal] = useState(false);
     const [successmsg, setSuccessmsg] = useState("");
     const [errorMsg, setErrorMsg] = useState("");
+    const [openWithdrawModal, setOpenWithdrawModal] = useState(false);
+    const [withdrawAmount, setWithdrawAmount] = useState(""); 
 
-  const handleTopUp = async () => {
-    setSuccessmsg("");
+    const handleTransaction = async (type: "topup" | "withdraw", amount: string) => {
     setErrorMsg("");
+    setSuccessmsg("");
 
     const parsedAmount = parseFloat(amount);
     if (isNaN(parsedAmount) || parsedAmount <= 0) {
-      setErrorMsg("Please enter a valid positive amount.");
+      setErrorMsg("Enter a valid amount.");
       return;
     }
 
@@ -52,27 +56,29 @@ import {
       const res = await fetch("/api/managewallet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: parsedAmount }),
+        body: JSON.stringify({ amount: parsedAmount, type }),
       });
 
+      const data = await res.json();
+
       if (res.ok) {
-        setSuccessmsg("Your wallet balance has topped up successfully!");
-        setAmount("");
-        setOpenModal(false);
-        const walletRes = await fetch("/api/managewallet");
-        const walletData = await walletRes.json();
-        setWalletBalance(walletData.balance);
+        setSuccessmsg(`Your wallet balance has ${type === "topup" ? "top-up" : "withdraw"} successfully!`);
+        setWalletBalance(data.balance);
+        setTopUpAmount("");
+        setWithdrawAmount("");
+        setOpenTopUpModal(false);
+        setOpenWithdrawModal(false);
       } else {
-        const error = await res.json();
-        setErrorMsg(error.message || "Your wallet balance unable to top up.");
+        setErrorMsg(data.message || "Transaction failed.");
       }
-    } catch (error) {
-      setErrorMsg("Failed to connect to the server.");
-      console.error("Error in wallet balance:", error);
+    } catch (err) {
+      console.error("Transaction error:", err);
+      setErrorMsg("Server error.");
     } finally {
       setLoading(false);
     }
   };
+
 
   useEffect(() => {
     // Fetch wallet balance
@@ -124,21 +130,25 @@ import {
           ${walletBalance}
         </Typography>
 
-        <Button
+        <Box display="flex" gap={2} mt={2}>
+          <Button
             variant="contained"
             color="primary"
-            fullWidth
-            onClick={() => setOpenModal(true)}>
+            onClick={() => setOpenTopUpModal(true)}>
             Top Up Wallet
           </Button>
+          <Button variant="outlined" color="error" onClick={() => setOpenWithdrawModal(true)}>
+            Withdraw balance
+          </Button>
+        </Box>
 
-          {/* Modal for Top Up */}
+          {/* Modal for top up wallet */}
           <Modal
-            open={openModal}
-            onClose={() => setOpenModal(false)}
+            open={openTopUpModal}
+            onClose={() => setOpenTopUpModal(false)}
             closeAfterTransition
           >
-            <Fade in={openModal}>
+            <Fade in={openTopUpModal}>
               <Box
                 sx={{
                   position: "absolute",
@@ -160,8 +170,8 @@ import {
                   fullWidth
                   label="Enter your amount ($)"
                   type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  value={topUpAmount}
+                  onChange={(e) => setTopUpAmount(e.target.value)}
                   inputProps={{ min: 0, step: "0.01" }}
                   sx={{ mb: 3 }}
                 />
@@ -170,7 +180,7 @@ import {
                   <Button
                     variant="contained"
                     color="primary"
-                    onClick={handleTopUp}
+                    onClick={() => handleTransaction("topup", topUpAmount)}
                     sx={{ width: "48%" }}
                     disabled={loading}
                   >
@@ -180,6 +190,43 @@ import {
               </Box>
             </Fade>
           </Modal>
+
+          {/* Model for withdraw balance */}
+          <Modal open={openWithdrawModal} onClose={() => setOpenWithdrawModal(false)} closeAfterTransition>
+            <Fade in={openWithdrawModal}>
+              <Box sx={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "50%",
+                  transform: "translate(-50%, -50%)",
+                  width: 400,
+                  bgcolor: "background.paper",
+                  boxShadow: 24,
+                  p: 4,
+                  borderRadius: 2,
+                }}>
+                <Typography variant="h6">Enter an amount to withdraw</Typography>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Amount ($)"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  sx={{ mt: 2 }}
+                />
+                <Button
+                  variant="outlined"
+                  color="error"
+                  sx={{ mt: 2 }}
+                  onClick={() => handleTransaction("withdraw", withdrawAmount)}
+                  disabled={loading}
+                >
+                  {loading ? "Processing..." : "Withdraw"}
+                </Button>
+              </Box>
+            </Fade>
+          </Modal>
+
       </Paper>
 
       {/* View transactions */}

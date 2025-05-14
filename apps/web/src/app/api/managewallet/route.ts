@@ -56,7 +56,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Parse the amount to be topped up
-    const { amount } = await req.json();
+    const { amount, type = "topup" } = await req.json();
     if (isNaN(amount) || amount <= 0) {
       return new Response(
         JSON.stringify({ message: "Invalid amount to top up" }),
@@ -86,46 +86,48 @@ export async function POST(req: NextRequest) {
     const lastUpdated = new Date().toISOString();
 
     if (existingwallet.length === 0) {
-      await db.insert(wallets).values({
-        userUuid: user_uuid,
-        balance: amount.toFixed(2),
-        lastUpdated,
-      });
-      return new Response(
-        JSON.stringify({ balance: amount.toFixed(2), lastUpdated }),
-        { status: 200 }
-      );
+      existingwallet = await db
+        .insert(wallets)
+        .values({
+          userUuid: user_uuid,
+          balance: 0,
+          lastUpdated: new Date().toISOString(),
+        })
+        .returning();
     }
 
     const wallet = existingwallet[0];
+    let newBalance: number;
 
-    // Update the wallet balance
-    const updatedBalance = wallet.balance + amount;
+    if (type === "withdraw") {
+      if (wallet.balance < amount) {
+        return new Response(
+          JSON.stringify({ message: "Insufficient funds. Please try again." }),
+          { status: 400 }
+        );
+      }
+      newBalance = wallet.balance - amount;
+    } else {
+      newBalance = wallet.balance + amount;
+    }
 
-    const updatewallet = await db
+    await db
       .update(wallets)
       .set({
-        balance: updatedBalance.toString(),
+        balance: newBalance,
         lastUpdated,
       })
       .where(eq(wallets.userUuid, user_uuid));
 
-    if (updatewallet) {
-      return new Response(
-        JSON.stringify({
-          balance: updatedBalance.toFixed(2),
-          lastUpdated: new Date(),
-        }),
-        { status: 200 }
-      );
-    }
-
     return new Response(
-      JSON.stringify({ message: "Failed to update wallet balance." }),
-      { status: 500 }
+      JSON.stringify({
+        balance: newBalance.toFixed(2),
+        lastUpdated,
+      }),
+      { status: 200 }
     );
   } catch (err) {
-    console.error("Error in wallet top up:", err);
+    console.error("Wallet update error:", err);
     return new Response(JSON.stringify({ error: "Internal Server Error" }), {
       status: 500,
     });
