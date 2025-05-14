@@ -98,7 +98,7 @@ const ViewListingPage = () => {
     if (user.user?.sub) {
       setChatModalOpen(true);
     } else {
-      router.push("/api/auth/login");
+      router.push("/auth/login");
     }
   }
 
