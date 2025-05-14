@@ -38,6 +38,12 @@ export default function NavBar() {
   };
   const [walletBalance, setWalletBalance] = useState<number>(0);
 
+  const [auctionMenuAnchorEl, setAuctionMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
+
+  const [reverseAuctionMenuAnchorEl, setReverseAuctionMenuAnchorEl] =
+    useState<null | HTMLElement>(null);
+
   useEffect(() => {
     if (auth.user) {
       getRole(auth.user.sub).then((x) => {
@@ -113,18 +119,6 @@ export default function NavBar() {
                     gap: "16px",
                   }}
                 >
-                  <NextLink href="/mylistings" passHref>
-                    <span
-                      style={{
-                        cursor: "pointer",
-                        fontSize: "16px",
-                        fontWeight: "bold",
-                        color: "#333",
-                      }}
-                    >
-                      My Listings
-                    </span>
-                  </NextLink>
                   <NextLink href="/createlisting" passHref>
                     <span
                       style={{
@@ -137,6 +131,73 @@ export default function NavBar() {
                       Sell
                     </span>
                   </NextLink>
+                  <NextLink href="/createRequest" passHref>
+                    <span
+                      style={{
+                        cursor: "pointer",
+                        fontSize: "16px",
+                        fontWeight: "bold",
+                        color: "#333",
+                      }}
+                    >
+                      Request
+                    </span>
+                  </NextLink>
+                  <span
+                    style={{
+                      cursor: "pointer",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
+                    onClick={(e) => setAuctionMenuAnchorEl(e.currentTarget)}
+                  >
+                    Auction
+                  </span>
+                  <Menu
+                    id="auction-menu"
+                    anchorEl={auctionMenuAnchorEl}
+                    open={Boolean(auctionMenuAnchorEl)}
+                    onClose={() => setAuctionMenuAnchorEl(null)}
+                  >
+                    <MenuItem onClick={() => setAuctionMenuAnchorEl(null)}>
+                      <NextLink href="/mylistings">My Listings</NextLink>
+                    </MenuItem>
+                    <MenuItem onClick={() => setAuctionMenuAnchorEl(null)}>
+                      <NextLink href={"/mybids"}>My Bids</NextLink>
+                    </MenuItem>
+                  </Menu>
+                  <span
+                    style={{
+                      cursor: "pointer",
+                      fontSize: "16px",
+                      fontWeight: "bold",
+                      color: "#333",
+                    }}
+                    onClick={(e) =>
+                      setReverseAuctionMenuAnchorEl(e.currentTarget)
+                    }
+                  >
+                    Reverse Auction
+                  </span>
+                  <Menu
+                    id="reverse-auction-menu"
+                    anchorEl={reverseAuctionMenuAnchorEl}
+                    open={Boolean(reverseAuctionMenuAnchorEl)}
+                    onClose={() => setReverseAuctionMenuAnchorEl(null)}
+                  >
+                    <MenuItem
+                      onClick={() => setReverseAuctionMenuAnchorEl(null)}
+                    >
+                      <NextLink href="/myrequests">My Requests</NextLink>
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => setReverseAuctionMenuAnchorEl(null)}
+                    >
+                      <NextLink href={"/myoffers"}>My Offers</NextLink>
+                    </MenuItem>
+                  </Menu>
+
                   <NextLink href="/chats" passHref>
                     <span
                       style={{
