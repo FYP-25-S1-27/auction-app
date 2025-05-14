@@ -17,7 +17,14 @@ export async function ConversationList() {
   //   getConversationList().then((newConversations) => {
   //     conversations = newConversations;
   //   });
-  // });
+  let otherPartyUuid: string[] | null = null;
+  if (typeof conversations === "string") {
+    otherPartyUuid = null;
+  } else {
+    otherPartyUuid = conversations.map((conversation) =>
+      conversation.conversationId.replace(userUuid, "")
+    );
+  }
 
   return (
     <Stack direction={"column"} spacing={2} sx={{ padding: 2 }}>
@@ -37,7 +44,7 @@ export async function ConversationList() {
         </>
       ) : (
         Array.isArray(conversations) &&
-        conversations.map((conversation) => (
+        conversations.map((conversation, i) => (
           <NextLink
             key={conversation.id}
             href={`/chats/${conversation.conversationId}`}
@@ -59,8 +66,8 @@ export async function ConversationList() {
                 width="100%"
               >
                 <Typography variant="body1">
-                  {conversation.senderUuid &&
-                    getUser(conversation.senderUuid).then(
+                  {otherPartyUuid &&
+                    getUser(otherPartyUuid[i]).then(
                       (user) => user[0]?.username || "Unknown User"
                     )}
                 </Typography>
