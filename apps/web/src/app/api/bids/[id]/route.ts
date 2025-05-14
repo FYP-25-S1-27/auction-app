@@ -8,7 +8,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params; // Await the promise to get the actual params
+    const { id } = await params;
+
     if (!id || isNaN(Number(id))) {
       return NextResponse.json(
         { error: "Invalid listing ID" },
@@ -16,10 +17,10 @@ export async function GET(
       );
     }
 
-    const listing_id = Number(id); // Convert ID to number
+    const listing_id = Number(id);
     console.log("🔍 Fetching bids for listing ID:", listing_id);
 
-    // Fetch bid history
+    // Fetch full bid history
     const bidHistory = await db
       .select({
         id: bids.id,
@@ -31,9 +32,17 @@ export async function GET(
       .where(eq(bids.listingId, listing_id))
       .orderBy(desc(bids.bidTime)); // Most recent first
 
+    const latestBid = bidHistory.length > 0 ? bidHistory[0] : null;
+
     console.log("📄 Retrieved Bids:", bidHistory);
 
-    return NextResponse.json(bidHistory, { status: 200 });
+    return NextResponse.json(
+      {
+        latestBid,
+        bidHistory,
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("❌ Error fetching bids:", error);
     return NextResponse.json(
