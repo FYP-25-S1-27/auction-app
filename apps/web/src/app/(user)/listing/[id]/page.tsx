@@ -102,6 +102,14 @@ const ViewListingPage = () => {
     }
   }
 
+  function handlePlaceBidClick() {
+    if (user.user?.sub) {
+      setModalOpen(true);
+    } else {
+      router.push("/auth/login");
+    }
+  }
+
   if (!listing) return <Typography>Loading...</Typography>;
 
   const formattedPrice = listing.current_price
@@ -177,7 +185,7 @@ const ViewListingPage = () => {
             variant="contained"
             color="primary"
             sx={{ mt: 2 }}
-            onClick={() => setModalOpen(true)}
+            onClick={handlePlaceBidClick}
           >
             Place Bid
           </Button>
