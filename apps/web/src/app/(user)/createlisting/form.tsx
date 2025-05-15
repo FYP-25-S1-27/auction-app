@@ -29,7 +29,6 @@ const ListingForm = () => {
   const supabase = createClient();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("");
-  const [condition, setCondition] = useState("");
   const [description, setDescription] = useState("");
   const [starting_price, setstarting_price] = useState("");
   const [end_time, setend_time] = useState<dayjs.Dayjs | null>(null);
@@ -138,7 +137,6 @@ const ListingForm = () => {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("category", category);
-    formData.append("condition", condition);
     formData.append("description", description);
     formData.append("starting_price", String(priceNumber));
     formData.append("end_time", end_timeString || ""); // Send as string, handle null
@@ -265,18 +263,6 @@ const ListingForm = () => {
             ))}
           </Select>
         </FormControl>
-        {/* Condition */}
-        <FormControl fullWidth margin="normal" required>
-          <InputLabel>Item Condition</InputLabel>
-          <Select
-            value={condition}
-            onChange={(e) => setCondition(e.target.value)}
-          >
-            <MenuItem value="new">New</MenuItem>
-            <MenuItem value="used">Used</MenuItem>
-            <MenuItem value="heavily_used">Heavily Used</MenuItem>
-          </Select>
-        </FormControl>
         {/* Condition Description */}
         <TextField
           label="Condition Description"
@@ -317,15 +303,17 @@ const ListingForm = () => {
             onChange={(e) => setScheduled(e.target.checked)}
           />
         </Box>
+
         {/* Scheduled Start Time (ADDED THIS) */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
-            label="Listing Start Time"
+            label="Listing Scheduled Time"
             value={start_time}
             onChange={(newValue) => setstart_time(newValue)}
             disabled={!scheduled} // disable the field if not scheduled
           />
         </LocalizationProvider>
+
         {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button variant="contained" color="primary" type="submit">

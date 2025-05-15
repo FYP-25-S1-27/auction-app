@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
-import { listings } from "@/libs/db/schema";
+import { listings, listingImages } from "@/libs/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function PUT(
@@ -18,7 +18,7 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { name, category, description, starting_price, end_time } = body;
+    const { name, category, description, starting_price, end_time, start_time, image_url } = body;
 
     console.log("📝 Updating listing:", { listingId, ...body });
 
@@ -32,17 +32,44 @@ export async function PUT(
       return NextResponse.json({ error: "Listing not found" }, { status: 404 });
     }
 
-    // ✅ Perform the update
+    const updateData: Record<string, unknown> = {
+      name,
+      category,
+      description,
+      startingPrice: Number(starting_price),
+      endTime: end_time,
+    };
+
+    if (start_time && new Date(start_time) > new Date()) {
+      updateData.startTime = start_time;
+    }
+
     await db
       .update(listings)
-      .set({
-        name,
-        category,
-        description,
-        startingPrice: Number(starting_price), // Ensure number
-        endTime: end_time, // Ensure valid date
-      })
+      .set(updateData)
       .where(eq(listings.id, listingId));
+
+    // Handle image URL update/insertion
+    if (image_url) {
+      // Check if image exists for listing
+      const existingImage = await db
+        .select()
+        .from(listingImages)
+        .where(eq(listingImages.listingId, listingId));
+
+      if (existingImage.length) {
+        // Update existing image record
+        await db
+          .update(listingImages)
+          .set({ imageUrl: image_url })
+          .where(eq(listingImages.listingId, listingId));
+      } else {
+        // Insert new image record
+        await db
+          .insert(listingImages)
+          .values({ listingId, imageUrl: image_url });
+      }
+    }
 
     console.log("✅ Listing updated successfully!");
 
