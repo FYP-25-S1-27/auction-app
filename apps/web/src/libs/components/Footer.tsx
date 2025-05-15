@@ -46,7 +46,7 @@ export default async function Footer() {
               Buy
             </Typography>
             <Link
-              href="#"
+              href="https://fyp25s127.wordpress.com/how-to-buy/"
               variant="body2"
               color="#6F6F6F"
               underline="hover"
@@ -61,7 +61,7 @@ export default async function Footer() {
               Sell
             </Typography>
             <Link
-              href="#"
+              href="https://fyp25s127.wordpress.com/how-to-sell/"
               variant="body2"
               color="#6F6F6F"
               underline="hover"
