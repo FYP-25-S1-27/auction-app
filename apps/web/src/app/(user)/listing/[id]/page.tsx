@@ -23,6 +23,13 @@ import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
 // import ChatModal from "@/libs/components/chats/ChatModal";
 // import { useRouter } from "next/navigation";
 
+// ✅ Define type before use
+interface LatestBid {
+  id: number;
+  bidAmount: number;
+  bidTime: string;
+}
+
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
@@ -32,7 +39,7 @@ const ViewListingPage = () => {
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
   const [winner, setWinner] = useState<string | null>(null);
-  const [latestBids, setLatestBids] = useState<any[]>([]);
+  const [latestBids, setLatestBids] = useState<LatestBid[]>([]);
 
   const fetchListing = useCallback(async () => {
     try {
@@ -55,9 +62,7 @@ const ViewListingPage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (id) {
-      fetchListing();
-    }
+    if (id) fetchListing();
   }, [id, fetchListing]);
 
   useEffect(() => {
@@ -100,13 +105,11 @@ const ViewListingPage = () => {
   };
 
   function handleChatClick() {
-    // Future logic for chat interaction:
     // if (user.user?.sub) {
     //   setChatModalOpen(true);
     // } else {
     //   router.push("/auth/login");
     // }
-
     console.log("Chat click triggered");
   }
 
@@ -162,9 +165,7 @@ const ViewListingPage = () => {
         </Grid>
 
         <Grid item xs={12} md={5}>
-          <Typography variant="h5" color={"textPrimary"}>
-            {listing.name}
-          </Typography>
+          <Typography variant="h5">{listing.name}</Typography>
           <Typography variant="body1" color="textSecondary">
             Category: {listing.category}
           </Typography>
@@ -184,7 +185,7 @@ const ViewListingPage = () => {
           >
             {formattedPrice}
           </Typography>
-          <Typography variant="subtitle1" color={"textSecondary"}>
+          <Typography variant="subtitle1" color="textSecondary">
             Starting Bid: ${listing.starting_price}
           </Typography>
 
@@ -207,13 +208,9 @@ const ViewListingPage = () => {
           <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
             <Typography fontWeight="bold">Shipping</Typography>
             <Typography>
-              {listing.shipping_fee
-                ? `$${listing.shipping_fee}`
-                : "$10 per order"}
+              {listing.shipping_fee ? `$${listing.shipping_fee}` : "$10 per order"}
             </Typography>
-
             <Divider sx={{ my: 1 }} />
-
             <Typography fontWeight="bold">Delivery</Typography>
             <Typography>
               {listing.delivery_estimate ?? "Estimated between 3–10 business days"}
