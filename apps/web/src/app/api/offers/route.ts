@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    let { listing_id, bid_amount, bid_type, user_uuid } = body;
+    const { listing_id, bid_amount, bid_type, user_uuid } = body;
 
     // ✅ Validate input
     if (!listing_id || typeof bid_amount !== "number" || !bid_type || !user_uuid) {
