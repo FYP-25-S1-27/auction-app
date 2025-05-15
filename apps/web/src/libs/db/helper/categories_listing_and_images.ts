@@ -405,6 +405,10 @@ export async function seedCategoriesListingsAndImages(userId: string[]) {
             endTime: _endDateTime,
             description: faker.lorem.paragraph(),
             createdAt: _createAt,
+            startTime: faker.helpers.arrayElement([
+              _createAt,
+              faker.date.soon({ days: 30, refDate: _createAt }),
+            ]),
             status: faker.helpers.arrayElement(["ACTIVE"]), // sold status will be handled in transactions.ts
           })
           .returning({ id: listings.id });
