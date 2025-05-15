@@ -11,7 +11,7 @@ import {
   Button,
   Box,
   CircularProgress,
-  Alert,
+  Alert,Divider, Tabs, Tab, Link
 } from "@mui/material";
 import { listings } from "@/libs/db/schema";
 
@@ -25,6 +25,7 @@ const MyListings = () => {
   const searchParams = useSearchParams();
   const updated = searchParams.get("updated") === "true";
   const [showSuccess, setShowSuccess] = useState(updated);
+  const [currentTab, setCurrentTab] = useState(0);
 
   useEffect(() => {
     if (updated) {
@@ -84,6 +85,15 @@ const MyListings = () => {
       setError(error.message);
     }
   };
+  const now = new Date();
+  const categorizedListings = {
+    upcoming: _listings.filter((l) => new Date(l.startTime) > now),
+    ongoing: _listings.filter((l) => l.status === "ACTIVE" && new Date(l.startTime) <= now && new Date(l.endTime) >= now),
+    sold: _listings.filter((l) => new Date(l.endTime) < now ),
+  };
+
+  const tabLabels = ["Upcoming listings", "Ongoing listings", "Sold/Expired listings"];
+  const tabKeys = ["upcoming", "ongoing", "sold"] as const;
 
   return (
     <Container maxWidth="md" sx={{ minHeight: "80vh" }}>
@@ -97,36 +107,65 @@ const MyListings = () => {
         <Alert severity="success">Your listing had updated successfully!</Alert>
       )}
 
-      <List sx={{ mt: 3 }}>
-        {_listings.map((listing) => (
-          <ListItem
-            key={listing.id}
-            sx={{ display: "flex", justifyContent: "space-between" }}
-          >
-            <ListItemText
-              primary={listing.name}
-              secondary={`Category: ${listing.category} | Price: $${listing.startingPrice}`}
-            />
-            <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleEdit(listing.id)}
-              >
-                Edit
-              </Button>
-              <Button
-                variant="outlined"
-                color="error"
-                sx={{ ml: 2 }}
-                onClick={() => handleDelete(listing.id)}
-              >
-                Delete
-              </Button>
-            </Box>
-          </ListItem>
+      <Tabs
+        value={currentTab}
+        onChange={(e, newValue) => setCurrentTab(newValue)}
+        sx={{ mt: 3 }}
+        centered
+      >
+        {tabLabels.map((label, i) => (
+          <Tab label={label} key={i} />
         ))}
-      </List>
+      </Tabs>
+
+      <Box mt={3}>
+        {categorizedListings[tabKeys[currentTab]].length === 0 ? (
+          <Typography>No listings in this tab.</Typography>
+        ) : (
+          <List>
+            {categorizedListings[tabKeys[currentTab]].map((listing) => (
+              <Box key={listing.id}>
+                <ListItem
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Link
+                    href={`/listing/${listing.id}`}
+                    style={{ flexGrow: 1, textDecoration: "none", color: "inherit" }}
+                  >
+                  <ListItemText
+                    primary={listing.name}
+                    secondary={`Category: ${listing.category} | Price: $${listing.startingPrice}`}
+                  />
+                  </Link>
+                  {new Date(listing.endTime) > new Date() && (
+                  <Box>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleEdit(listing.id)}
+                    >
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      sx={{ ml: 2 }}
+                      onClick={() => handleDelete(listing.id)}
+                    >
+                      Delete
+                    </Button>
+                  </Box>
+                  )}
+                </ListItem>
+                <Divider />
+              </Box>
+            ))}
+          </List>
+        )}
+      </Box>
     </Container>
   );
 };

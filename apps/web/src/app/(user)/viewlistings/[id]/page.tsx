@@ -8,10 +8,13 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Typography, Select, MenuItem, InputLabel, FormControl
+  Typography, Select, MenuItem, InputLabel, FormControl, Box
 } from "@mui/material";
+import { listings } from "@/libs/db/schema";
+import { createClient } from "@/libs/supabase/client";
 
 const EditListing = () => {
+  const supabase = createClient();
   const { id } = useParams();
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +22,22 @@ const EditListing = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+  const fetchImage = async () => {
+    const res = await fetch(`/api/listing_images?listingId=${id}`);
+    const data = await res.json();
+    if (data.length > 0) {
+      setImageUrl(data[0].imageUrl);
+    }
+  };
+
+  if (listings?.id) {
+    fetchImage();
+  }
+}, [id]);
+
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -38,6 +57,10 @@ const EditListing = () => {
           ...data,
           endTime: data.endTime ? formatDateTime(data.endTime) : "",
           startingPrice: data.startingPrice || "",
+          status: data.status,
+          startTime: data.startTime
+          ? formatDateTime(data.startTime)
+          : "",
         };
         
         setFormData(formattedData);
@@ -75,31 +98,76 @@ const EditListing = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const listingdata = {
-      name: formData.name,
-      category: formData.category,
-      description: formData.description,
-      starting_price: Number(formData.startingPrice),
-      end_time: formData.endTime,
-    };
+    if (
+      new Date(formData.startTime) > new Date(formData.endTime)
+  ) {
+    setError("Scheduled time cannot be later than the end time.");
+    return;
+  }
 
-    try {
-      const response = await fetch(`/api/updatelisting/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(listingdata),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update listing");
-      }
-
-      router.push("/mylistings?updated=true");
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
-      setError(error.message);
+  const priceNumber = parseInt(formData.startingPrice, 10);
+    if (
+      isNaN(priceNumber) ||
+      priceNumber <= 0
+    ) {
+      alert("Starting price must be a positive whole number!");
+      return;
     }
+  
+  let uploadedImageUrl = imageUrl;
+
+  // If a new image is selected
+  if (formData.newImage) {
+    const file = formData.newImage;
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${id}-${Date.now()}.${fileExt}`;
+    const filePath = `listing-images/${fileName}`;
+
+    // Upload to Supabase
+    const { error: uploadError } = await supabase.storage
+      .from("listing-images")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: true,
+      });
+    if (uploadError) {
+      alert("Image upload failed.");
+      return;
+    }
+
+    // Get the public URL
+    const { data } = supabase.storage
+      .from("listing-images")
+      .getPublicUrl(filePath);
+    uploadedImageUrl = data.publicUrl;
+  }
+
+  const payload = {
+    name: formData.name,
+    category: formData.category,
+    description: formData.description,
+    starting_price: Number(formData.startingPrice),
+    end_time: formData.endTime,
+    start_time: formData.startTime,
+    image_url: uploadedImageUrl,
   };
+
+  try {
+    const response = await fetch(`/api/updatelisting/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update listing");
+    }
+
+    router.push("/mylistings?updated=true");
+  } catch (error) {
+    console.error("❌ Error updating form:", error);
+  }
+};
 
   return (
     <Container maxWidth="sm">
@@ -111,6 +179,26 @@ const EditListing = () => {
       {error && <Alert severity="error">{error}</Alert>}
 
       <form onSubmit={handleSubmit}>
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt="Listing Image"
+            style={{ width: "400px", height: "400px", objectFit: "cover", marginBottom: "1rem" }}
+          />
+        )}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 3 }}>
+          <Typography variant="h6">Replace Image: </Typography>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                setFormData({ ...formData, newImage: e.target.files[0] });
+              }
+            }}
+          />
+        </Box>
+
         <TextField
           name="name"
           label="Name"
@@ -118,6 +206,7 @@ const EditListing = () => {
           value={formData.name || ""}
           onChange={handleChange}
           sx={{ mt: 3 }}
+          required
         />
 
         <FormControl fullWidth sx={{ mt: 3 }}>
@@ -146,6 +235,7 @@ const EditListing = () => {
           sx={{ mt: 3 }}
           multiline
           rows={3}
+          required
         />
 
         <TextField
@@ -156,6 +246,7 @@ const EditListing = () => {
           value={formData.startingPrice || ""}
           onChange={handleChange}
           sx={{ mt: 3 }}
+          required
         />
 
         <TextField
@@ -167,8 +258,35 @@ const EditListing = () => {
           onChange={handleChange}
           sx={{ mt: 3 }}
           InputLabelProps={{ shrink: true }}
+          required
         />
 
+        {/* if listing is scheduled, scheduled time appear */}
+        {formData.startTime && new Date(formData.startTime) > new Date() && (
+          <TextField
+            name="startTime"
+            label="Scheduled Time"
+            fullWidth
+            type="datetime-local"
+            value={formData.startTime || ""}
+            onChange={handleChange}
+            sx={{ mt: 3 }}
+            InputLabelProps={{ shrink: true }}
+            inputProps={{
+              min: new Date().toISOString().slice(0, 16),
+            }}
+            required
+          />
+        )}
+
+        <Button
+          variant="outlined"
+          color="secondary"
+          sx={{ mt: 3, mr: 2 }}
+          onClick={() => router.push("/mylistings")}
+        >
+          Cancel
+        </Button>
         <Button
           type="submit"
           variant="contained"
