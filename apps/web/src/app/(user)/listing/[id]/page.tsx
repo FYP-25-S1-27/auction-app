@@ -19,19 +19,20 @@ import {
 import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
 import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
-import { useUser } from "@auth0/nextjs-auth0";
-import ChatModal from "@/libs/components/chats/ChatModal";
-import { useRouter } from "next/navigation";
+// import { useUser } from "@auth0/nextjs-auth0";
+// import ChatModal from "@/libs/components/chats/ChatModal";
+// import { useRouter } from "next/navigation";
 
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
-  const [chatModalOpen, setChatModalOpen] = useState(false);
+  // const [chatModalOpen, setChatModalOpen] = useState(false);
   const [listing, setListing] = useState<GetListingByIdWithImages | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
   const [winner, setWinner] = useState<string | null>(null);
+  const [latestBids, setLatestBids] = useState<any[]>([]);
 
   const fetchListing = useCallback(async () => {
     try {
@@ -39,7 +40,6 @@ const ViewListingPage = () => {
       const data: GetListingByIdWithImages = await res.json();
       setListing(data);
 
-      // 👑 If auction ended, fetch winning bidder
       if (data.end_time && new Date(data.end_time) < new Date()) {
         const bidsRes = await fetch(`/api/listings/${id}/bids`);
         if (bidsRes.ok) {
@@ -59,6 +59,7 @@ const ViewListingPage = () => {
       fetchListing();
     }
   }, [id, fetchListing]);
+
   useEffect(() => {
     if (id) {
       getLatestBids(parseInt(id as string)).then((bids) => {
@@ -96,15 +97,17 @@ const ViewListingPage = () => {
   const handleBidPlaced = () => {
     fetchListing();
     setModalOpen(false);
-    // setShowSuccess(true); this shall be handled by the modal/form
   };
 
   function handleChatClick() {
-    if (user.user?.sub) {
-      setChatModalOpen(true);
-    } else {
-      router.push("/auth/login");
-    }
+    // Future logic for chat interaction:
+    // if (user.user?.sub) {
+    //   setChatModalOpen(true);
+    // } else {
+    //   router.push("/auth/login");
+    // }
+
+    console.log("Chat click triggered");
   }
 
   function handlePlaceBidClick() {
@@ -213,10 +216,10 @@ const ViewListingPage = () => {
 
             <Typography fontWeight="bold">Delivery</Typography>
             <Typography>
-              {listing.delivery_estimate ??
-                "Estimated between 3-10 business days"}
+              {listing.delivery_estimate ?? "Estimated between 3–10 business days"}
             </Typography>
           </Box>
+
           <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
             <Typography fontWeight="bold">Latest Bids</Typography>
             {latestBids.length > 0 ? (
@@ -258,7 +261,9 @@ const ViewListingPage = () => {
             </Box>
           </Box>
           <Box mt={2} display="flex" gap={2}>
-            <Button variant="contained">Contact</Button>
+            <Button variant="contained" onClick={handleChatClick}>
+              Contact
+            </Button>
           </Box>
         </Box>
       </Box>
