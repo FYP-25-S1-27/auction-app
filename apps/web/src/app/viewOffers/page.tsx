@@ -35,7 +35,7 @@ const ViewOffersPage = () => {
   const [newAmount, setNewAmount] = useState<string>("");
   const router = useRouter();
 
-  const userUuid = "auth0|67d91134f8221c2f7344d9de"; // your test user
+  const userUuid = "auth0|67d91134f8221c2f7344d9de";
 
   const fetchOffers = async () => {
     try {
@@ -43,15 +43,24 @@ const ViewOffersPage = () => {
       if (!res.ok) throw new Error("Failed to fetch offers");
 
       const rawData = await res.json();
-      const mapped: Offer[] = rawData.map((offer: any) => ({
-        id: offer.id,
-        offerAmount: offer.bidAmount,
-        requestId: offer.listingId,
-        offerTime: offer.bidTime,
-        title: offer.title || "Untitled Request",
-      }));
+      const mapped: Offer[] = rawData.map(
+        (offer: {
+          id: number;
+          bidAmount: number;
+          bidTime: string;
+          listingId: number;
+          title: string;
+        }) => ({
+          id: offer.id,
+          offerAmount: offer.bidAmount,
+          requestId: offer.listingId,
+          offerTime: offer.bidTime,
+          title: offer.title || "Untitled Request",
+        })
+      );
       setOffers(mapped);
     } catch (err) {
+      console.error("Failed to fetch offers:", err);
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
@@ -75,6 +84,7 @@ const ViewOffersPage = () => {
       if (!res.ok) throw new Error("Failed to retract offer");
       await fetchOffers(); // Refresh list
     } catch (err) {
+      console.error("Failed to retract offer:", err);
       alert("Failed to retract offer.");
     }
   };
@@ -99,6 +109,7 @@ const ViewOffersPage = () => {
       setNewAmount("");
       await fetchOffers(); // Refresh list
     } catch (err) {
+      console.error("Failed to update offer:", err);
       alert("Failed to update offer.");
     }
   };
