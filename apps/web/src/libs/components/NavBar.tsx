@@ -33,7 +33,7 @@ export default function NavBar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchNameQuery.trim()) {
-      window.location.href = `/search?name=${searchNameQuery}`;
+      window.location.href = `/search?name=${searchNameQuery}&status=ACTIVE`;
     }
   };
   const [walletBalance, setWalletBalance] = useState<number>(0);

@@ -4,6 +4,7 @@ import FilterCard from "@/libs/components/search/FilterCard";
 import {
   Box,
   Breadcrumbs,
+  CircularProgress,
   Grid2,
   Link,
   Pagination,
@@ -101,7 +102,9 @@ export default function SearchPage() {
           </div>
           <div>
             <Grid2 container spacing={4}>
-              {listings && listings.items.length > 0 ? (
+              {!listings ? (
+                <CircularProgress />
+              ) : listings.items.length > 0 ? (
                 listings.items.map((listing, i) => {
                   return <ListingCard listing={listing} key={i} />;
                 })
