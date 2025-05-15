@@ -6,10 +6,11 @@ import { eq, and, desc } from "drizzle-orm";
 // GET offers for a specific listing/request
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const requestId = parseInt(params.id);
+    const { id } = await params;
+    const requestId = parseInt(id);
     const offers = await db
       .select({
         id: bids.id,
@@ -33,10 +34,11 @@ export async function GET(
 // PUT to update an offer
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const offerId = parseInt(params.id);
+    const { id } = await params;
+    const offerId = parseInt(id);
     const body = await req.json();
     const { bid_amount } = body;
 
@@ -64,10 +66,11 @@ export async function PUT(
 // DELETE to remove an offer
 export async function DELETE(
   _req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const offerId = parseInt(params.id);
+    const { id } = await params;
+    const offerId = parseInt(id);
 
     const deleted = await db.delete(bids).where(eq(bids.id, offerId));
 
