@@ -189,13 +189,18 @@ export default function NavBar() {
                     <MenuItem
                       onClick={() => setReverseAuctionMenuAnchorEl(null)}
                     >
-                      <NextLink href="/myrequests">My Requests</NextLink>
+                      <NextLink href="/myRequests">My Requests</NextLink>
                     </MenuItem>
                     <MenuItem
                       onClick={() => setReverseAuctionMenuAnchorEl(null)}
                     >
-                      <NextLink href={"/myoffers"}>My Offers</NextLink>
+                      <NextLink href={"/viewOffers"}>My Offers</NextLink>
                     </MenuItem>
+                    <MenuItem
+                      onClick={() => setReverseAuctionMenuAnchorEl(null)}
+                    >
+                      <NextLink href={"/request"}>Others Requests</NextLink>
+                    </MenuItem>                    
                   </Menu>
 
                   <NextLink href="/chats" passHref>
