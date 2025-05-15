@@ -38,6 +38,7 @@ const ViewListingPage = () => {
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [winner, setWinner] = useState<string | null>(null);
   const [latestBids, setLatestBids] = useState<LatestBid[]>([]);
 
@@ -132,7 +133,7 @@ const ViewListingPage = () => {
   const formattedEndTime = listing.end_time
     ? new Date(listing.end_time).toLocaleString()
     : "Unknown";
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   const auctionEnded = listing.end_time && new Date(listing.end_time) < new Date();
 
   return (
