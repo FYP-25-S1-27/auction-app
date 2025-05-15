@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { bids } from "@/libs/db/schema";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 
-// GET: Fetch all offers for a specific request/listing
+// GET offers for a specific listing/request
 export async function GET(
-  req: Request,
-  { params }: { params: Promise<{ id: number }> }
+  _req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
-    console.log("🔍 Fetching offers for request ID:", id);
-
-    const offerHistory = await db
+    const requestId = parseInt(params.id);
+    const offers = await db
       .select({
         id: bids.id,
         user_uuid: bids.userUuid,
@@ -20,45 +18,21 @@ export async function GET(
         bid_time: bids.bidTime,
       })
       .from(bids)
-      .where(
-        and(
-          eq(bids.listingId, id),
-          eq(bids.type, "OFFER")
-        )
-      )
+      .where(and(eq(bids.listingId, requestId), eq(bids.type, "OFFER")))
       .orderBy(desc(bids.bidTime));
 
-    return NextResponse.json(offerHistory, { status: 200 });
-  } catch (error) {
-    console.error("❌ Error fetching offers:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    return NextResponse.json(offers);
+  } catch {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }
 
-// DELETE: Retract (remove) an offer
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const offerId = parseInt(params.id);
-
-    if (isNaN(offerId)) {
-      return NextResponse.json({ error: "Invalid offer ID" }, { status: 400 });
-    }
-
-    await db.delete(bids).where(eq(bids.id, offerId));
-
-    return NextResponse.json({ success: true, message: "Offer retracted" });
-  } catch (error) {
-    console.error("❌ Error deleting offer:", error);
-    return NextResponse.json({ error: "Failed to delete offer" }, { status: 500 });
-  }
-}
-
-// PUT: Adjust the offer amount
+// PUT to update an offer
 export async function PUT(
-  req: Request,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
@@ -66,18 +40,42 @@ export async function PUT(
     const body = await req.json();
     const { bid_amount } = body;
 
-    if (!bid_amount || isNaN(offerId)) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+    if (!bid_amount || typeof bid_amount !== "number") {
+      return NextResponse.json(
+        { error: "Invalid bid_amount" },
+        { status: 400 }
+      );
     }
 
-    await db
+    const updated = await db
       .update(bids)
       .set({ bidAmount: bid_amount })
       .where(eq(bids.id, offerId));
 
-    return NextResponse.json({ success: true, message: "Offer updated" });
-  } catch (error) {
-    console.error("❌ Error updating offer:", error);
-    return NextResponse.json({ error: "Failed to update offer" }, { status: 500 });
+    return NextResponse.json({ message: "Offer updated", updated });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to update offer" },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE to remove an offer
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const offerId = parseInt(params.id);
+
+    const deleted = await db.delete(bids).where(eq(bids.id, offerId));
+
+    return NextResponse.json({ message: "Offer deleted", deleted });
+  } catch {
+    return NextResponse.json(
+      { error: "Failed to delete offer" },
+      { status: 500 }
+    );
   }
 }
