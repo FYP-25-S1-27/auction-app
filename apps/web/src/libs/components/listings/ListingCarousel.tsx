@@ -61,26 +61,30 @@ export default function ListingCarousel({
         <Typography variant="h5" sx={{ fontWeight: "bold" }}>
           {title}
         </Typography>
-        <Stack direction={"row"} gap={"0.5rem"}>
-          {[...Array(noOfPages)].map((_, index) => (
-            <Box
-              component={"button"}
-              key={index}
-              pl={"3.5rem"}
-              bgcolor={
-                index <= Math.floor(currentIndex / itemsPerPage)
-                  ? "#007C5F"
-                  : "#6F6F6F"
-              }
-              // width={"2px"}
-              height={"8px"}
-              onClick={() => {
-                setCurrentIndex(index * itemsPerPage);
-              }}
-              type={"button"}
-            />
-          ))}
-        </Stack>
+        {!listings || listings.length === 0 ? (
+          <Typography>No listings</Typography>
+        ) : (
+          <Stack direction={"row"} gap={"0.5rem"}>
+            {[...Array(noOfPages)].map((_, index) => (
+              <Box
+                component={"button"}
+                key={index}
+                pl={"3.5rem"}
+                bgcolor={
+                  index <= Math.floor(currentIndex / itemsPerPage)
+                    ? "#007C5F"
+                    : "#6F6F6F"
+                }
+                // width={"2px"}
+                height={"8px"}
+                onClick={() => {
+                  setCurrentIndex(index * itemsPerPage);
+                }}
+                type={"button"}
+              />
+            ))}
+          </Stack>
+        )}
       </Stack>
       <Stack direction={"row"} alignItems={"center"}>
         {/* Left Arrow */}

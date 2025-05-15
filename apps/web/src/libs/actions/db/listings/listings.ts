@@ -9,8 +9,11 @@ export async function setListingStatus(id: number, status: ListingStatus) {
   await db.update(listings).set({ status: status }).where(eq(listings.id, id));
 }
 
-export async function deleteListing(id: number) {
-  await db.delete(listings).where(eq(listings.id, id));
+export async function suspendListing(id: number, isSuspended: boolean) {
+  await db
+    .update(listings)
+    .set({ status: isSuspended ? "SUSPENDED" : "ACTIVE" })
+    .where(eq(listings.id, id));
 }
 
 export async function getListing(id?: number) {
