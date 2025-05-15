@@ -9,17 +9,16 @@ import {
   Typography,
   CircularProgress,
   Alert,
-  Paper,
-  Stack,
 } from "@mui/material";
-import OfferForm from "./offerForm"; // Adjust if needed
+import OfferForm from "./offerForm";
 
+// ✅ Define the Request interface
 interface Request {
   id: number;
   name: string;
-  description: string;
   category: string;
-  startingPrice: number;
+  description: string;
+  starting_price: number;
 }
 
 const ViewRequestPage = () => {
@@ -32,73 +31,68 @@ const ViewRequestPage = () => {
   useEffect(() => {
     const fetchRequest = async () => {
       try {
-        const res = await fetch(`/api/listings/${id}`);
+        const res = await fetch(`/api/requests/${id}`);
         if (!res.ok) throw new Error("Failed to fetch request");
         const data: Request = await res.json();
-        console.log("📦 Request data fetched from API:", data);
         setRequest(data);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Unknown error");
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("An unknown error occurred.");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchRequest();
+    fetchRequest();
   }, [id]);
 
   const handleOpenOfferForm = () => setShowOfferForm(true);
   const handleCloseOfferForm = () => setShowOfferForm(false);
 
   return (
-    <Container maxWidth="md" sx={{ mt: 6, mb: 8 }}>
+    <Container maxWidth="md" sx={{ mt: 5 }}>
       {loading ? (
         <CircularProgress />
       ) : error ? (
         <Alert severity="error">{error}</Alert>
       ) : request ? (
-        <Paper elevation={3} sx={{ p: 4 }}>
-          <Stack spacing={2}>
-            <Typography variant="h4" fontWeight="bold">
-              {request.name}
-            </Typography>
+        <>
+          <Typography variant="h4" gutterBottom>
+            {request.name}
+          </Typography>
+          <Typography variant="subtitle1" gutterBottom>
+            Category: {request.category}
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 2 }}>
+            Description: {request.description}
+          </Typography>
+          <Typography variant="body2" sx={{ mb: 2 }}>
+            Budget: ${request.starting_price}
+          </Typography>
 
-            <Typography variant="subtitle2" color="text.secondary">
-              Category: {request.category}
-            </Typography>
-
-            <Typography variant="body1" sx={{ mt: 2 }}>
-              {request.description}
-            </Typography>
-
-            <Typography variant="h6" sx={{ mt: 3 }}>
-              Budget:{" "}
-              <Box component="span" fontWeight="bold" color="primary.main">
-                ${request.startingPrice}
-              </Box>
-            </Typography>
-
-            <Box sx={{ mt: 4 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenOfferForm}
-                fullWidth
-              >
-                Make an Offer
-              </Button>
-            </Box>
-          </Stack>
+          <Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenOfferForm}
+            >
+              Make an Offer
+            </Button>
+          </Box>
 
           {showOfferForm && (
             <OfferForm
               requestId={request.id}
+              // matchAmount={request.starting_price} @azwssoh001 fix this component
               open={showOfferForm}
               refreshOffers={() => {}}
               onClose={handleCloseOfferForm}
             />
           )}
-        </Paper>
+        </>
       ) : (
         <Typography>No request found.</Typography>
       )}

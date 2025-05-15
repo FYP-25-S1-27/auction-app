@@ -1,106 +1,70 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { bids } from "@/libs/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { auth0 } from "@/libs/auth0";
+import { eq, desc } from "drizzle-orm";
 
-// ✅ GET: Fetch offers filtered by user_uuid
-export async function GET(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const userUuid = req.nextUrl.searchParams.get("user_uuid");
+    const session = await auth0.getSession();
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!userUuid) {
+    const { listing_id, offer_price } = await req.json();
+
+    if (!listing_id || !offer_price || offer_price <= 0) {
       return NextResponse.json(
-        { error: "Missing user_uuid" },
+        { error: "Invalid offer data" },
         { status: 400 }
       );
     }
 
-    const userOffers = await db
-      .select()
-      .from(bids)
-      .where(eq(bids.userUuid, userUuid))
-      .orderBy(desc(bids.bidTime));
+    // ✅ Insert offer into the bids table
+    const newOffer = await db
+      .insert(bids)
+      .values({
+        listingId: listing_id,
+        userUuid: session.user.sub,
+        bidAmount: offer_price,
+        type: "OFFER", // ✅ Important
+      })
+      .returning();
 
-    return NextResponse.json(userOffers);
+    console.log("✅ Offer placed:", newOffer[0]);
+
+    return NextResponse.json(newOffer[0], { status: 201 });
   } catch (error) {
-    console.error("❌ Failed to fetch offers:", error);
+    console.error("❌ Error placing offer:", error);
     return NextResponse.json(
-      { error: "Failed to fetch offers." },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }
 }
 
-// ✅ POST: Submit new offer (with match offer + dedup logic)
-export async function POST(req: Request) {
+export async function GET() {
   try {
-    const body = await req.json();
-    const { listing_id, bid_amount: initialBidAmount, bid_type, user_uuid } = body;
-
-    // ✅ Validate input
-    if (!listing_id || typeof initialBidAmount !== "number" || !bid_type || !user_uuid) {
-      return NextResponse.json(
-        { error: "Missing required fields." },
-        { status: 400 }
-      );
+    const session = await auth0.getSession();
+    if (!session || !session.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Assign to a mutable `let` so we can modify it if match logic applies
-    let bid_amount = initialBidAmount;
+    const user_uuid = session.user.sub;
 
-    // ✅ Server-side "Match Offer" logic
-    if (bid_amount === 0 && bid_type === "OFFER") {
-      const [topOffer] = await db
-        .select({ bidAmount: bids.bidAmount })
-        .from(bids)
-        .where(and(eq(bids.listingId, listing_id), eq(bids.type, "OFFER")))
-        .orderBy(desc(bids.bidAmount))
-        .limit(1);
-
-      const defaultMatchAmount = 100;
-      bid_amount = topOffer?.bidAmount ?? defaultMatchAmount;
-    }
-
-    // ✅ Deduplication: Check existing offer by this user
-    const [existing] = await db
-      .select({ bidAmount: bids.bidAmount })
+    const offers = await db
+      .select()
       .from(bids)
-      .where(
-        and(
-          eq(bids.listingId, listing_id),
-          eq(bids.userUuid, user_uuid),
-          eq(bids.type, bid_type)
-        )
-      )
-      .orderBy(desc(bids.bidAmount))
-      .limit(1);
+      .where(eq(bids.userUuid, user_uuid))
+      .orderBy(desc(bids.bidTime));
 
-    if (existing && bid_amount <= existing.bidAmount) {
-      return NextResponse.json(
-        {
-          error: `Your offer must be higher than your previous one ($${existing.bidAmount})`,
-        },
-        { status: 400 }
-      );
-    }
+    console.log("✅ Retrieved offers:", offers);
 
-    // ✅ Insert offer
-    const result = await db.insert(bids).values({
-      listingId: listing_id,
-      bidAmount: bid_amount,
-      type: bid_type,
-      userUuid: user_uuid,
-    });
-
-    return NextResponse.json({
-      success: true,
-      matchedAmount: bid_amount,
-      result,
-    });
+    return NextResponse.json(offers, { status: 200 });
   } catch (error) {
-    console.error("❌ Error submitting offer:", error);
+    console.error("❌ Error fetching offers:", error);
     return NextResponse.json(
-      { error: "Failed to submit offer." },
+      { error: "Internal Server Error" },
       { status: 500 }
     );
   }

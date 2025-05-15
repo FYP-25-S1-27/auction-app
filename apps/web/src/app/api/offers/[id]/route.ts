@@ -1,17 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { bids } from "@/libs/db/schema";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
-// GET offers for a specific listing/request
 export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  req: Request,
+  { params }: { params: Promise<{ id: number }> }
 ) {
   try {
-    const { id } = await params;
-    const requestId = parseInt(id);
-    const offers = await db
+    const { id } = await params; // Await the promise to get the actual params
+
+    console.log("🔍 Fetching offers for request ID:", id);
+
+    const offerHistory = await db
       .select({
         id: bids.id,
         user_uuid: bids.userUuid,
@@ -19,65 +20,21 @@ export async function GET(
         bid_time: bids.bidTime,
       })
       .from(bids)
-      .where(and(eq(bids.listingId, requestId), eq(bids.type, "OFFER")))
+      .where(
+        and(
+          eq(bids.listingId, id), // Must match the request ID
+          eq(bids.type, "OFFER") // Only fetch "OFFER" entries)
+        )
+      )
       .orderBy(desc(bids.bidTime));
 
-    return NextResponse.json(offers);
-  } catch {
+    console.log("📄 Retrieved Offers:", offerHistory);
+
+    return NextResponse.json(offerHistory, { status: 200 });
+  } catch (error) {
+    console.error("❌ Error fetching offers:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
-}
-
-// PUT to update an offer
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const offerId = parseInt(id);
-    const body = await req.json();
-    const { bid_amount } = body;
-
-    if (!bid_amount || typeof bid_amount !== "number") {
-      return NextResponse.json(
-        { error: "Invalid bid_amount" },
-        { status: 400 }
-      );
-    }
-
-    const updated = await db
-      .update(bids)
-      .set({ bidAmount: bid_amount })
-      .where(eq(bids.id, offerId));
-
-    return NextResponse.json({ message: "Offer updated", updated });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to update offer" },
-      { status: 500 }
-    );
-  }
-}
-
-// DELETE to remove an offer
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const offerId = parseInt(id);
-
-    const deleted = await db.delete(bids).where(eq(bids.id, offerId));
-
-    return NextResponse.json({ message: "Offer deleted", deleted });
-  } catch {
-    return NextResponse.json(
-      { error: "Failed to delete offer" },
       { status: 500 }
     );
   }
