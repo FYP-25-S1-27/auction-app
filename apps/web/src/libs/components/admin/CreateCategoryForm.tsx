@@ -32,8 +32,14 @@ export function CreateCategoryForm({
             </MenuItem>
           ))}
         </TextField>
-
-        <TextField label="Sub Category" name="subCategory" required />
+        <TextField
+          label="Sub Category"
+          name="subCategory"
+          required
+          onChange={(e) => {
+            e.target.value = e.target.value.toUpperCase();
+          }}
+        />
 
         <Button type="submit" variant="contained" color="primary">
           Create category
