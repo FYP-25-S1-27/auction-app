@@ -36,6 +36,7 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
           listing_id: requestId, // using the same field because 'listing_id' now refers to request or listing
           bid_amount: Number(offerAmount),
           bid_type: "OFFER", // important to distinguish offers from bids!
+          user_uuid: "auth0|67d91134f8221c2f7344d9de", // Replace with actual user UUID
         }),
       });
 

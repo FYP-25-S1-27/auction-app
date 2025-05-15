@@ -1,5 +1,7 @@
 import { GetUsers200ResponseOneOfInner } from "auth0";
 
-export interface CustomUser extends GetUsers200ResponseOneOfInner {
+export type Auth0User = GetUsers200ResponseOneOfInner;
+
+export interface CustomUser extends Auth0User {
   is_admin: boolean;
 }

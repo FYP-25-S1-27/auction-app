@@ -1,5 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
+
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
@@ -19,40 +22,53 @@ import {
 import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
 import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
-import { useUser } from "@auth0/nextjs-auth0";
-import ChatModal from "@/libs/components/chats/ChatModal";
-import { useRouter } from "next/navigation";
+// import { useUser } from "@auth0/nextjs-auth0";
+// import ChatModal from "@/libs/components/chats/ChatModal";
+// import { useRouter } from "next/navigation";
+
+// ✅ Define type before use
+interface LatestBid {
+  id: number;
+  bidAmount: number;
+  bidTime: string;
+}
 
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
-  const [chatModalOpen, setChatModalOpen] = useState(false);
+  // const [chatModalOpen, setChatModalOpen] = useState(false);
   const [listing, setListing] = useState<GetListingByIdWithImages | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
   const [bigImage, setBigImage] = useState<string | null>(null);
-  const [latestBids, setLatestBids] = useState<
-    Awaited<ReturnType<typeof getLatestBids>>
-  >([]); // Adjust type as needed
-
-  const user = useUser();
-  const router = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [winner, setWinner] = useState<string | null>(null);
+  const [latestBids, setLatestBids] = useState<LatestBid[]>([]);
 
   const fetchListing = useCallback(async () => {
     try {
       const res = await fetch(`/api/listings/${id}`);
       const data: GetListingByIdWithImages = await res.json();
       setListing(data);
+
+      if (data.end_time && new Date(data.end_time) < new Date()) {
+        const bidsRes = await fetch(`/api/listings/${id}/bids`);
+        if (bidsRes.ok) {
+          const bids = await bidsRes.json();
+          if (bids.length > 0) {
+            setWinner(bids[0].user_uid);
+          }
+        }
+      }
     } catch (err) {
       console.error("Error fetching listing:", err);
     }
   }, [id]);
 
   useEffect(() => {
-    if (id) {
-      fetchListing();
-    }
+    if (id) fetchListing();
   }, [id, fetchListing]);
+
   useEffect(() => {
     if (id) {
       getLatestBids(parseInt(id as string)).then((bids) => {
@@ -61,7 +77,6 @@ const ViewListingPage = () => {
     }
   }, [id, showSuccess]);
 
-  // ⏳ Live countdown timer
   useEffect(() => {
     const interval = setInterval(() => {
       if (listing?.end_time) {
@@ -91,15 +106,15 @@ const ViewListingPage = () => {
   const handleBidPlaced = () => {
     fetchListing();
     setModalOpen(false);
-    // setShowSuccess(true); this shall be handled by the modal/form
   };
 
   function handleChatClick() {
-    if (user.user?.sub) {
-      setChatModalOpen(true);
-    } else {
-      router.push("/auth/login");
-    }
+    // if (user.user?.sub) {
+    //   setChatModalOpen(true);
+    // } else {
+    //   router.push("/auth/login");
+    // }
+    console.log("Chat click triggered");
   }
 
   function handlePlaceBidClick() {
@@ -121,6 +136,8 @@ const ViewListingPage = () => {
   const formattedEndTime = listing.end_time
     ? new Date(listing.end_time).toLocaleString()
     : "Unknown";
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const auctionEnded = listing.end_time && new Date(listing.end_time) < new Date();
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -133,7 +150,7 @@ const ViewListingPage = () => {
                   <ImageListItem key={i}>
                     <img
                       src={img}
-                      alt={listing.name + { i }}
+                      alt={listing.name + i}
                       onClick={() => setBigImage(img)}
                       style={{ cursor: "pointer" }}
                     />
@@ -142,15 +159,17 @@ const ViewListingPage = () => {
               </ImageList>
             </Grid>
             <Grid item xs={9}>
-              <img src={bigImage ?? listing.image_urls[0]} alt={listing.name} />
+              <img
+                src={bigImage ?? listing.image_urls[0]}
+                alt={listing.name}
+                style={{ width: "100%", objectFit: "contain" }}
+              />
             </Grid>
           </Grid>
         </Grid>
 
         <Grid item xs={12} md={5}>
-          <Typography variant="h5" color={"textPrimary"}>
-            {listing.name}
-          </Typography>
+          <Typography variant="h5">{listing.name}</Typography>
           <Typography variant="body1" color="textSecondary">
             Category: {listing.category}
           </Typography>
@@ -170,7 +189,7 @@ const ViewListingPage = () => {
           >
             {formattedPrice}
           </Typography>
-          <Typography variant="subtitle1" color={"textSecondary"}>
+          <Typography variant="subtitle1" color="textSecondary">
             Starting Bid: ${listing.starting_price}
           </Typography>
 
@@ -193,19 +212,15 @@ const ViewListingPage = () => {
           <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
             <Typography fontWeight="bold">Shipping</Typography>
             <Typography>
-              {listing.shipping_fee
-                ? `$${listing.shipping_fee}`
-                : "$10 per order"}
+              {listing.shipping_fee ? `$${listing.shipping_fee}` : "$10 per order"}
             </Typography>
-
             <Divider sx={{ my: 1 }} />
-
             <Typography fontWeight="bold">Delivery</Typography>
             <Typography>
-              {listing.delivery_estimate ??
-                "Estimated between 3-10 business days"}
+              {listing.delivery_estimate ?? "Estimated between 3–10 business days"}
             </Typography>
           </Box>
+
           <Box sx={{ mt: 3, p: 2, border: "1px solid #ddd", borderRadius: 2 }}>
             <Typography fontWeight="bold">Latest Bids</Typography>
             {latestBids.length > 0 ? (
@@ -246,32 +261,23 @@ const ViewListingPage = () => {
               </Typography>
             </Box>
           </Box>
-          {listing.user_uuid !== user.user?.sub && (
-            <Box mt={2} display="flex" gap={2}>
-              {/* <Button variant="outlined">Other Products</Button> */}
-              <Button variant="contained" onClick={handleChatClick}>
-                Send a message
-              </Button>
-            </Box>
-          )}
+          <Box mt={2} display="flex" gap={2}>
+            <Button variant="contained" onClick={handleChatClick}>
+              Contact
+            </Button>
+          </Box>
         </Box>
       </Box>
-      {user.user?.sub && (
-        <ChatModal
-          open={chatModalOpen}
-          onClose={() => setChatModalOpen(false)}
-          userUuid={user.user.sub}
-          otherPartyUuid={listing.user_uuid}
-          otherPartyUuidUsername={listing.seller_name}
-          preFilledMessage={`Hi, I am interested in your ${listing.name}.`}
+
+      {modalOpen && (
+        <BidFormModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          listingId={Number(id)}
+          listing={listing}
+          onSuccess={handleBidPlaced}
         />
       )}
-      <BidFormModal
-        open={modalOpen}
-        onClose={handleBidPlaced}
-        listingId={Number(id)}
-        setShowSuccessMessage={setShowSuccess}
-      />
 
       <Snackbar
         open={showSuccess}

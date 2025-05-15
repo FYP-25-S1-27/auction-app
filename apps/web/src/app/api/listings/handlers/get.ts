@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { listings } from "@/libs/db/schema";
 import {
+  eq,
   and,
   gte,
   lte,
@@ -15,19 +16,15 @@ import {
 
 export async function handleGet(request: NextRequest) {
   try {
-    // Get all search params from the URL
     const searchParams = request.nextUrl.searchParams;
     const filters: SQL[] = [];
-    let orderBy: SQL = desc(listings.createdAt); // Default order by createdAt descending
-    let pageSize: number = 20; // Default page size
-    let page: number = 1; // Default page number
+    let orderBy: SQL = desc(listings.createdAt);
+    let pageSize: number = 20;
+    let page: number = 1;
 
-    // Process each query parameter and build filters dynamically
     searchParams.forEach((value, key) => {
-      // Default values to append if no params are provided
       if (!value) return;
 
-      // Handle special cases for different column types
       switch (key) {
         case "page":
           page = parseInt(value);
@@ -72,7 +69,6 @@ export async function handleGet(request: NextRequest) {
           );
           break;
         case "orderBy":
-          // Handle ordering
           if (value === "priceAsc") {
             orderBy = asc(listings.currentPrice);
           } else if (value === "priceDesc") {
@@ -87,9 +83,14 @@ export async function handleGet(request: NextRequest) {
             orderBy = desc(listings.endTime);
           }
           break;
+        case "type":
+          if (value === "REQUEST" || value === "LISTING") {
+            filters.push(eq(listings.type, value));
+          }
+          break;
       }
     });
-    // Fetch the true min and max prices for the entire dataset (without filters)
+
     const priceMetadata = await db
       .select({
         minPrice: sql`MIN(${listings.currentPrice || listings.startingPrice})`,
@@ -106,9 +107,6 @@ export async function handleGet(request: NextRequest) {
     const minPrice = priceMetadata[0]?.minPrice || 0;
     const maxPrice = priceMetadata[0]?.maxPrice || 0;
 
-    // Execute the query with all applied filters
-    // Add default filters
-    filters.push(lte(listings.startTime, sql`CURRENT_TIMESTAMP`)); // Only include listings that have started
     const items = await db
       .select()
       .from(listings)
@@ -117,7 +115,6 @@ export async function handleGet(request: NextRequest) {
       .limit(pageSize)
       .offset((page - 1) * pageSize);
 
-    // Get total count for pagination
     const countResult = await db
       .select({ count: sql<number>`count(*)` })
       .from(listings)
@@ -131,7 +128,7 @@ export async function handleGet(request: NextRequest) {
       pagination: {
         page,
         pageSize,
-        totalItems: items.length,
+        totalItems,
         totalPages,
       },
       metadata: {
