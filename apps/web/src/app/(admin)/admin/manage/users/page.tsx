@@ -2,7 +2,7 @@ import { getAuth0ManagementClient } from "@/libs/actions/auth0-management";
 import { CustomAdminUserDataGrid } from "@/libs/components/admin/datagrid/UserDataGrid";
 import { db } from "@/libs/db/drizzle";
 import { users } from "@/libs/db/schema";
-import { CustomUser, Auth0User } from "@/libs/types/users";
+import { CustomUser } from "@/libs/types/users";
 import { Paper, Typography } from "@mui/material";
 import { connection } from "next/server";
 
@@ -10,9 +10,8 @@ export default async function UsersPage() {
   await connection();
   const auth0management = getAuth0ManagementClient();
 
-  const getUsersResponse = auth0management.users.getAll();
-  const auth0users: Auth0User[] = (await getUsersResponse).data || [];
-
+  const getUsersRepsonse = auth0management.users.getAll();
+  const auth0users = (await getUsersRepsonse).data || [];
   const dbUsers = await db
     .select({
       uuid: users.uuid,
@@ -20,9 +19,8 @@ export default async function UsersPage() {
       username: users.username,
     })
     .from(users);
-
   // Merge the two lists of users using uuid as the key
-  const _users: CustomUser[] = auth0users.map((auth0user: Auth0User) => {
+  const _users: CustomUser[] = auth0users.map((auth0user) => {
     const dbUser = dbUsers.find((dbUser) => dbUser.uuid === auth0user.user_id);
     return {
       ...auth0user,

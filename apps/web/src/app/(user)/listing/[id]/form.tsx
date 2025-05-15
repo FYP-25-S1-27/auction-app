@@ -9,77 +9,28 @@ import {
   TextField,
   Alert,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-
-interface Listing {
-  id: number;
-  user_uuid: string;
-  end_time?: string;
-}
+import { Dispatch, SetStateAction, useState } from "react";
 
 interface BidFormModalProps {
   open: boolean;
   onClose: () => void;
   listingId: number;
-  listing: Listing;
-  onSuccess: () => void;
-}
-
-interface User {
-  uuid: string;
-  is_admin: boolean;
+  setShowSuccessMessage: Dispatch<SetStateAction<boolean>>;
 }
 
 const BidFormModal = ({
   open,
   onClose,
   listingId,
-  listing,
-  onSuccess,
+  setShowSuccessMessage,
 }: BidFormModalProps) => {
   const [bidAmount, setBidAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-
-  // 🔍 Fetch current user data when modal opens
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const res = await fetch("/api/me");
-        if (!res.ok) throw new Error("Failed to fetch user");
-        const data = await res.json();
-        setUser(data);
-      } catch (err) {
-        console.error("Failed to load user", err);
-      }
-    };
-
-    if (open) fetchUser();
-  }, [open]);
+  const [success, setSuccess] = useState(false);
 
   const handleBid = async () => {
     setError(null);
-
-    // 🛑 Safety checks
-    if (!user) {
-      setError("User not authenticated.");
-      return;
-    }
-
-    if (user.is_admin) {
-      setError("Admins are not allowed to place bids.");
-      return;
-    }
-
-    if (user.uuid === listing.user_uuid) {
-      setError("You cannot bid on your own listing.");
-      return;
-    }
-
-    if (listing.end_time && new Date(listing.end_time) < new Date()) {
-      setError("Auction has already ended.");
-      return;
-    }
+    setSuccess(false);
 
     try {
       const res = await fetch("/api/bids", {
@@ -96,9 +47,10 @@ const BidFormModal = ({
         throw new Error(data.error || "Failed to place bid");
       }
 
+      setSuccess(true);
+      setShowSuccessMessage(true);
       setBidAmount("");
-      onClose();      // 🔐 Only close on success
-      onSuccess();    // 🟢 Trigger success handler outside
+      onClose(); // optionally close on success
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -112,7 +64,16 @@ const BidFormModal = ({
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>Place Your Bid</DialogTitle>
       <DialogContent>
-        {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        {success && (
+          <Alert severity="success" sx={{ mb: 2 }}>
+            Bid placed successfully!
+          </Alert>
+        )}
         <TextField
           fullWidth
           type="number"
