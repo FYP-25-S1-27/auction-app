@@ -20,14 +20,13 @@ import BidFormModal from "./form";
 import { GetListingByIdWithImages } from "@/app/api/listings/[id]/route";
 import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
 import { useUser } from "@auth0/nextjs-auth0";
-import ChatModal from "@/libs/components/chats/ChatModal";
 import { useRouter } from "next/navigation";
 import { getRole } from "@/libs/actions/db/users";
+import SendMessageButton from "@/libs/components/chats/SendMessageButton";
 
 const ViewListingPage = () => {
   const { id } = useParams();
   const [modalOpen, setModalOpen] = useState(false);
-  const [chatModalOpen, setChatModalOpen] = useState(false);
   const [listing, setListing] = useState<GetListingByIdWithImages | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [timeLeft, setTimeLeft] = useState<string>("");
@@ -103,13 +102,13 @@ const ViewListingPage = () => {
     // setShowSuccess(true); this shall be handled by the modal/form
   };
 
-  function handleChatClick() {
-    if (user.user?.sub) {
-      setChatModalOpen(true);
-    } else {
-      router.push("/auth/login");
-    }
-  }
+  // function handleChatClick() {
+  //   if (user.user?.sub) {
+  //     setChatModalOpen(true);
+  //   } else {
+  //     router.push("/auth/login");
+  //   }
+  // }
 
   function handlePlaceBidClick() {
     if (user.user?.sub) {
@@ -257,25 +256,14 @@ const ViewListingPage = () => {
             </Box>
           </Box>
           {listing.user_uuid !== user.user?.sub && (
-            <Box mt={2} display="flex" gap={2}>
-              {/* <Button variant="outlined">Other Products</Button> */}
-              <Button variant="contained" onClick={handleChatClick}>
-                Send a message
-              </Button>
-            </Box>
+            <SendMessageButton
+              otherPartyUuid={listing.user_uuid}
+              prefilledMessage={`Hi I am interested in your ${listing.name}`}
+            />
           )}
         </Box>
       </Box>
-      {user.user?.sub && (
-        <ChatModal
-          open={chatModalOpen}
-          onClose={() => setChatModalOpen(false)}
-          userUuid={user.user.sub}
-          otherPartyUuid={listing.user_uuid}
-          otherPartyUuidUsername={listing.seller_name}
-          preFilledMessage={`Hi, I am interested in your ${listing.name}.`}
-        />
-      )}
+
       <BidFormModal
         open={modalOpen}
         onClose={handleBidPlaced}

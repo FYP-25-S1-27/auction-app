@@ -5,8 +5,10 @@ import { Box, Stack, Typography } from "@mui/material";
 
 export default async function ConversationPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ prefilledMessage: string | null }>;
 }) {
   const { id } = await params;
   const conversationId = id;
@@ -26,6 +28,8 @@ export default async function ConversationPage({
     return "User not found";
   }
   const otherPartyUsername = otherPartyUser[0]?.username || "Unknown User";
+  // get prefilled message from url
+  const prefilledMessage = (await searchParams).prefilledMessage;
 
   return (
     <Stack direction={"column"} spacing={2} sx={{ padding: 2 }} width={"100%"}>
@@ -44,6 +48,7 @@ export default async function ConversationPage({
         <ConversationBody
           conversationId={conversationId}
           otherPartyUuid={otherPartyUuid}
+          prefilledMessage={prefilledMessage}
         />
       </Box>
     </Stack>

@@ -21,12 +21,14 @@ import { socket } from "@/libs/sio";
 interface ConversationBodyProps {
   conversationId: string;
   otherPartyUuid: string;
+  prefilledMessage?: string | null;
   // otherPartyUsername: string;
 }
 
 export default function ConversationBody({
   conversationId,
   otherPartyUuid,
+  prefilledMessage,
 }: // otherPartyUsername,
 ConversationBodyProps) {
   const [message, setMessage] = useState<string>("");
@@ -82,7 +84,10 @@ ConversationBodyProps) {
 
   useEffect(() => {
     _getChatMessages();
-  }, [_getChatMessages, conversationId, otherPartyUuid]);
+    if (prefilledMessage) {
+      setMessage(prefilledMessage);
+    }
+  }, [_getChatMessages, conversationId, otherPartyUuid, prefilledMessage]);
   useEffect(() => {
     if (chatHistoryContainerRef.current) {
       chatHistoryContainerRef.current.scrollTop =
