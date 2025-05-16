@@ -383,11 +383,8 @@ export async function seedCategoriesListingsAndImages(userId: string[]) {
             break;
         }
         const _createAt = faker.date.past({ years: 1 });
-        const withinTheWeek = faker.date.soon({ days: 6 });
-        const others = faker.date.between({
-          from: _createAt,
-          to: new Date(),
-        });
+        const withinTheWeek = faker.date.soon({ days: 6, refDate: _createAt });
+        const others = faker.date.future({ years: 1, refDate: _createAt });
         // Insert listing
         const _endDateTime = faker.helpers.weightedArrayElement([
           { weight: 2, value: withinTheWeek },
