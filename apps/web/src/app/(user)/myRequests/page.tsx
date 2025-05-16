@@ -45,6 +45,7 @@ export default function MyRequestsPage() {
       </Typography>
       <Box mt={3}>
         {requests.length === 0 ? (
+            /* eslint-disable-next-line react/no-unescaped-entities */
           <Typography>Can't find what you're looking for? Make a request now!</Typography>
         ) : (
           requests.map((req) => (

@@ -156,6 +156,7 @@ const CreateRequestForm = () => {
         {previewUrl && (
           <Box mt={2}>
             <Typography variant="subtitle2">Preview:</Typography>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={previewUrl}
               alt="Preview"
