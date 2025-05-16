@@ -21,9 +21,13 @@ cp .env.example .env
 # Edit .env file with your configuration
 ```
 
-3. Start development server
+3. Start server
 ```bash
+# for development:
 npm run dev
+# for production:
+npm run build
+npm start
 ```
 
 4. View Database Tables
@@ -33,11 +37,10 @@ npm run dev
 
 5. For database schema changes/migrations, please use:
 ```bash
-npm run -w web db:generate # to generate sql files (apps/web/drizzle_output)
-
-npm run -w web db:migrate # to migrate schema using above sql files
+npm run -w web db:push
 ```
 
+#### Optional
 1. To use or edit the files under the bruno/ folder, you can download https://www.usebruno.com/downloads (it can also be used to test our APIs)
 
 
