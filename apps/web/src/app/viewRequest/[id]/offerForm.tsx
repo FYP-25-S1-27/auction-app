@@ -79,7 +79,7 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
           {error && <Alert severity="error">{error}</Alert>}
 
           <TextField
-            label="Offer Amount (SGD)"
+            label="Offer Amount"
             type="number"
             value={offerAmount}
             onChange={(e) => setOfferAmount(e.target.value)}
