@@ -21,11 +21,13 @@ interface OfferFormProps {
 }
 
 const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) => {
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
 
   const [offerAmount, setOfferAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const isValidAmount = offerAmount !== "" && !isNaN(Number(offerAmount)) && Number(offerAmount) >= 0;
 
   const handleSubmit = async () => {
     setError(null);
@@ -67,7 +69,7 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
   };
 
   const handleMatchOffer = async () => {
-    setOfferAmount("0"); // Convention for "Match Offer"
+    setOfferAmount("0");
     await handleSubmit();
   };
 
@@ -85,7 +87,9 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
             onChange={(e) => setOfferAmount(e.target.value)}
             fullWidth
             required
-            disabled={!user && !isLoading}
+            inputProps={{ min: 1 }}
+            error={!isValidAmount && offerAmount !== ""}
+            helperText={!isValidAmount && offerAmount !== "" ? "Offer must be 0 or higher." : ""}
           />
         </Stack>
       </DialogContent>
@@ -94,7 +98,12 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
         <Button onClick={handleMatchOffer} color="secondary" variant="outlined" disabled={!user}>
           Match Offer
         </Button>
-        <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading || !user}>
+        <Button
+          onClick={handleSubmit}
+          color="primary"
+          variant="contained"
+          disabled={loading || !user || !isValidAmount}
+        >
           {loading ? "Submitting..." : "Submit Offer"}
         </Button>
       </DialogActions>

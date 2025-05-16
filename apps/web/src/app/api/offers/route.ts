@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { bids } from "@/libs/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { listings } from "@/libs/db/schema";
 
 // ✅ GET: Fetch offers filtered by user_uuid
 export async function GET(req: NextRequest) {
@@ -45,20 +46,29 @@ export async function POST(req: Request) {
       );
     }
 
-    // Assign to a mutable `let` so we can modify it if match logic applies
+    // ✅ Reject negative values early
+    if (initialBidAmount < 0) {
+      return NextResponse.json(
+        { error: "Offer amount cannot be negative." },
+        { status: 400 }
+      );
+    }
+
     let bid_amount = initialBidAmount;
 
     // ✅ Server-side "Match Offer" logic
     if (bid_amount === 0 && bid_type === "OFFER") {
-      const [topOffer] = await db
-        .select({ bidAmount: bids.bidAmount })
-        .from(bids)
-        .where(and(eq(bids.listingId, listing_id), eq(bids.type, "OFFER")))
-        .orderBy(desc(bids.bidAmount))
+      const [listing] = await db
+        .select({ startingPrice: listings.startingPrice })
+        .from(listings)
+        .where(eq(listings.id, listing_id))
         .limit(1);
 
-      const defaultMatchAmount = 100;
-      bid_amount = topOffer?.bidAmount ?? defaultMatchAmount;
+      if (!listing) {
+        return NextResponse.json({ error: "Listing not found." }, { status: 404 });
+      }
+
+      bid_amount = listing.startingPrice;
     }
 
     // ✅ Deduplication: Check existing offer by this user
