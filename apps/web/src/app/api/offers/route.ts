@@ -45,7 +45,14 @@ export async function POST(req: Request) {
       );
     }
 
-    // Assign to a mutable `let` so we can modify it if match logic applies
+    // ✅ Reject negative values early
+    if (initialBidAmount < 0) {
+      return NextResponse.json(
+        { error: "Offer amount cannot be negative." },
+        { status: 400 }
+      );
+    }
+
     let bid_amount = initialBidAmount;
 
     // ✅ Server-side "Match Offer" logic
