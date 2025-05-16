@@ -11,7 +11,11 @@ import {
   Button,
   Box,
   CircularProgress,
-  Alert,Divider, Tabs, Tab, Link
+  Alert,
+  Divider,
+  Tabs,
+  Tab,
+  Link,
 } from "@mui/material";
 import { listings } from "@/libs/db/schema";
 
@@ -88,11 +92,22 @@ const MyListings = () => {
   const now = new Date();
   const categorizedListings = {
     upcoming: _listings.filter((l) => new Date(l.startTime) > now),
-    ongoing: _listings.filter((l) => l.status === "ACTIVE" && new Date(l.startTime) <= now && new Date(l.endTime) >= now),
-    sold: _listings.filter((l) => new Date(l.endTime) < now ),
+    ongoing: _listings.filter(
+      (l) =>
+        l.status === "ACTIVE" &&
+        new Date(l.startTime) <= now &&
+        new Date(l.endTime) >= now
+    ),
+    sold: _listings.filter(
+      (l) => new Date(l.endTime) < now || l.status === "SOLD"
+    ),
   };
 
-  const tabLabels = ["Upcoming listings", "Ongoing listings", "Sold/Expired listings"];
+  const tabLabels = [
+    "Upcoming listings",
+    "Ongoing listings",
+    "Sold/Expired listings",
+  ];
   const tabKeys = ["upcoming", "ongoing", "sold"] as const;
 
   return (
@@ -134,31 +149,36 @@ const MyListings = () => {
                 >
                   <Link
                     href={`/listing/${listing.id}`}
-                    style={{ flexGrow: 1, textDecoration: "none", color: "inherit" }}
+                    style={{
+                      flexGrow: 1,
+                      textDecoration: "none",
+                      color: "inherit",
+                    }}
                   >
-                  <ListItemText
-                    primary={listing.name}
-                    secondary={`Category: ${listing.category} | Price: $${listing.startingPrice}`}
-                  />
+                    <ListItemText
+                      primary={listing.name}
+                      secondary={`Category: ${listing.category}| Status: ${listing.status} | Price: $${listing.startingPrice}`}
+                    />
                   </Link>
-                  {new Date(listing.endTime) > new Date() && (
-                  <Box>
-                    <Button
-                      variant="contained"
-                      onClick={() => handleEdit(listing.id)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      sx={{ ml: 2 }}
-                      onClick={() => handleDelete(listing.id)}
-                    >
-                      Delete
-                    </Button>
-                  </Box>
-                  )}
+                  {new Date(listing.endTime) > new Date() &&
+                    listing.status !== "SOLD" && (
+                      <Box>
+                        <Button
+                          variant="contained"
+                          onClick={() => handleEdit(listing.id)}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          color="error"
+                          sx={{ ml: 2 }}
+                          onClick={() => handleDelete(listing.id)}
+                        >
+                          Delete
+                        </Button>
+                      </Box>
+                    )}
                 </ListItem>
                 <Divider />
               </Box>
