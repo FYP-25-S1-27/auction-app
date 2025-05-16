@@ -163,10 +163,10 @@ export async function GET(
         currentPrice: listings.currentPrice,
         endTime: listings.endTime,
         status: listings.status,
-        imageUrl: listingImages.imageUrl, // Fetch the image URL directly
+        // imageUrl: listingImages.imageUrl, // Fetch the image URL directly
       })
       .from(listings)
-      .leftJoin(listingImages, eq(listingImages.listingId, listings.id)) // Join with listingImages
+      // .leftJoin(listingImages, eq(listingImages.listingId, listings.id)) // Join with listingImages
       .where(eq(listings.category, subcategory));
 
     // Return the subcategory and its listings

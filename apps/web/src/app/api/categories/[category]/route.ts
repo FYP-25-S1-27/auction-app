@@ -228,10 +228,10 @@ export async function GET(
         currentPrice: listings.currentPrice,
         endTime: listings.endTime,
         status: listings.status,
-        imageUrl: listingImages.imageUrl, // Fetch the image URL directly
+        // imageUrl: listingImages.imageUrl, // Fetch the image URL directly
       })
       .from(listings)
-      .leftJoin(listingImages, eq(listingImages.listingId, listings.id))
+      // .leftJoin(listingImages, eq(listingImages.listingId, listings.id))
       .where(inArray(listings.category, categoryNames));
 
     // Return the category and its listings
