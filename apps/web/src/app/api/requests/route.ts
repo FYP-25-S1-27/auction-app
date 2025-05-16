@@ -7,14 +7,11 @@ export async function POST(req: Request) {
   try {
     const session = await auth0.getSession();
 
-    let userUuid: string | null = null;
-
-    if (session && session.user) {
-      userUuid = session.user.sub;
-    } else {
-      console.warn("⚠️ No session found. Using hardcoded UUID for testing.");
-      userUuid = "auth0|67d91134f8221c2f7344d9de"; // Replace this after Auth0 integration is done
+    if (!session || !session.user?.sub) {
+      console.error("❌ No user session found. Unauthorized request.");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+    const userUuid = session.user.sub;
 
     const { title, description, category } = await req.json();
 

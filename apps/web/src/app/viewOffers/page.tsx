@@ -18,6 +18,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useUser } from "@auth0/nextjs-auth0";
 
 interface Offer {
   id: number;
@@ -28,6 +29,7 @@ interface Offer {
 }
 
 const ViewOffersPage = () => {
+  const { user, isLoading: authLoading } = useUser();
   const [offers, setOffers] = useState<Offer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,11 +37,15 @@ const ViewOffersPage = () => {
   const [newAmount, setNewAmount] = useState<string>("");
   const router = useRouter();
 
-  const userUuid = "auth0|67d91134f8221c2f7344d9de";
-
   const fetchOffers = async () => {
+    if (!user?.sub) {
+      setError("You must be logged in to view your offers.");
+      setLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/offers?user_uuid=${encodeURIComponent(userUuid)}`);
+      const res = await fetch(`/api/offers?user_uuid=${encodeURIComponent(user.sub)}`);
       if (!res.ok) throw new Error("Failed to fetch offers");
 
       const rawData = await res.json();
@@ -68,8 +74,8 @@ const ViewOffersPage = () => {
   };
 
   useEffect(() => {
-    fetchOffers();
-  }, []);
+    if (user) fetchOffers();
+  }, [user]);
 
   const handleViewRequest = (id: number) => {
     router.push(`/viewRequest/${id}`);
@@ -120,7 +126,7 @@ const ViewOffersPage = () => {
         My Offers
       </Typography>
 
-      {loading && <CircularProgress />}
+      {(loading || authLoading) && <CircularProgress />}
       {error && <Alert severity="error">{error}</Alert>}
 
       {offers.length > 0 ? (
@@ -155,7 +161,7 @@ const ViewOffersPage = () => {
           ))}
         </List>
       ) : (
-        !loading && <Typography>No offers found.</Typography>
+        !loading && !authLoading && <Typography>No offers found.</Typography>
       )}
 
       {/* Adjust Offer Modal */}

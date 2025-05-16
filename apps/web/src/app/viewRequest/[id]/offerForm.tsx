@@ -11,6 +11,7 @@ import {
   Stack,
   Alert,
 } from "@mui/material";
+import { useUser } from "@auth0/nextjs-auth0";
 
 interface OfferFormProps {
   open: boolean;
@@ -20,6 +21,8 @@ interface OfferFormProps {
 }
 
 const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) => {
+  const { user, isLoading } = useUser();
+
   const [offerAmount, setOfferAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,14 +32,18 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
     setLoading(true);
 
     try {
+      if (!user?.sub) {
+        throw new Error("You must be logged in to submit an offer.");
+      }
+
       const response = await fetch("/api/offers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          listing_id: requestId, // using the same field because 'listing_id' now refers to request or listing
+          listing_id: requestId,
           bid_amount: Number(offerAmount),
-          bid_type: "OFFER", // important to distinguish offers from bids!
-          user_uuid: "auth0|67d91134f8221c2f7344d9de", // Replace with actual user UUID
+          bid_type: "OFFER",
+          user_uuid: user.sub,
         }),
       });
 
@@ -46,8 +53,8 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
       }
 
       setOfferAmount("");
-      refreshOffers(); // Refresh the offers list after successful offer
-      onClose(); // Close the modal
+      refreshOffers();
+      onClose();
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
@@ -60,7 +67,7 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
   };
 
   const handleMatchOffer = async () => {
-    setOfferAmount("0"); // Assuming 0 means match? You can adjust if you have a specific value
+    setOfferAmount("0"); // Convention for "Match Offer"
     await handleSubmit();
   };
 
@@ -78,15 +85,16 @@ const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) 
             onChange={(e) => setOfferAmount(e.target.value)}
             fullWidth
             required
+            disabled={!user && !isLoading}
           />
         </Stack>
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={handleMatchOffer} color="secondary" variant="outlined">
+        <Button onClick={handleMatchOffer} color="secondary" variant="outlined" disabled={!user}>
           Match Offer
         </Button>
-        <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading}>
+        <Button onClick={handleSubmit} color="primary" variant="contained" disabled={loading || !user}>
           {loading ? "Submitting..." : "Submit Offer"}
         </Button>
       </DialogActions>

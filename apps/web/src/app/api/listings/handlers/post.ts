@@ -9,18 +9,14 @@ export async function handlePost(req: Request) {
     // ✅ Get user session
     const session = await auth0.getSession();
 
-    let user_uuid: string | null = null;
-
-    if (session && session.user) {
-      user_uuid = session.user.sub;
-    } else {
-      console.warn(
-        "⚠️ No session found, using hardcoded user_uuid for testing."
-      );
-      user_uuid = "auth0|67d91134f8221c2f7344d9de";
+    if (!session || !session.user?.sub) {
+      console.error("❌ No user session found. Unauthorized request.");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user_uuid = session.user.sub;
     console.log("✅ User UUID:", user_uuid);
+
 
     // ✅ Parse form data
     const formData = await req.formData();
