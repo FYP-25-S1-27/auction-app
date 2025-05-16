@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
-import { requests } from "@/libs/db/schema";
+import { requests, listingImages } from "@/libs/db/schema";
 import { auth0 } from "@/libs/auth0";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
@@ -45,9 +46,27 @@ export async function POST(req: Request) {
 
 export async function GET() {
   try {
+    // Get all requests
     const allRequests = await db.select().from(requests);
-    return NextResponse.json(allRequests, { status: 200 });
-  } catch {
+
+    // For each request, fetch related images
+    const requestsWithImages = await Promise.all(
+      allRequests.map(async (req) => {
+        const images = await db
+          .select({ imageUrl: listingImages.imageUrl })
+          .from(listingImages)
+          .where(eq(listingImages.listingId, req.id));
+
+        return {
+          ...req,
+          imageUrls: images.map((img) => img.imageUrl),
+        };
+      })
+    );
+
+    return NextResponse.json(requestsWithImages, { status: 200 });
+  } catch (error) {
+    console.error("❌ Error fetching requests:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

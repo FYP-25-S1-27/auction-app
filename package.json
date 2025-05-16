@@ -7,9 +7,9 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "dotenvx run -- concurrently --names web,backend -c red,blue 'npm run dev -w apps/web' 'npm run dev -w apps/backend'",
-    "build": "dotenvx run -- concurrently --names web,backend -c red,blue 'npm run build -w apps/web' 'npm run build -w apps/backend'",
-    "start": "dotenvx run -- concurrently --names web,backend -c red,blue 'npm run start -w apps/web' 'npm run start -w apps/backend'"
+    "dev": "dotenvx run -- concurrently --names web,backend -c red,blue \"npm run dev -w apps/web\" \"npm run dev -w apps/backend\"",
+    "build": "dotenvx run -- concurrently --names web,backend -c red,blue \"npm run build -w apps/web\" \"npm run build -w apps/backend\"",
+    "start": "dotenvx run -- concurrently --names web,backend -c red,blue \"npm run start -w apps/web\" \"npm run start -w apps/backend\""
   },
   "repository": {
     "type": "git",

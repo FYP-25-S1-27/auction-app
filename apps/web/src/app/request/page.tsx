@@ -11,16 +11,17 @@ import {
   Alert,
   Divider,
   Box,
+  CardMedia,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 
-// Define request interface
 interface Request {
   id: number;
   name: string;
   category: string;
   startingPrice: number;
   description: string;
+  imageUrls?: string[];
 }
 
 const ViewAllRequestsPage = () => {
@@ -30,32 +31,23 @@ const ViewAllRequestsPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-  const fetchRequests = async () => {
-    try {
-      const res = await fetch("/api/listings?listing_types=REQUEST");
-      if (!res.ok) throw new Error("Failed to fetch requests");
+    const fetchRequests = async () => {
+      try {
+        const res = await fetch("/api/listings?listing_types=REQUEST");
+        if (!res.ok) throw new Error("Failed to fetch requests");
 
-      const data = await res.json();
+        const data = await res.json();
+        setRequests(data.items || []);
+      } catch (err) {
+        console.error("❌ Error fetching requests:", err);
+        setError(err instanceof Error ? err.message : "Unknown error");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      // console.log("📦 Requests fetched:", {
-      //   total: data.items?.length,
-      //   data: data.items,
-      //   pagination: data.pagination,
-      //   metadata: data.metadata,
-      // });
-
-      setRequests(data.items || []);
-    } catch (err) {
-      console.error("❌ Error fetching requests:", err);
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchRequests();
-}, []);
-
+    fetchRequests();
+  }, []);
 
   const handleClick = (id: number) => {
     router.push(`/viewRequest/${id}`);
@@ -74,9 +66,24 @@ const ViewAllRequestsPage = () => {
         <List>
           {requests.map((request) => (
             <Box key={request.id}>
-              <ListItem component="button" onClick={() => handleClick(request.id)}>
+              <ListItem component="button" onClick={() => handleClick(request.id)} alignItems="flex-start">
                 <ListItemText
-                  primary={`${request.name} - $${request.startingPrice}`}
+                  primary={
+                    <>
+                      <Typography variant="h6">
+                        {request.name} - ${request.startingPrice}
+                      </Typography>
+                      {(request.imageUrls?.length ?? 0) > 0 && (
+                        <CardMedia
+                          component="img"
+                          height="150"
+                          sx={{ mt: 1, borderRadius: 1, objectFit: "cover" }}
+                          image={request.imageUrls![0]}
+                          alt={request.name}
+                        />
+                      )}
+                    </>
+                  }
                   secondary={
                     <>
                       <Typography variant="body2" component="span">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, ChangeEvent } from "react";
+import { useEffect, useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -38,7 +38,6 @@ const CreateRequestForm = () => {
         console.error("Failed to fetch categories:", err);
       }
     };
-
     fetchCategories();
   }, []);
 
@@ -65,7 +64,7 @@ const CreateRequestForm = () => {
       formData.append("type", "REQUEST");
 
       images.forEach((img) => {
-        formData.append("image_urls", img); // matches backend
+        formData.append("image_urls", img);
       });
 
       const res = await fetch("/api/listings", {
@@ -78,11 +77,7 @@ const CreateRequestForm = () => {
 
       router.push("/");
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("An unknown error occurred.");
-      }
+      setError(err instanceof Error ? err.message : "An unknown error occurred.");
     } finally {
       setLoading(false);
     }
@@ -90,11 +85,46 @@ const CreateRequestForm = () => {
 
   return (
     <Container maxWidth="sm" sx={{ mt: 5 }}>
-      <h2>Create Product Request</h2>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        Create Product Request
+      </Typography>
 
       {error && <Alert severity="error">{error}</Alert>}
 
       <form onSubmit={handleSubmit}>
+        <Box
+          sx={{
+            border: "2px dashed #ccc",
+            padding: "20px",
+            textAlign: "center",
+            cursor: "pointer",
+            mb: 3,
+          }}
+        >
+          <label htmlFor="image-upload">
+            <Typography>Drag and drop images here, or click to select images</Typography>
+            <input
+              id="image-upload"
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleImageChange}
+            />
+          </label>
+        </Box>
+
+        {previewUrl && (
+          <Box mt={2}>
+            <Typography variant="subtitle2">Preview:</Typography>
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{ width: "100%", maxHeight: "300px", objectFit: "contain" }}
+            />
+          </Box>
+        )}
+
         <TextField
           label="Product Name"
           value={productName}
@@ -105,7 +135,7 @@ const CreateRequestForm = () => {
         />
 
         <TextField
-          label="Budget (SGD)"
+          label="Budget"
           type="number"
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
@@ -139,31 +169,6 @@ const CreateRequestForm = () => {
             ))}
           </Select>
         </FormControl>
-
-        <Box mt={2}>
-          <Button variant="outlined" component="label" fullWidth>
-            Upload Images (Optional)
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              hidden
-              onChange={handleImageChange}
-            />
-          </Button>
-        </Box>
-
-        {previewUrl && (
-          <Box mt={2}>
-            <Typography variant="subtitle2">Preview:</Typography>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={previewUrl}
-              alt="Preview"
-              style={{ width: "100%", maxHeight: "300px", objectFit: "contain" }}
-            />
-          </Box>
-        )}
 
         <Box sx={{ mt: 3 }}>
           <Button
