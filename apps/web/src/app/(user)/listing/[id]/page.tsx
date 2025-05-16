@@ -22,6 +22,7 @@ import getLatestBids from "@/libs/actions/db/bids/getLatestBids";
 import { useUser } from "@auth0/nextjs-auth0";
 import ChatModal from "@/libs/components/chats/ChatModal";
 import { useRouter } from "next/navigation";
+import { getRole } from "@/libs/actions/db/users";
 
 const ViewListingPage = () => {
   const { id } = useParams();
@@ -34,6 +35,7 @@ const ViewListingPage = () => {
   const [latestBids, setLatestBids] = useState<
     Awaited<ReturnType<typeof getLatestBids>>
   >([]); // Adjust type as needed
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const user = useUser();
   const router = useRouter();
@@ -52,7 +54,14 @@ const ViewListingPage = () => {
     if (id) {
       fetchListing();
     }
-  }, [id, fetchListing]);
+    if (user.user?.sub) {
+      getRole(user.user.sub).then((role) => {
+        if (role[0].is_admin) {
+          setIsAdmin(true);
+        }
+      });
+    }
+  }, [id, fetchListing, user.user?.sub]);
   useEffect(() => {
     if (id) {
       getLatestBids(parseInt(id as string)).then((bids) => {
@@ -179,6 +188,7 @@ const ViewListingPage = () => {
               !listing ||
               !user ||
               listing.status?.toUpperCase() !== "ACTIVE" ||
+              isAdmin ||
               new Date(listing.end_time) < new Date() ||
               listing.user_uuid === user.user?.sub
             }
