@@ -172,14 +172,26 @@ const ViewOffersPage = () => {
             fullWidth
             label="New Offer Amount"
             value={newAmount}
-            onChange={(e) => setNewAmount(e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === "" || Number(value) >= 1) {
+                setNewAmount(value);
+              }
+            }}
             type="number"
             sx={{ mt: 2 }}
+            inputProps={{ min: 1 }}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAdjustingOfferId(null)}>Cancel</Button>
-          <Button onClick={handleAdjust} variant="contained">
+          <Button
+            onClick={handleAdjust}
+            variant="contained"
+            disabled={
+              newAmount === "" || isNaN(Number(newAmount)) || Number(newAmount) < 1
+            }
+          >
             Submit
           </Button>
         </DialogActions>
