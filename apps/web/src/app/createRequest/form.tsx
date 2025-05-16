@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -13,6 +13,7 @@ import {
   InputLabel,
   Alert,
   CircularProgress,
+  Typography,
 } from "@mui/material";
 
 const CreateRequestForm = () => {
@@ -20,28 +21,56 @@ const CreateRequestForm = () => {
   const [productName, setProductName] = useState("");
   const [budget, setBudget] = useState("");
   const [description, setDescription] = useState("");
-  const [category] = useState("");
+  const [category, setCategory] = useState("");
+  const [categoryList, setCategoryList] = useState<{ name: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const res = await fetch("/api/categories");
+        const data = await res.json();
+        setCategoryList(data);
+      } catch (err) {
+        console.error("Failed to fetch categories:", err);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setImages(Array.from(files));
+      const preview = URL.createObjectURL(files[0]);
+      setPreviewUrl(preview);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    const requestData = {
-      name: productName,
-      starting_price: Number(budget),
-      description,
-      category,
-      listing_types: "REQUEST", // ✅ Important for requests
-    };
-
     try {
+      const formData = new FormData();
+      formData.append("name", productName);
+      formData.append("starting_price", budget);
+      formData.append("description", description);
+      formData.append("category", category);
+      formData.append("type", "REQUEST");
+
+      images.forEach((img) => {
+        formData.append("image_urls", img); // matches backend
+      });
+
       const res = await fetch("/api/listings", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestData),
+        body: formData,
       });
 
       const data = await res.json();
@@ -96,24 +125,47 @@ const CreateRequestForm = () => {
           margin="normal"
         />
 
-        <FormControl fullWidth margin="normal">
+        <FormControl fullWidth margin="normal" required>
           <InputLabel>Category</InputLabel>
           <Select
             value={category}
-            // onChange={(e: React.ChangeEvent<{ value: unknown }>) =>
-            //   setCategory(e.target.value as string)
-            // }
-
-            // commented above temporarily to build properly @azwssoh001 please fix
-            required
+            onChange={(e) => setCategory(e.target.value)}
+            label="Category"
           >
-            <MenuItem value="Electronics">Electronics</MenuItem>
-            <MenuItem value="Books">Books</MenuItem>
-            <MenuItem value="Clothing">Clothing</MenuItem>
+            {categoryList.map((cat) => (
+              <MenuItem key={cat.name} value={cat.name}>
+                {cat.name}
+              </MenuItem>
+            ))}
           </Select>
         </FormControl>
 
-        <Box sx={{ mt: 2 }}>
+        <Box mt={2}>
+          <Button variant="outlined" component="label" fullWidth>
+            Upload Images (Optional)
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={handleImageChange}
+            />
+          </Button>
+        </Box>
+
+        {previewUrl && (
+          <Box mt={2}>
+            <Typography variant="subtitle2">Preview:</Typography>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewUrl}
+              alt="Preview"
+              style={{ width: "100%", maxHeight: "300px", objectFit: "contain" }}
+            />
+          </Box>
+        )}
+
+        <Box sx={{ mt: 3 }}>
           <Button
             type="submit"
             variant="contained"

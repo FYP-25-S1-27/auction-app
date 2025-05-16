@@ -180,11 +180,12 @@ const EditListing = () => {
 
       <form onSubmit={handleSubmit}>
         {imageUrl && (
+          /* eslint-disable @next/next/no-img-element */
           <img
             src={imageUrl}
             alt="Listing Image"
             style={{ width: "400px", height: "400px", objectFit: "cover", marginBottom: "1rem" }}
-          />
+          />/* eslint-disable @next/next/no-img-element */
         )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 3 }}>
           <Typography variant="h6">Replace Image: </Typography>

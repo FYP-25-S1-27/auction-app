@@ -9,17 +9,14 @@ export async function handlePost(req: Request) {
     // ✅ Get user session
     const session = await auth0.getSession();
 
-    let user_uuid: string | null = null;
-
-    if (session && session.user) {
-      user_uuid = session.user.sub;
-    } else {
-      console.warn(
-        "⚠️ No session found, using hardcoded user_uuid for testing."
-      );
+    if (!session || !session.user?.sub) {
+      console.error("❌ No user session found. Unauthorized request.");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user_uuid = session.user.sub;
     console.log("✅ User UUID:", user_uuid);
+
 
     // ✅ Parse form data
     const formData = await req.formData();
@@ -27,11 +24,11 @@ export async function handlePost(req: Request) {
     const category = formData.get("category") as string;
     const description = formData.get("description") as string;
     const starting_price = formData.get("starting_price") as string;
-    const end_time = formData.get("end_time") as string;
+    const end_time = formData.get("end_time") as string | null;
     const start_time = formData.get("start_time") as string;
     const scheduled = formData.get("scheduled") as string;
-    const image_urls = formData.getAll("image_urls") as string[]; // Use getAll to get all files
-    const type = formData.get("type") as string;
+    const image_urls = formData.getAll("image_urls") as string[];
+    const type = (formData.get("type") as string)?.toUpperCase();
 
     console.log("📩 Received Data:", {
       name,
@@ -40,22 +37,30 @@ export async function handlePost(req: Request) {
       starting_price,
       end_time,
       scheduled,
-      start_time, // ADD
+      start_time,
       type,
-      image_urls: image_urls.map((f) => f), // Log file names
+      image_urls: image_urls.map((f) => f),
     });
 
-    // ✅ Validate required fields
-    if (!user_uuid || !name || !category || !starting_price || !end_time) {
+    // ✅ Validate required fields for both LISTING and REQUEST
+    if (!user_uuid || !name || !category || !starting_price) {
       console.error("❌ Missing required fields:", {
         user_uuid,
         name,
         category,
         starting_price,
-        end_time,
       });
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // 🚨 Validate end_time only for LISTING
+    if (type !== "REQUEST" && !end_time) {
+      console.error("❌ Missing end_time for LISTING:", { end_time });
+      return NextResponse.json(
+        { error: "end_time is required for listings" },
         { status: 400 }
       );
     }
@@ -68,34 +73,33 @@ export async function handlePost(req: Request) {
         name,
         category,
         description,
-        startingPrice: Number(starting_price), // Ensure it's a number
-        endTime: end_time,
-        startTime: start_time ? start_time : sql`CURRENT_TIMESTAMP`, // ADD THIS LINE
-        status: "ACTIVE", // ADD THIS LINE
-        type: "LISTING",
+        startingPrice: Number(starting_price),
+        endTime: end_time ?? sql`CURRENT_TIMESTAMP + interval '30 days'`,
+        startTime: start_time ? start_time : sql`CURRENT_TIMESTAMP`,
+        status: "ACTIVE",
+        type: type === "REQUEST" ? "REQUEST" : "LISTING",
       })
       .returning({ id: listings.id });
 
-    console.log("✅ Listing created successfully!");
+    console.log(`✅ ${type} created successfully!`);
 
-    // File uploads and save image URLs
-    // ✅ Insert image URLs into listingImages table
-    if (image_urls.length > 0) {
+    // ✅ Only attach images if it's a listing
+    if (type === "LISTING" && image_urls.length > 0) {
       for (const image_url of image_urls) {
         await db.insert(listingImages).values({
           listingId: newListing[0].id,
           imageUrl: image_url,
         });
       }
+      console.log("Image URLs saved to listingImages");
     }
 
-    console.log("Image URLs saved to listingImages");
     return NextResponse.json(
-      { message: "Listing created successfully!" },
+      { message: `${type} created successfully!` },
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Error creating listing:", error);
+    console.error("❌ Error creating listing/request:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
