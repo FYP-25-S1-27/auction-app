@@ -9,8 +9,10 @@ import {
   CardContent,
   CircularProgress,
   Alert,
+  CardActionArea,
 } from "@mui/material";
 import { useUser } from "@auth0/nextjs-auth0";
+import { useRouter } from "next/navigation";
 
 interface Request {
   id: number;
@@ -26,6 +28,7 @@ export default function MyRequestsPage() {
   const [requests, setRequests] = useState<Request[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -69,26 +72,28 @@ export default function MyRequestsPage() {
         ) : (
           requests.map((req) => (
             <Card key={req.id} sx={{ mb: 2 }}>
-              <CardContent>
-                <Typography variant="h6">{req.name}</Typography>
-                <Typography variant="body2" color="textSecondary">
-                  Category: {req.category}
-                </Typography>
-                <Typography>{req.description}</Typography>
-                <Typography variant="body2" fontWeight="bold" sx={{ mt: 1 }}>
-                  Budget: ${req.startingPrice}
-                </Typography>
+              <CardActionArea onClick={() => router.push(`/viewRequest/${req.id}`)}>
+                <CardContent>
+                  <Typography variant="h6">{req.name}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    Category: {req.category}
+                  </Typography>
+                  <Typography>{req.description}</Typography>
+                  <Typography variant="body2" fontWeight="bold" sx={{ mt: 1 }}>
+                    Budget: ${req.startingPrice}
+                  </Typography>
 
-                {req.imageUrls && req.imageUrls.length > 0 && (
-                  <Box mt={2}>
-                    <img
-                      src={req.imageUrls[0]}
-                      alt="Request Image"
-                      style={{ width: "100%", maxHeight: 200, objectFit: "cover" }}
-                    />
-                  </Box>
-                )}
-              </CardContent>
+                  {req.imageUrls && req.imageUrls.length > 0 && (
+                    <Box mt={2}>
+                      <img
+                        src={req.imageUrls[0]}
+                        alt="Request Image"
+                        style={{ width: "100%", maxHeight: 200, objectFit: "cover" }}
+                      />
+                    </Box>
+                  )}
+                </CardContent>
+              </CardActionArea>
             </Card>
           ))
         )}
