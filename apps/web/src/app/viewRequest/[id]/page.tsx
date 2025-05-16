@@ -12,7 +12,8 @@ import {
   Paper,
   Stack,
 } from "@mui/material";
-import OfferForm from "./offerForm"; // Adjust if needed
+import { useUser } from "@auth0/nextjs-auth0";
+import OfferForm from "./offerForm";
 
 interface Request {
   id: number;
@@ -20,9 +21,11 @@ interface Request {
   description: string;
   category: string;
   startingPrice: number;
+  user_uuid: string;
 }
 
 const ViewRequestPage = () => {
+  const { user, isLoading: userLoading } = useUser();
   const { id } = useParams();
   const [request, setRequest] = useState<Request | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -34,8 +37,18 @@ const ViewRequestPage = () => {
       try {
         const res = await fetch(`/api/listings/${id}`);
         if (!res.ok) throw new Error("Failed to fetch request");
-        const data: Request = await res.json();
-        console.log("📦 Request data fetched from API:", data);
+
+        const raw = await res.json();
+
+        const data: Request = {
+          id: raw.id,
+          name: raw.name,
+          description: raw.description,
+          category: raw.category,
+          startingPrice: raw.starting_price,
+          user_uuid: raw.user_uuid,
+        };
+
         setRequest(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Unknown error");
@@ -50,9 +63,11 @@ const ViewRequestPage = () => {
   const handleOpenOfferForm = () => setShowOfferForm(true);
   const handleCloseOfferForm = () => setShowOfferForm(false);
 
+  const isOwnRequest = user?.sub === request?.user_uuid;
+
   return (
     <Container maxWidth="md" sx={{ mt: 6, mb: 8 }}>
-      {loading ? (
+      {loading || userLoading ? (
         <CircularProgress />
       ) : error ? (
         <Alert severity="error">{error}</Alert>
@@ -74,23 +89,29 @@ const ViewRequestPage = () => {
             <Typography variant="h6" sx={{ mt: 3 }}>
               Budget:{" "}
               <Box component="span" fontWeight="bold" color="primary.main">
-                ${request.startingPrice}
+                {typeof request.startingPrice === "number"
+                  ? `$${request.startingPrice}`
+                  : "Not specified"}
               </Box>
             </Typography>
 
-            <Box sx={{ mt: 4 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleOpenOfferForm}
-                fullWidth
-              >
-                Make an Offer
-              </Button>
-            </Box>
+            {/* Only show Make Offer if NOT the owner */}
+            {!isOwnRequest && (
+              <Box sx={{ mt: 4 }}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleOpenOfferForm}
+                  fullWidth
+                >
+                  Make an Offer
+                </Button>
+              </Box>
+            )}
           </Stack>
 
-          {showOfferForm && (
+          {/* Only show modal if NOT the owner */}
+          {!isOwnRequest && showOfferForm && (
             <OfferForm
               requestId={request.id}
               open={showOfferForm}
