@@ -17,7 +17,6 @@ export async function handlePost(req: Request) {
     const user_uuid = session.user.sub;
     console.log("✅ User UUID:", user_uuid);
 
-
     // ✅ Parse form data
     const formData = await req.formData();
     const name = formData.get("name") as string;
@@ -28,7 +27,7 @@ export async function handlePost(req: Request) {
     const start_time = formData.get("start_time") as string;
     const scheduled = formData.get("scheduled") as string;
     const image_urls = formData.getAll("image_urls") as string[];
-    const type = (formData.get("type") as string)?.toUpperCase();
+    const type = (formData.get("type") as string)?.toUpperCase() || "LISTING";
 
     console.log("📩 Received Data:", {
       name,
