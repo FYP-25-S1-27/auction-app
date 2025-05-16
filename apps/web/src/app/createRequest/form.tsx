@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState, ChangeEvent } from "react";
@@ -77,7 +78,9 @@ const CreateRequestForm = () => {
 
       router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An unknown error occurred.");
+      setError(
+        err instanceof Error ? err.message : "An unknown error occurred."
+      );
     } finally {
       setLoading(false);
     }
@@ -102,7 +105,9 @@ const CreateRequestForm = () => {
           }}
         >
           <label htmlFor="image-upload">
-            <Typography>Drag and drop images here, or click to select images</Typography>
+            <Typography>
+              Drag and drop images here, or click to select images
+            </Typography>
             <input
               id="image-upload"
               type="file"
@@ -120,7 +125,11 @@ const CreateRequestForm = () => {
             <img
               src={previewUrl}
               alt="Preview"
-              style={{ width: "100%", maxHeight: "300px", objectFit: "contain" }}
+              style={{
+                width: "100%",
+                maxHeight: "300px",
+                objectFit: "contain",
+              }}
             />
           </Box>
         )}
