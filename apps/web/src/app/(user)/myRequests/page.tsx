@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useEffect, useState } from "react";
@@ -36,7 +37,9 @@ export default function MyRequestsPage() {
 
       try {
         const res = await fetch(
-          `/api/listings?listing_types=REQUEST&user_uuid=${encodeURIComponent(user.sub)}`
+          `/api/listings?listing_types=REQUEST&user_uuid=${encodeURIComponent(
+            user.sub
+          )}`
         );
 
         if (!res.ok) throw new Error("Failed to fetch requests");
@@ -72,7 +75,9 @@ export default function MyRequestsPage() {
         ) : (
           requests.map((req) => (
             <Card key={req.id} sx={{ mb: 2 }}>
-              <CardActionArea onClick={() => router.push(`/viewRequest/${req.id}`)}>
+              <CardActionArea
+                onClick={() => router.push(`/viewRequest/${req.id}`)}
+              >
                 <CardContent>
                   <Typography variant="h6">{req.name}</Typography>
                   <Typography variant="body2" color="textSecondary">
@@ -88,7 +93,11 @@ export default function MyRequestsPage() {
                       <img
                         src={req.imageUrls[0]}
                         alt="Request Image"
-                        style={{ width: "100%", maxHeight: 200, objectFit: "cover" }}
+                        style={{
+                          width: "100%",
+                          maxHeight: 200,
+                          objectFit: "cover",
+                        }}
                       />
                     </Box>
                   )}

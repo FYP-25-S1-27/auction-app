@@ -45,7 +45,9 @@ const ViewOffersPage = () => {
     }
 
     try {
-      const res = await fetch(`/api/offers?user_uuid=${encodeURIComponent(user.sub)}`);
+      const res = await fetch(
+        `/api/offers?user_uuid=${encodeURIComponent(user.sub)}`
+      );
       if (!res.ok) throw new Error("Failed to fetch offers");
 
       const rawData = await res.json();
@@ -75,6 +77,7 @@ const ViewOffersPage = () => {
 
   useEffect(() => {
     if (user) fetchOffers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const handleViewRequest = (id: number) => {
@@ -82,7 +85,9 @@ const ViewOffersPage = () => {
   };
 
   const handleRetract = async (id: number) => {
-    const confirm = window.confirm("Are you sure you want to retract this offer?");
+    const confirm = window.confirm(
+      "Are you sure you want to retract this offer?"
+    );
     if (!confirm) return;
 
     try {
@@ -136,7 +141,9 @@ const ViewOffersPage = () => {
               <ListItemText
                 primary={
                   <Stack spacing={0.5}>
-                    <Typography variant="h6">Offer: ${offer.offerAmount}</Typography>
+                    <Typography variant="h6">
+                      Offer: ${offer.offerAmount}
+                    </Typography>
                     <Typography variant="subtitle1" color="text.secondary">
                       Request: {offer.title}
                     </Typography>
@@ -147,13 +154,24 @@ const ViewOffersPage = () => {
                 }
               />
               <Stack spacing={1} direction="column" alignItems="flex-end">
-                <Button variant="outlined" onClick={() => handleViewRequest(offer.requestId)}>
+                <Button
+                  variant="outlined"
+                  onClick={() => handleViewRequest(offer.requestId)}
+                >
                   View Request
                 </Button>
-                <Button variant="text" color="warning" onClick={() => openAdjustModal(offer.id, offer.offerAmount)}>
+                <Button
+                  variant="text"
+                  color="warning"
+                  onClick={() => openAdjustModal(offer.id, offer.offerAmount)}
+                >
                   Adjust
                 </Button>
-                <Button variant="text" color="error" onClick={() => handleRetract(offer.id)}>
+                <Button
+                  variant="text"
+                  color="error"
+                  onClick={() => handleRetract(offer.id)}
+                >
                   Retract
                 </Button>
               </Stack>
@@ -165,7 +183,10 @@ const ViewOffersPage = () => {
       )}
 
       {/* Adjust Offer Modal */}
-      <Dialog open={adjustingOfferId !== null} onClose={() => setAdjustingOfferId(null)}>
+      <Dialog
+        open={adjustingOfferId !== null}
+        onClose={() => setAdjustingOfferId(null)}
+      >
         <DialogTitle>Adjust Your Offer</DialogTitle>
         <DialogContent>
           <TextField

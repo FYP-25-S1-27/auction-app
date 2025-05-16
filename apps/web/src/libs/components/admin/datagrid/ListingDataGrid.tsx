@@ -22,7 +22,6 @@ export function CustomAdminListingDataGrid({
 }: {
   listings: (typeof listings.$inferSelect)[];
 }) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [listings, setListings] = useState(intitialListings);
   const [selectedListings, setSelectedListings] = useState<number[]>([]);
   // const [rowModesModel, setRowModesModel] = useState<GridRowModesModel>({});
