@@ -18,7 +18,16 @@ export async function PUT(
     }
 
     const body = await req.json();
-    const { name, category, description, starting_price, end_time, start_time, image_url } = body;
+    const {
+      name,
+      category,
+      description,
+      starting_price,
+      end_time,
+      start_time,
+      image_url,
+      status,
+    } = body;
 
     console.log("📝 Updating listing:", { listingId, ...body });
 
@@ -38,16 +47,14 @@ export async function PUT(
       description,
       startingPrice: Number(starting_price),
       endTime: end_time,
+      status,
     };
 
     if (start_time && new Date(start_time) > new Date()) {
       updateData.startTime = start_time;
     }
 
-    await db
-      .update(listings)
-      .set(updateData)
-      .where(eq(listings.id, listingId));
+    await db.update(listings).set(updateData).where(eq(listings.id, listingId));
 
     // Handle image URL update/insertion
     if (image_url) {

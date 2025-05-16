@@ -76,7 +76,11 @@ export async function seedTransactions(
       // set the listing's status to SOLD and update the current price
       await db
         .update(listings)
-        .set({ status: "SOLD", currentPrice: bid[0].bidAmount })
+        .set({
+          status: "SOLD",
+          currentPrice: bid[0].bidAmount,
+          endTime: randomTransactionTime.toISOString(),
+        })
         .where(eq(listings.id, randomListing.id));
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

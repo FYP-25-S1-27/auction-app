@@ -64,10 +64,33 @@ export async function handleGet(request: NextRequest) {
           );
           break;
         case "status":
+          const statuses = value.split(",").map((s) => s.toUpperCase());
+          let statusFilters: string[] = statuses;
+
+          if (
+            statuses.includes("ACTIVE") &&
+            !statuses.includes("ENDED") &&
+            !statuses.includes("SOLD")
+          ) {
+            filters.push(
+              lte(sql`CURRENT_TIMESTAMP`, listings.endTime) // Exclude ended listings
+            );
+          }
+          if (
+            !statuses.includes("ACTIVE") &&
+            statuses.includes("ENDED") &&
+            !statuses.includes("SOLD")
+          ) {
+            filters.push(
+              lte(listings.endTime, sql`CURRENT_TIMESTAMP`) // Include only ended listings
+            );
+            statusFilters = ["ACTIVE"]; // add back ACTIVE to the filter since there is no ENDED status in the DB
+          }
+
           filters.push(
             inArray(
               listings.status,
-              value.split(",").map((s) => s.toUpperCase())
+              statusFilters.filter((s) => s !== "ENDED") // Exclude ENDED status from the filter (there is no ENDED status in the DB)
             )
           );
           break;
@@ -97,9 +120,11 @@ export async function handleGet(request: NextRequest) {
       })
       .from(listings)
       .where(
-        searchParams.get("name")
-          ? ilike(listings.name, `%${searchParams.get("name")}%`)
-          : undefined
+        and(
+          searchParams.get("name")
+            ? ilike(listings.name, `%${searchParams.get("name")}%`)
+            : undefined
+        )
       )
       .limit(1);
 

@@ -49,6 +49,8 @@ function buildCategoryHierarchy(categories: GetCategories) {
   }));
 }
 
+type ExtendedListingStatus = ListingStatus | "ENDED";
+
 export default function FilterCard({ initialFilters }: FilterProps) {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -58,7 +60,9 @@ export default function FilterCard({ initialFilters }: FilterProps) {
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams.get("orderBy") as SortOption) || "endTimeAsc"
   );
-  const [selectedStatuses, setSelectedStatuses] = useState<ListingStatus[]>(
+  const [selectedStatuses, setSelectedStatuses] = useState<
+    ExtendedListingStatus[]
+  >(
     searchParams.get("status")
       ? (searchParams.get("status")!.split(",") as ListingStatus[])
       : ["ACTIVE"]
@@ -92,7 +96,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
     fetchCategories();
   }, []);
 
-  const handleStatusChange = (status: ListingStatus) => {
+  const handleStatusChange = (status: ExtendedListingStatus) => {
     setSelectedStatuses((prev) =>
       prev.includes(status)
         ? prev.filter((s) => s !== status)
@@ -186,6 +190,15 @@ export default function FilterCard({ initialFilters }: FilterProps) {
                     />
                   }
                   label="Sold"
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedStatuses.includes("ENDED")}
+                      onChange={() => handleStatusChange("ENDED")}
+                    />
+                  }
+                  label="Ended"
                 />
               </Stack>
             </AccordionDetails>

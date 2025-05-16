@@ -8,7 +8,13 @@ import {
   Button,
   CircularProgress,
   Alert,
-  Typography, Select, MenuItem, InputLabel, FormControl, Box
+  Typography,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Box,
+  Checkbox,
 } from "@mui/material";
 import { listings } from "@/libs/db/schema";
 import { createClient } from "@/libs/supabase/client";
@@ -25,19 +31,18 @@ const EditListing = () => {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
   useEffect(() => {
-  const fetchImage = async () => {
-    const res = await fetch(`/api/listing_images?listingId=${id}`);
-    const data = await res.json();
-    if (data.length > 0) {
-      setImageUrl(data[0].imageUrl);
+    const fetchImage = async () => {
+      const res = await fetch(`/api/listing_images?listingId=${id}`);
+      const data = await res.json();
+      if (data.length > 0) {
+        setImageUrl(data[0].imageUrl);
+      }
+    };
+
+    if (listings?.id) {
+      fetchImage();
     }
-  };
-
-  if (listings?.id) {
-    fetchImage();
-  }
-}, [id]);
-
+  }, [id]);
 
   useEffect(() => {
     const fetchListing = async () => {
@@ -52,17 +57,15 @@ const EditListing = () => {
         const formatDateTime = (datetime: string) => {
           return datetime.replace(" ", "T").slice(0, 16);
         };
-  
+
         const formattedData = {
           ...data,
           endTime: data.endTime ? formatDateTime(data.endTime) : "",
           startingPrice: data.startingPrice || "",
           status: data.status,
-          startTime: data.startTime
-          ? formatDateTime(data.startTime)
-          : "",
+          startTime: data.startTime ? formatDateTime(data.startTime) : "",
         };
-        
+
         setFormData(formattedData);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
@@ -79,95 +82,99 @@ const EditListing = () => {
     const fetchCategories = async () => {
       try {
         const res = await fetch("/api/categories");
-        const data: { name: string; parent: number | null }[] = await res.json();
+        const data: { name: string; parent: number | null }[] =
+          await res.json();
         const subcategories = data
-        .filter((cat) => cat.parent !== null)
-        .map((cat) => cat.name);
-  
+          .filter((cat) => cat.parent !== null)
+          .map((cat) => cat.name);
+
         setCategories(subcategories);
       } catch (err) {
         console.error("Failed to fetch categories", err);
       }
-    }; 
+    };
     fetchCategories();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    if (type === "checkbox" && name === "isSold") {
+      setFormData({ ...formData, status: checked ? "SOLD" : formData.status });
+    } else {
+      setFormData({ ...formData, [name]: value });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      new Date(formData.startTime) > new Date(formData.endTime)
-  ) {
-    setError("Scheduled time cannot be later than the end time.");
-    return;
-  }
+    if (new Date(formData.startTime) > new Date(formData.endTime)) {
+      setError("Scheduled time cannot be later than the end time.");
+      return;
+    }
 
-  const priceNumber = parseInt(formData.startingPrice, 10);
-    if (
-      isNaN(priceNumber) ||
-      priceNumber <= 0
-    ) {
+    const priceNumber = parseInt(formData.startingPrice, 10);
+    if (isNaN(priceNumber) || priceNumber <= 0) {
       alert("Starting price must be a positive whole number!");
       return;
     }
-  
-  let uploadedImageUrl = imageUrl;
 
-  // If a new image is selected
-  if (formData.newImage) {
-    const file = formData.newImage;
-    const fileExt = file.name.split(".").pop();
-    const fileName = `${id}-${Date.now()}.${fileExt}`;
-    const filePath = `listing-images/${fileName}`;
+    let uploadedImageUrl = imageUrl;
 
-    // Upload to Supabase
-    const { error: uploadError } = await supabase.storage
-      .from("listing-images")
-      .upload(filePath, file, {
-        cacheControl: "3600",
-        upsert: true,
+    // If a new image is selected
+    if (formData.newImage) {
+      const file = formData.newImage;
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${id}-${Date.now()}.${fileExt}`;
+      const filePath = `listing-images/${fileName}`;
+
+      // Upload to Supabase
+      const { error: uploadError } = await supabase.storage
+        .from("listing-images")
+        .upload(filePath, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+      if (uploadError) {
+        alert("Image upload failed.");
+        return;
+      }
+
+      // Get the public URL
+      const { data } = supabase.storage
+        .from("listing-images")
+        .getPublicUrl(filePath);
+      uploadedImageUrl = data.publicUrl;
+    }
+
+    const payload = {
+      name: formData.name,
+      category: formData.category,
+      description: formData.description,
+      starting_price: Number(formData.startingPrice),
+      end_time: formData.endTime,
+      start_time: formData.startTime,
+      status: formData.status,
+      image_url: uploadedImageUrl,
+    };
+
+    console.log(payload);
+
+    try {
+      const response = await fetch(`/api/updatelisting/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
-    if (uploadError) {
-      alert("Image upload failed.");
-      return;
+
+      if (!response.ok) {
+        throw new Error("Failed to update listing");
+      }
+
+      router.push("/mylistings?updated=true");
+    } catch (error) {
+      console.error("❌ Error updating form:", error);
     }
-
-    // Get the public URL
-    const { data } = supabase.storage
-      .from("listing-images")
-      .getPublicUrl(filePath);
-    uploadedImageUrl = data.publicUrl;
-  }
-
-  const payload = {
-    name: formData.name,
-    category: formData.category,
-    description: formData.description,
-    starting_price: Number(formData.startingPrice),
-    end_time: formData.endTime,
-    start_time: formData.startTime,
-    image_url: uploadedImageUrl,
   };
-
-  try {
-    const response = await fetch(`/api/updatelisting/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to update listing");
-    }
-
-    router.push("/mylistings?updated=true");
-  } catch (error) {
-    console.error("❌ Error updating form:", error);
-  }
-};
 
   return (
     <Container maxWidth="sm">
@@ -184,8 +191,13 @@ const EditListing = () => {
           <img
             src={imageUrl}
             alt="Listing Image"
-            style={{ width: "400px", height: "400px", objectFit: "cover", marginBottom: "1rem" }}
-          />/* eslint-disable @next/next/no-img-element */
+            style={{
+              width: "400px",
+              height: "400px",
+              objectFit: "cover",
+              marginBottom: "1rem",
+            }}
+          /> /* eslint-disable @next/next/no-img-element */
         )}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mt: 3 }}>
           <Typography variant="h6">Replace Image: </Typography>
@@ -216,7 +228,9 @@ const EditListing = () => {
             labelId="categoryLabel"
             name="category"
             value={formData.category || ""}
-            onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, category: e.target.value })
+            }
             label="Category"
           >
             {categories.map((cat) => (
@@ -279,6 +293,10 @@ const EditListing = () => {
             required
           />
         )}
+        <div>
+          <span>Mark as Sold?</span>
+          <Checkbox name="isSold" onChange={handleChange} />
+        </div>
 
         <Button
           variant="outlined"
