@@ -21,7 +21,7 @@ interface OfferFormProps {
 }
 
 const OfferForm = ({ open, onClose, requestId, refreshOffers }: OfferFormProps) => {
-  const { user, isLoading } = useUser();
+  const { user } = useUser();
 
   const [offerAmount, setOfferAmount] = useState("");
   const [error, setError] = useState<string | null>(null);
