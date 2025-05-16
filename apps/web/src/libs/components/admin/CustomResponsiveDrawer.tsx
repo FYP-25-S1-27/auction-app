@@ -9,7 +9,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Divider,
+  // Divider,
   IconButton,
   Box,
 } from "@mui/material";
@@ -40,7 +40,7 @@ export default function ResponsiveDrawer() {
     <div>
       <Toolbar />
       <List>
-        <ListItem>
+        {/* <ListItem>
           <ListItemButton href="/admin" LinkComponent={NextLink}>
             <ListItemIcon>
               <AccountCircleIcon />
@@ -48,7 +48,7 @@ export default function ResponsiveDrawer() {
             <ListItemText primary="Dashboard" />
           </ListItemButton>
         </ListItem>
-        <Divider />
+        <Divider /> */}
         <ListItem>
           <ListItemButton href="/admin/manage/users" LinkComponent={NextLink}>
             <ListItemIcon>
