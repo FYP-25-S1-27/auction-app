@@ -17,6 +17,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  RadioGroup,
+  Radio,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { InferSelectModel } from "drizzle-orm";
@@ -60,13 +62,10 @@ export default function FilterCard({ initialFilters }: FilterProps) {
   const [sortBy, setSortBy] = useState<SortOption>(
     (searchParams.get("orderBy") as SortOption) || "endTimeAsc"
   );
-  const [selectedStatuses, setSelectedStatuses] = useState<
-    ExtendedListingStatus[]
-  >(
-    searchParams.get("status")
-      ? (searchParams.get("status")!.split(",") as ListingStatus[])
-      : ["ACTIVE"]
-  );
+  const [selectedStatuses, setSelectedStatuses] =
+    useState<ExtendedListingStatus>(
+      (searchParams.get("status") as ExtendedListingStatus) || "ACTIVE"
+    );
 
   const [selectedPriceRange, setSelectedPriceRange] = useState<number[]>([
     Number(searchParams.get("minPrice")) || initialFilters?.minPrice || 0,
@@ -97,11 +96,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
   }, []);
 
   const handleStatusChange = (status: ExtendedListingStatus) => {
-    setSelectedStatuses((prev) =>
-      prev.includes(status)
-        ? prev.filter((s) => s !== status)
-        : [...prev, status]
-    );
+    setSelectedStatuses(status);
   };
 
   const handleCategoryChange = (category: string) => {
@@ -114,7 +109,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
   };
 
   const handleReset = () => {
-    setSelectedStatuses(["ACTIVE"]);
+    setSelectedStatuses("ACTIVE");
     setSelectedPriceRange([
       initialFilters?.minPrice ?? 0,
       initialFilters?.maxPrice ?? 0,
@@ -132,7 +127,7 @@ export default function FilterCard({ initialFilters }: FilterProps) {
       maxPrice: selectedPriceRange[1].toString(), // Update maxPrice
       category: selectedCategories.join(","), // Include selected categories
       ...(selectedStatuses.length > 0 && {
-        status: selectedStatuses.join(","),
+        status: selectedStatuses,
       }),
       orderBy: sortBy,
     };
@@ -173,33 +168,29 @@ export default function FilterCard({ initialFilters }: FilterProps) {
             </AccordionSummary>
             <AccordionDetails>
               <Stack spacing={1} direction={"row"}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedStatuses.includes("ACTIVE")}
-                      onChange={() => handleStatusChange("ACTIVE")}
-                    />
+                <RadioGroup
+                  value={selectedStatuses}
+                  onChange={(e) =>
+                    handleStatusChange(e.target.value as ExtendedListingStatus)
                   }
-                  label="Active"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedStatuses.includes("SOLD")}
-                      onChange={() => handleStatusChange("SOLD")}
-                    />
-                  }
-                  label="Sold"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedStatuses.includes("ENDED")}
-                      onChange={() => handleStatusChange("ENDED")}
-                    />
-                  }
-                  label="Ended"
-                />
+                  row
+                >
+                  <FormControlLabel
+                    value={"ACTIVE"}
+                    control={<Radio />}
+                    label="Active"
+                  />
+                  <FormControlLabel
+                    value={"SOLD"}
+                    control={<Radio />}
+                    label="Sold"
+                  />
+                  <FormControlLabel
+                    value={"ENDED"}
+                    control={<Radio />}
+                    label="Ended"
+                  />
+                </RadioGroup>
               </Stack>
             </AccordionDetails>
           </Accordion>

@@ -49,51 +49,32 @@ export async function handleGet(request: NextRequest) {
           filters.push(ilike(listings.description, `%${value}%`));
           break;
         case "minPrice":
-          filters.push(
-            gte(
-              listings.currentPrice || listings.startingPrice,
-              parseInt(value)
-            )
-          );
+          filters.push(gte(listings.currentPrice, parseInt(value)));
           break;
         case "maxPrice":
-          filters.push(
-            lte(
-              listings.currentPrice || listings.startingPrice,
-              parseInt(value)
-            )
-          );
+          filters.push(lte(listings.currentPrice, parseInt(value)));
           break;
         case "status":
-          const statuses = value.split(",").map((s) => s.toUpperCase());
-          let statusFilters: string[] = statuses;
+          const status = value.toUpperCase();
 
-          if (
-            statuses.includes("ACTIVE") &&
-            !statuses.includes("ENDED") &&
-            !statuses.includes("SOLD")
-          ) {
+          if (status === "ACTIVE") {
             filters.push(
               lte(sql`CURRENT_TIMESTAMP`, listings.endTime) // Exclude ended listings
             );
+            filters.push(eq(listings.status, "ACTIVE"));
           }
-          if (
-            !statuses.includes("ACTIVE") &&
-            statuses.includes("ENDED") &&
-            !statuses.includes("SOLD")
-          ) {
+          if (status === "SOLD") {
+            filters.push(
+              eq(listings.status, "SOLD") // Include only sold listings
+            );
+          }
+          if (status.includes("ENDED")) {
             filters.push(
               lte(listings.endTime, sql`CURRENT_TIMESTAMP`) // Include only ended listings
             );
-            statusFilters = ["ACTIVE"]; // add back ACTIVE to the filter since there is no ENDED status in the DB
+            filters.push(eq(listings.status, "ACTIVE")); // use ACTIVE as there is no ENDED status in the db
           }
 
-          filters.push(
-            inArray(
-              listings.status,
-              statusFilters.filter((s) => s !== "ENDED") // Exclude ENDED status from the filter (there is no ENDED status in the DB)
-            )
-          );
           break;
         case "orderBy":
           // Handle ordering

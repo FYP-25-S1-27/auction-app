@@ -1,6 +1,6 @@
 import { db } from "@/libs/db/drizzle";
 import { listingCategory, listings } from "@/libs/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, lte, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -60,7 +60,12 @@ export async function GET(
       })
       .from(listings)
       // .leftJoin(listingImages, eq(listingImages.listingId, listings.id))
-      .where(inArray(listings.category, categoryNames));
+      .where(
+        and(
+          inArray(listings.category, categoryNames),
+          lte(listings.startTime, sql`CURRENT_TIMESTAMP`)
+        )
+      );
 
     // Return the category and its listings
     return NextResponse.json({
