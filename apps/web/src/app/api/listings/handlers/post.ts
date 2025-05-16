@@ -73,6 +73,7 @@ export async function handlePost(req: Request) {
         category,
         description,
         startingPrice: Number(starting_price),
+        currentPrice: Number(starting_price),
         endTime: end_time ?? sql`CURRENT_TIMESTAMP + interval '30 days'`,
         startTime: start_time ? start_time : sql`CURRENT_TIMESTAMP`,
         status: "ACTIVE",

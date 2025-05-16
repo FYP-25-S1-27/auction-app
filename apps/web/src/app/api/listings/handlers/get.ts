@@ -125,18 +125,17 @@ export async function handleGet(request: NextRequest) {
     // Fetch the true min and max prices for the entire dataset (without filters)
     const priceMetadata = await db
       .select({
-        minPrice: sql`MIN(${listings.currentPrice || listings.startingPrice})`,
-        maxPrice: sql`MAX(${listings.currentPrice || listings.startingPrice})`,
+        minPrice: sql`MIN(COALESCE(${listings.currentPrice}, ${listings.startingPrice}))`,
+        maxPrice: sql`MAX(COALESCE(${listings.currentPrice}, ${listings.startingPrice}))`,
       })
       .from(listings)
       .where(
-        and(
-          searchParams.get("name")
-            ? ilike(listings.name, `%${searchParams.get("name")}%`)
-            : undefined
-        )
+        searchParams.get("name")
+          ? ilike(listings.name, `%${searchParams.get("name")}%`)
+          : undefined
       )
       .limit(1);
+    console.log(priceMetadata);
 
     const minPrice = priceMetadata[0]?.minPrice || 0;
     const maxPrice = priceMetadata[0]?.maxPrice || 0;

@@ -31,7 +31,7 @@ export default function ListingCarousel({
         name: "NIL",
         description: null,
         startingPrice: 0,
-        currentPrice: null,
+        currentPrice: 0,
         type: "LISTING",
         endTime: "",
         startTime: "",
