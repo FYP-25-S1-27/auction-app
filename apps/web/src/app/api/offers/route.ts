@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/libs/db/drizzle";
 import { bids } from "@/libs/db/schema";
 import { eq, and, desc } from "drizzle-orm";
+import { listings } from "@/libs/db/schema";
 
 // ✅ GET: Fetch offers filtered by user_uuid
 export async function GET(req: NextRequest) {
@@ -57,15 +58,17 @@ export async function POST(req: Request) {
 
     // ✅ Server-side "Match Offer" logic
     if (bid_amount === 0 && bid_type === "OFFER") {
-      const [topOffer] = await db
-        .select({ bidAmount: bids.bidAmount })
-        .from(bids)
-        .where(and(eq(bids.listingId, listing_id), eq(bids.type, "OFFER")))
-        .orderBy(desc(bids.bidAmount))
+      const [listing] = await db
+        .select({ startingPrice: listings.startingPrice })
+        .from(listings)
+        .where(eq(listings.id, listing_id))
         .limit(1);
 
-      const defaultMatchAmount = 100;
-      bid_amount = topOffer?.bidAmount ?? defaultMatchAmount;
+      if (!listing) {
+        return NextResponse.json({ error: "Listing not found." }, { status: 404 });
+      }
+
+      bid_amount = listing.startingPrice;
     }
 
     // ✅ Deduplication: Check existing offer by this user
