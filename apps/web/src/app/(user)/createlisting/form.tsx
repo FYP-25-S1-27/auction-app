@@ -93,7 +93,7 @@ const ListingForm = () => {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { "image/*": [], "video/*": [] },
+    accept: { "image/*": [] },
   });
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -303,7 +303,6 @@ const ListingForm = () => {
             onChange={(e) => setScheduled(e.target.checked)}
           />
         </Box>
-
         {/* Scheduled Start Time (ADDED THIS) */}
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateTimePicker
@@ -313,7 +312,6 @@ const ListingForm = () => {
             disabled={!scheduled} // disable the field if not scheduled
           />
         </LocalizationProvider>
-
         {/* Buttons */}
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
           <Button variant="contained" color="primary" type="submit">
