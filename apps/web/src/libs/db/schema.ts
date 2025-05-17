@@ -4,7 +4,6 @@ import {
   foreignKey,
   integer,
   text,
-  numeric,
   timestamp,
   boolean,
   pgEnum,
@@ -228,42 +227,6 @@ export const user_category_interests = pgTable(
       columns: [table.categoryName],
       foreignColumns: [listingCategory.name],
       name: "user_interests_category_id_fkey",
-    }).onDelete("cascade"),
-  ]
-);
-
-export const requests = pgTable("requests", {
-  id: serial().primaryKey().notNull(),
-  title: text().notNull(),
-  description: text(),
-  category: text().notNull(),
-  userUuid: text().notNull(),
-  createdAt: timestamp({ mode: "string", withTimezone: true })
-    .default(sql`CURRENT_TIMESTAMP`)
-    .notNull(),
-});
-
-export const offers = pgTable(
-  "offers",
-  {
-    id: serial().primaryKey().notNull(),
-    requestId: integer().notNull(),
-    userUuid: text().notNull(),
-    offerAmount: numeric().notNull(),
-    offerTime: timestamp({ mode: "string", withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.userUuid],
-      foreignColumns: [users.uuid],
-      name: "offers_user_uuid_fkey",
-    }).onDelete("cascade"),
-    foreignKey({
-      columns: [table.requestId],
-      foreignColumns: [requests.id],
-      name: "offers_request_id_fkey",
     }).onDelete("cascade"),
   ]
 );
