@@ -37,7 +37,11 @@ npm start
 
 5. For database schema changes/migrations, please use:
 ```bash
+# to push the database schema
 npm run -w web db:push
+# to seed data
+npm run -w web db:seed # this will reset+seed the db as well as create the test users on auth0/reset their password
+npm run -w web db:seed:skip-users # use this if you only need to reset+seed the db (it will still fetch the users from auth0 but will not create/reset their info)
 ```
 
 #### Optional
